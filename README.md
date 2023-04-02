@@ -23,7 +23,7 @@ $ conda config --get channels
 ~~~
 $ conda create -n vprimer python 'biopython==1.76'
 $ conda activate vprimer
-$ conda install pandas vcfpy pysam joblib samtools bcftools tabix primer3 primer3-py blast
+$ conda install pandas vcfpy pysam joblib samtools bcftools bedtools tabix primer3 primer3-py blast
 ~~~
 
 ~~~
