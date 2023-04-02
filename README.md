@@ -40,6 +40,18 @@ $ pip install git+https://github.com/ncod3/vprimer
 $ git clone https://github.com/ncod3/data_vprimer
 ~~~
 
+~~~
+$ ln -s data_vprimer/test_script/*.sh .
+$ sh ./010.show_samples.sh
+
+overwrite
+
+$ cat data_vprimer/bams/MP2_6_TDr96_F1.vcf.gz_GTonly.vcf.gz_sample_bam_table.txt_filled > refs/MP2_6_TDr96_F1.vcf.gz_GTonly.vcf.gz_sample_bam_table.txt
+
+$ sh ./020.6samples_indel.sh
+
+~~~
+
 ## Usage
 
 ## Note
