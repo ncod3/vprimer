@@ -10,7 +10,7 @@ vprimer 1.00
 
 ## Installation
 ~~~
-$ git clone https://github.com/ncod3/vprimer
+$ pip install git+https://github.com/ncod3/vprimer
 ~~~
 
 ## Getting Started
