@@ -479,11 +479,12 @@ def write_df_to_csv(dataframe, out_file, index=True, force=True):
 
 #    return stat
 
-def print_distin_grp(proc_name, distin_gdct, reg, proc_cnt, simple=False):
+def print_dg(proc_name, distin_gdct, reg, proc_cnt, simple=False):
 
     reg_dict = glv.conf.regions_dict[reg]
 
     # ここは全処理数が必要だ
+    log.info("")
     log.info("proc:        {}, {} / {}".format(proc_name, proc_cnt,
         glv.conf.all_proc_cnt))
 
@@ -493,29 +494,31 @@ def print_distin_grp(proc_name, distin_gdct, reg, proc_cnt, simple=False):
     else:
         log.info("distin_str   {}".format(distin_gdct['distin_str']))
 
-    log.info("now_region   {}".format(reg))
-    log.info("all_regions  {}".format(distin_gdct['regions']))
-    log.info("groups       {} / {}".format(
+    log.info("now_region    {}".format(reg))
+    log.info("all_regions   {}".format(distin_gdct['regions']))
+    log.info("groups        {} / {}".format(
         distin_gdct[0], distin_gdct[1]))
-    log.info("region_str   {}".format(reg_dict['reg']))
-    log.info("pick_mode    {}".format(distin_gdct['pick_mode']))
-    log.info("indel_size   {}".format(distin_gdct['indel_size']))
-    log.info("product_size {}".format(distin_gdct['product_size']))
-    log.info("sort_samples {}".format(distin_gdct['sorted_samples']))
+    log.info("region_str    {}".format(reg_dict['reg']))
+    log.info("pick_mode     {}".format(distin_gdct['pick_mode']))
+    log.info("indel_size    {}".format(distin_gdct['indel_size']))
+    log.info("product_size  {}".format(distin_gdct['product_size']))
+    log.info("sort_samples  {}".format(distin_gdct['sorted_samples']))
 
-    # no_group
-    log.info("members      {} : {}".format(
+    # auto_group
+    log.info("members       {} : {}".format(
         distin_gdct[0],
         ', '.join(
             glv.conf.group_members_dict[distin_gdct[0]]['sn_lst']))
         )
 
-    if not glv.conf.is_no_group:
-        log.info("members      {} : {}".format(
+    if not glv.conf.is_auto_group:
+        log.info("members       {} : {}".format(
             distin_gdct[1],
             ', '.join(
                 glv.conf.group_members_dict[distin_gdct[1]]['sn_lst']))
             )
+
+    log.info("bed_thal_path {}\n".format(distin_gdct['bed_thal_path']))
 
 
 def decide_action_stop(now_progress):
@@ -729,8 +732,8 @@ def sort_file(
 
         # header
     header_txt = distin_gdct[proc]['hdr_text']
-    # if glv.conf.is_no_group, remove last 2 columns
-    header_txt = remove_nogrp_header_txt(header_txt)
+    # if glv.conf.is_auto_group, remove last 2 columns
+    header_txt = remove_autogrp_header_txt(header_txt)
 
     with out_txt_header_path.open('w', encoding='utf-8') as f:
         f.write("{}\n".format(header_txt))
@@ -775,9 +778,9 @@ def get_specified_sample_list(group_list, add_remain=False):
 
     if add_remain:
 
-        nogrp_nickname_list = list()
-        nogrp_basename_list = list()
-        nogrp_fullname_list = list()
+        autogrp_nickname_list = list()
+        autogrp_basename_list = list()
+        autogrp_fullname_list = list()
 
         # Add members other than the nickname specified in the group
         # to the end of ordered_list
@@ -786,13 +789,13 @@ def get_specified_sample_list(group_list, add_remain=False):
             fullname = get_fullname(nickname)
 
             if nickname not in sample_nickname_ordered_list:
-                nogrp_nickname_list += [nickname]
-                nogrp_basename_list += [basename]
-                nogrp_fullname_list += [fullname]
+                autogrp_nickname_list += [nickname]
+                autogrp_basename_list += [basename]
+                autogrp_fullname_list += [fullname]
 
-        sample_nickname_ordered_list += nogrp_nickname_list
-        sample_basename_ordered_list += nogrp_basename_list
-        sample_fullname_ordered_list += nogrp_fullname_list
+        sample_nickname_ordered_list += autogrp_nickname_list
+        sample_basename_ordered_list += autogrp_basename_list
+        sample_fullname_ordered_list += autogrp_fullname_list
 
     return \
         sample_nickname_ordered_list, \
@@ -1011,12 +1014,12 @@ def get_basic_primer_info(df_row, hdr_dict):
     if 'vseq_lens_ano_str' in hdr_dict:
         vseq_lens_ano_str = str(df_row[hdr_dict['vseq_lens_ano_str']])
 
-    # when glv.conf.is_no_group, get group string separated by ,.
-    nogrp0 = ""
-    nogrp1 = ""
-    if glv.conf.is_no_group:
-        nogrp0 = str(df_row[hdr_dict['nogrp0']])
-        nogrp1 = str(df_row[hdr_dict['nogrp1']])
+    # when glv.conf.is_auto_group, get group string separated by ,.
+    autogrp0 = ""
+    autogrp1 = ""
+    if glv.conf.is_auto_group:
+        autogrp0 = str(df_row[hdr_dict['autogrp0']])
+        autogrp1 = str(df_row[hdr_dict['autogrp1']])
 
     return \
         marker_id, \
@@ -1039,8 +1042,8 @@ def get_basic_primer_info(df_row, hdr_dict):
         digest_pattern, \
         target_gno, \
         target_len, \
-        nogrp0, \
-        nogrp1
+        autogrp0, \
+        autogrp1
 
 def flip_gno(gno):
 
@@ -1137,15 +1140,15 @@ def is_need_update(src_pathlib, dist_pathlib):
         return do_update
 
 
-def remove_nogrp_header_txt(header_txt):
-    ''' nogrp0, nogrp1
-        When grouped, remove the last two headers nogrp0 and nogrp1
+def remove_autogrp_header_txt(header_txt):
+    ''' autogrp0, autogrp1
+        When grouped, remove the last two headers autogrp0 and autogrp1
     '''
 
     # grouped
-    if not glv.conf.is_no_group:
+    if not glv.conf.is_auto_group:
 
-        # Remove the last two items: nogrp0 nogrp1 for sample list
+        # Remove the last two items: autogrp0 autogrp1 for sample list
         header_list = header_txt.split('\t')
         del header_list[-2:]
         header_txt = '\t'.join(header_list)
@@ -1153,14 +1156,14 @@ def remove_nogrp_header_txt(header_txt):
     return header_txt
 
 
-def remove_deepcopy_nogrp_header_dict(header_dict):
+def remove_deepcopy_autogrp_header_dict(header_dict):
 
     hdr_dict = copy.deepcopy(header_dict)
 
     # grouped
-    if not glv.conf.is_no_group:
-        rm_dict = hdr_dict.pop('nogrp0')
-        rm_dict = hdr_dict.pop('nogrp1')
+    if not glv.conf.is_auto_group:
+        rm_dict = hdr_dict.pop('autogrp0')
+        rm_dict = hdr_dict.pop('autogrp1')
 
     return hdr_dict
 

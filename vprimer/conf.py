@@ -45,7 +45,7 @@ class ConfBase(object):
             'ref':          {'dtype': 'str',    'default': ''},
 
             # required (3) group definition
-            'no_group':     {'dtype': 'str',    'default': ''},
+            'auto_group':     {'dtype': 'str',    'default': ''},
             'a_sample':     {'dtype': 'str',    'default': ''},
             'b_sample':     {'dtype': 'str',    'default': ''},
 
@@ -73,8 +73,10 @@ class ConfBase(object):
             'ini_file':     {'dtype': 'str',    'default': ''},
             'ini_version':  {'dtype': 'str',    'default': ''},
             'thread':       {'dtype': 'int',    'default': '2'},
+
+            # 2023.03.31 force no
             'use_joblib_threading': # param
-                            {'dtype': 'str',    'default': 'yes'},
+                            {'dtype': 'str',    'default': 'no'},
 
             # list enzyme_file refs/enzyme_names.txt
             'enzyme_file':  {'dtype': 'str',    'default': ''},
@@ -87,6 +89,9 @@ class ConfBase(object):
 
             # for amplicon  refs/p3_amplicon.txt
             'p3_amplicon':  {'dtype': 'str',    'default': ''},
+
+            # for amplicon Ftag,Rtag[,HrTM,DyTM]")
+            'amplicon_param':  {'dtype': 'str',    'default': ''},
 
             # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             # bed_thal
@@ -487,7 +492,7 @@ class ConfBase(object):
         self.p3_normal_path = \
             self.refs_dir_path / glv.p3_normal_file
 
-        # p3_params_ampl ---------------------------------------
+        # p3_amplicon ------------------------------------------
         # user specified
         self.user_p3_amplicon_file = self.selected_value('p3_amplicon')
         self.user_p3_amplicon_path = glv.NonePath
@@ -498,6 +503,19 @@ class ConfBase(object):
         # system unprepared
         self.p3_amplicon_path = \
             self.refs_dir_path / glv.p3_amplicon_file
+
+        # amplicon_param ---------------------------------------
+        self.amplicon_forward_tag = ""
+        self.amplicon_reverse_tag = ""
+        self.hairpin_tm = 0
+        self.dimer_tm = 0
+
+        self.amplicon_param = self.selected_value('amplicon_param')
+        # check and separate
+        if self.amplicon_param != "":
+            self.amplicon_forward_tag, self.amplicon_reverse_tag, \
+            self.hairpin_tm, self.dimer_tm = \
+                self.check_amplicon_param(self.amplicon_param)
 
         # enzyme, name and files -------------------------------
         # enzyme, 3 items needed
@@ -584,13 +602,13 @@ class ConfBase(object):
             log.error(er_m)
             sys.exit(1)
 
-        # GROUP MODE == self.is_no_group ======================
-        self.no_group = self.selected_value('no_group')
-        # if no_group is not specified.
-        if self.no_group == "":
-            self.is_no_group = False
+        # GROUP MODE == self.is_auto_group ======================
+        self.auto_group = self.selected_value('auto_group')
+        # if auto_group is not specified.
+        if self.auto_group == "":
+            self.is_auto_group = False
         else:
-            self.is_no_group = True
+            self.is_auto_group = True
 
         self.a_sample = self.selected_value('a_sample')
         self.b_sample = self.selected_value('b_sample')
@@ -651,6 +669,88 @@ class ConfBase(object):
 
         # for debug -------------------------------------------
         self.analyse_caps = self.selected_value('analyse_caps')
+
+
+    def check_amplicon_param(self, amplicon_param):
+        # "ACACTGACGACATGGTTCTACA,TACGGTAGCAGAGACTTGGTCT,45,40"
+
+        ampl_p_list = amplicon_param.split(',')
+        p_cnt = len(ampl_p_list)
+        mes = ""
+
+        try:
+        
+            if p_cnt == 0 or p_cnt == 1:    # only amplicon_forward_tag error
+                mes = "--amplicon_param requires at least "
+                mes += "amplicon_forward_tag and amplicon_reverse_tag. "
+                mes += "exit."
+                raise UserFormatErrorConf(mes)
+
+            elif p_cnt == 2:    # pair, tag: two tm value omitted
+
+                amplicon_forward_tag = ampl_p_list[0]
+                amplicon_reverse_tag = ampl_p_list[1]
+                hairpin_tm = glv.hairpin_tm
+                dimer_tm = glv.dimer_tm
+
+                mes = "Since hairpin_tm and dimer_tm are omitted, "
+                mes += "the system default values "
+                mes += "({},{}) are used for them.".format(
+                    glv.hairpin_tm, glv.dimer_tm)
+
+                log.info(mes)
+
+            elif p_cnt == 3:    # pair, tag, tm1: dimer_tm omitted
+
+                amplicon_forward_tag = ampl_p_list[0]
+                amplicon_reverse_tag = ampl_p_list[1]
+                hairpin_tm = ampl_p_list[2]
+                dimer_tm = glv.dimer_tm
+
+                mes = "Since dimer_tm is omitted, "
+                mes += "the system default values "
+                mes += "({}) are used for them.".format(glv.dimer_tm)
+
+                log.info(mes)
+
+            elif p_cnt == 4:    # complete
+
+                amplicon_forward_tag = ampl_p_list[0]
+                amplicon_reverse_tag = ampl_p_list[1]
+                hairpin_tm = ampl_p_list[2]
+                dimer_tm = ampl_p_list[3]
+
+            else:
+
+                mes = "Too many components of "
+                mes += "amplicon_param {}. exit.".format(p_cnt)
+                raise UserFormatErrorConf(mes)
+
+            p_bps = re.compile('[a-zA-Z]+')
+            p_float = re.compile('[0-9\.]+')
+
+            if not p_bps.fullmatch(amplicon_forward_tag) or \
+                not p_bps.fullmatch(amplicon_reverse_tag):
+                mes = "Both tag must be strings ({},{}).".format(
+                    amplicon_forward_tag, amplicon_reverse_tag)
+                raise UserFormatErrorConf(mes)
+
+            if not p_float.fullmatch(hairpin_tm) or \
+                not p_float.fullmatch(dimer_tm):
+                mes = "Both ({},{})must be integers or floats.".format(
+                    hairpin_tm, dimer_tm)
+                raise UserFormatErrorConf(mes)
+
+
+        except UserFormatErrorConf as ex:
+            log.error("amplicon_param error: {}".format(ex))
+            sys.exit(1)
+
+        else:
+            log.info("ok, amplicon_param is valid format.")
+
+        return amplicon_forward_tag, amplicon_reverse_tag, \
+            hairpin_tm, dimer_tm
 
 
     def prepare_refs_filename(self):
@@ -1066,7 +1166,12 @@ class ConfBase(object):
         #print("_is_valid_chrom_range, min_pos={}, max_pos={}".format(
         #    min_pos, max_pos))
 
-        region_def, start, end, length = self.get_chrom_info(chrom_name)
+        chrom_info_list = self.get_chrom_info(chrom_name)
+        start = chrom_info_list[0]
+        end = chrom_info_list[1]
+        length =chrom_info_list[2]
+        region_def = chrom_info_list[3]
+
         #print("_is_valid_chrom_range, _get_chrom_info={}, {}, {}, {}".format(
         #    region_def, start, end, length))
 
@@ -1101,12 +1206,12 @@ class ConfBase(object):
         #pprint.pprint(glv.conf.ref_fasta_chrom_dict_list)
         #print("{}, {}".format(region_def, length))
 
-        return region_def, start, end, length
+        return [start, end, length, region_def]
 
 
     def is_easy_mode(self):
         ''' On the command line, determine if we are currently in easy mode.
-        A value is set for either a_sample and b_sample or no_group.
+        A value is set for either a_sample and b_sample or auto_group.
         '''
 
         easy_mode = False
@@ -1114,7 +1219,7 @@ class ConfBase(object):
         a_sample = False
         b_sample = False
 
-        if self.is_no_group:
+        if self.is_auto_group:
             easy_mode = True
 
         else:
@@ -1157,6 +1262,11 @@ class ConfBase(object):
         self.bak_timestamp_path = self.out_bak_dir_path / glv.bak_timestamp
         # touch
         self.bak_timestamp_path.touch(exist_ok=True)
+
+
+class UserFormatErrorConf(Exception):
+    """Detect user-defined format errors"""
+    pass
 
 
 class Conf(ConfBase, ConfDistinG, ConfRefFasta, ConfVcfFile,

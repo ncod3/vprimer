@@ -57,10 +57,15 @@ class ConfCurrSet(object):
 
                 current_setting_ini.append(key_value)
 
-                if vname == "ref" or vname == "stop" or \
-                    vname == "product_size" or vname == "enzyme" or \
-                    vname == "group_members" or vname == "blast_distance" or \
-                    vname == "use_joblib_threading":
+                # # separating,
+                if vname == "ref" or \
+                    vname == "stop" or \
+                    vname == "product_size" or \
+                    vname == "enzyme" or \
+                    vname == "group_members" or \
+                    vname == "blast_distance" or \
+                    vname == "use_joblib_threading" or \
+                    vname == "amplicon_param":
 
                     current_setting_ini.append("\n#")
 
@@ -77,6 +82,8 @@ class ConfCurrSet(object):
             # Export while adjusting
             #line = self.convert_setting_ini(current_setting_ini)
             #f.write("{}\n".format("\n".join(current_setting_ini)))
+
+            pprint.pprint(current_setting_ini)
             line = self.convert_setting_ini(current_setting_ini)
             f.write("{}\n".format(line))
 

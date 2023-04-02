@@ -154,8 +154,8 @@ class OutList(object):
             hd_l, hd_d, i = self.mkmap('vseq_ano_str',         hd_l, hd_d, i)
 
             # if grouped, these two items are removed
-            hd_l, hd_d, i = self.mkmap('nogrp0',               hd_l, hd_d, i)
-            hd_l, hd_d, i = self.mkmap('nogrp1',               hd_l, hd_d, i)
+            hd_l, hd_d, i = self.mkmap('autogrp0',             hd_l, hd_d, i)
+            hd_l, hd_d, i = self.mkmap('autogrp1',             hd_l, hd_d, i)
 
         elif type == 'marker':
             # Sync with eval_variant.py
@@ -195,8 +195,8 @@ class OutList(object):
             hd_l, hd_d, i = self.mkmap('seq_template_ref',     hd_l, hd_d, i)
 
             # if grouped, these two items are removed
-            hd_l, hd_d, i = self.mkmap('nogrp0',               hd_l, hd_d, i)
-            hd_l, hd_d, i = self.mkmap('nogrp1',               hd_l, hd_d, i)
+            hd_l, hd_d, i = self.mkmap('autogrp0',             hd_l, hd_d, i)
+            hd_l, hd_d, i = self.mkmap('autogrp1',             hd_l, hd_d, i)
 
         elif type == 'primer':  # there is no header
 
@@ -251,8 +251,8 @@ class OutList(object):
             hd_l, hd_d, i = self.mkmap('SEQUENCE_TEMPLATE',    hd_l, hd_d, i)
 
             # if grouped, these two items are removed
-            hd_l, hd_d, i = self.mkmap('nogrp0',               hd_l, hd_d, i)
-            hd_l, hd_d, i = self.mkmap('nogrp1',               hd_l, hd_d, i)
+            hd_l, hd_d, i = self.mkmap('autogrp0',             hd_l, hd_d, i)
+            hd_l, hd_d, i = self.mkmap('autogrp1',             hd_l, hd_d, i)
 
         elif type == 'formpass':
 
@@ -297,8 +297,8 @@ class OutList(object):
             hd_l, hd_d, i = self.mkmap('PRIMER_RIGHT_0_SEQUENCE',
                                                                hd_l, hd_d, i)
             # if grouped, these two items are removed
-            hd_l, hd_d, i = self.mkmap('nogrp0',               hd_l, hd_d, i)
-            hd_l, hd_d, i = self.mkmap('nogrp1',               hd_l, hd_d, i)
+            hd_l, hd_d, i = self.mkmap('autogrp0',             hd_l, hd_d, i)
+            hd_l, hd_d, i = self.mkmap('autogrp1',             hd_l, hd_d, i)
 
             #Allele string '00' information for each sample will be added
 

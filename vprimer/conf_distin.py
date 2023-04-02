@@ -64,7 +64,7 @@ class ConfDistinG(object):
         ''' from choice_variable
             group_members
 
-        self.is_no_group == True;  self.no_group
+        self.is_auto_group == True;  self.auto_group
         else:
 
         Variable origin priority
@@ -79,28 +79,28 @@ class ConfDistinG(object):
 
         group_members_str = ""
 
-        #print("self.no_group={}".format(self.no_group))
-        #print("self.is_no_group={}".format(self.is_no_group))
+        #print("self.auto_group={}".format(self.auto_group))
+        #print("self.is_auto_group={}".format(self.is_auto_group))
         #print("self.vcf_sample_nickname_list={}".format(
         #    self.vcf_sample_nickname_list))
         #sys.exit(1)
 
         if self.is_easy_mode():
 
-            # no_groupは、デフォルトの調査対象サンプル群
+            # auto_groupは、デフォルトの調査対象サンプル群
 
-            # self.no_group に値が設定されているならば、
-            #   self.is_no_group == True
-            #   通常通り、group_members_str に no_group のメンバを
+            # self.auto_group に値が設定されているならば、
+            #   self.is_auto_group == True
+            #   通常通り、group_members_str に auto_group のメンバを
             #   設定する
 
-            # 0) no_group
-            if self.is_no_group:
+            # 0) auto_group
+            if self.is_auto_group:
 
-                # no_group:Hitomebore,Ginganoshizuku,Takanari,Tupa121-3
-                # グループ名 no_groupを設定する
-                group_members_str = "{}:{}".format(glv.NO_GROUP,
-                    self.no_group)
+                # auto_group:Hitomebore,Ginganoshizuku,Takanari,Tupa121-3
+                # グループ名 auto_groupを設定する
+                group_members_str = "{}:{}".format(glv.AUTO_GROUP,
+                    self.auto_group)
 
                 group_members_str = re.sub(r",$", "", group_members_str)
 
@@ -109,7 +109,7 @@ class ConfDistinG(object):
             #   by 'a' and 'b'.
             else:
 
-                # self.no_group に値が設定されていないならば、
+                # self.auto_group に値が設定されていないならば、
                 group0 = "a"
                 group1 = "b"
 
@@ -127,7 +127,7 @@ class ConfDistinG(object):
             # #    self.group_members_vcf_str
             group_members_str = self.selected_value('group_members')
 
-        # no_group:all という書き方を許し、全サンプルをここに書く
+        # auto_group:all という書き方を許し、全サンプルをここに書く
         # all_targetというグループ名も後にdict内で設定する
 
         # set to self.group_members_str
@@ -150,9 +150,9 @@ class ConfDistinG(object):
         # EASY_MODE has all the information
         if self.is_easy_mode():
 
-            if self.is_no_group:
-                group0 = glv.NO_GROUP
-                group1 = glv.NO_GROUP
+            if self.is_auto_group:
+                group0 = glv.AUTO_GROUP
+                group1 = glv.AUTO_GROUP
                  
             else:
                 group0 = glv.GROUP_NAME[0]
@@ -174,7 +174,7 @@ class ConfDistinG(object):
             distinguish_groups_str = \
                 self.selected_value('distinguish_groups')
 
-        # no_group/no_group:<EASY_MODE>:indel+caps:20-200
+        # auto_group/auto_group:<EASY_MODE>:indel+caps:20-200
         #print("in init_distinguish_groups_str")
         #print("distinguish_groups_str >{}<".format(distinguish_groups_str))
         #sys.exit(1)
@@ -285,8 +285,13 @@ class ConfDistinG(object):
 
                 # t_name:chr01: fill the chrom_info
                 if range_str == "":
-                    region_def_tmp, start_pos, end_pos, length = \
-                        self.get_chrom_info(chrom_name)
+
+                    chrom_info_list = self.get_chrom_info(chrom_name)
+                    start_pos = chrom_info_list[0]
+                    end_pos = chrom_info_list[1]
+                    length =chrom_info_list[2]
+                    region_def_tmp = chrom_info_list[3]
+
                     #print("{},{},{},{}".format(
                     #    region_def_tmp, start_pos, end_pos, length))
 
@@ -332,8 +337,12 @@ class ConfDistinG(object):
             # set all chrom info if not easy_mode
             if not self.is_easy_mode():
                 for chrom_name in self.ref_fasta_chrom_list:
-                    region_def, start_pos, end_pos, length = \
-                        self.get_chrom_info(chrom_name)
+
+                    chrom_info_list = self.get_chrom_info(chrom_name)
+                    start_pos = chrom_info_list[0]
+                    end_pos = chrom_info_list[1]
+                    length =chrom_info_list[2]
+                    region_def = chrom_info_list[3]
 
                     # regist chromosome info as "each chromosome" name.
                     chrom_region_def = "{}:{}:{}-{}".format(
@@ -393,8 +402,8 @@ class ConfDistinG(object):
                     er_m = "Group_name is blank."
                     raise UserFormatErrorDistin(er_m)
 
-                # no_group
-                elif not glv.conf.is_no_group and gname == glv.NO_GROUP:
+                # auto_group
+                elif not glv.conf.is_auto_group and gname == glv.AUTO_GROUP:
                     er_m = "{} cannot be used as a group name.".format(
                         gname)
                     raise UserFormatErrorDistin(er_m)
@@ -417,9 +426,9 @@ class ConfDistinG(object):
 
                 if not utl.is_sample_name(member):
 
-                    # if no_group:all
+                    # if auto_group:all
                     # all vcf samples are target
-                    if gname.lower() == glv.NO_GROUP and \
+                    if gname.lower() == glv.AUTO_GROUP and \
                         member.lower() == glv.ALL_MEMBER:
                         member = ",".join(self.vcf_sample_nickname_list)
 
@@ -525,9 +534,9 @@ class ConfDistinG(object):
                 # Make sure the group name is a valid name
                 g_name0, g_name1 = gname_pair.split('/')
 
-                # when glv.conf.is_no_group is True,
-                # no_group/no_group:e_reg_1:indel+caps:20-200
-                if g_name0 == glv.NO_GROUP:
+                # when glv.conf.is_auto_group is True,
+                # auto_group/auto_group:e_reg_1:indel+caps:20-200
+                if g_name0 == glv.AUTO_GROUP:
                     pass
 
                 elif g_name0 == g_name1:
@@ -643,9 +652,9 @@ class ConfDistinG(object):
 
 
     # #######################################
-    # In the case of no_group, only no_group is registered in
+    # In the case of auto_group, only auto_group is registered in
     # rectified_group_members_str, so even if keys() is taken,
-    # only one no_group is extracted.
+    # only one auto_group is extracted.
     def set_group_members_dict(self, group_members_str):
 
         rectified_group_members_str = \
@@ -813,7 +822,7 @@ class ConfDistinG(object):
 
             # --------------------------------------------------------
             # sn_nd(sample name's onehot ndarray)'s list
-            # Can be held even with no_group
+            # Can be held even with auto_group
             group01_sn_nds = [
                 self.group_members_dict[gname0]['sn_nd'],
                 self.group_members_dict[gname1]['sn_nd']

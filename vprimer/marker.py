@@ -66,7 +66,7 @@ class Marker(object):
             proc_cnt += 1
 
             # logging current target
-            utl.print_distin_grp("marker", distin_gdct, reg, proc_cnt)
+            utl.print_dg("marker", distin_gdct, reg, proc_cnt)
 
             # read variant file 
             variant_file = distin_gdct['variant']['fn'][reg]['out_path']
@@ -81,8 +81,8 @@ class Marker(object):
 
             # header
             header_txt = distin_gdct['marker']['hdr_text']
-            # if glv.conf.is_no_group, remove last 2 columns
-            header_txt = utl.remove_nogrp_header_txt(header_txt)
+            # if glv.conf.is_auto_group, remove last 2 columns
+            header_txt = utl.remove_autogrp_header_txt(header_txt)
 
             with out_txt_path.open('a', encoding='utf-8') as f:
 

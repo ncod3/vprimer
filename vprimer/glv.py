@@ -57,14 +57,23 @@ bed_mid_txt =           '_depth_'
 
 #####
 
-bed_thal_prefix =       'bed_thal_'
-bed_tmp_ext =           '.bed_tmp'
-bed_thal_tmp_ext =      '.bed_thal_sort'
+#bed_thal_prefix =       'bed_thal_'
+#bed_tmp_ext =           '.bed_tmp'
+
+#bed_thal_tmp_ext =      '.bed_thal_sort'
+#bed_thal_merge_ext =    '.bed_thal_merge'
 
 #-----------------------------------------
 # glv.conf.p3_mode
 p3_normal =             'p3_normal'
 p3_amplicon =           'p3_amplicon'
+
+#-----------------------------------------
+# amplicon_param default value
+amplicon_forward_tag =  'ACACTGACGACATGGTTCTACA'
+amplicon_reverse_tag =  'TACGGTAGCAGAGACTTGGTCT'
+hairpin_tm =            '45'
+dimer_tm =              '40'
 
 #-----------------------------------------
 # depth_check_mode
@@ -74,31 +83,13 @@ depth_bam_table =       'depth_bam_table'
 depth_bed_thal =        'depth_bed_thal'
 depth_bed_bams =        'depth_bed_bams'
 
-# sample.bam -> sample.bam.m8_x300.bed
-depth_bed_ext =     '.mMin_xMax.bed'
-
 ##########################################
 # NonePath for pathlib resolve()
 # if ga.resolve() == None:
 NonePath = type('NonePath', (), {'resolve': lambda: None})
 
-
-'''
-# now_stat
-bed_now_nop    = "now_nop"
-
-bed_now_zero   = "Z"
-bed_now_thin   = "thin"
-bed_now_valid  = "valid"
-bed_now_thick  = "THICK"
-
-# stat_changed
-bed_stat_nop       = "bed_stat_nop"
-
-bed_stat_init      = "bed_stat_init"
-bed_stat_continue  = "bed_stat_continue"
-bed_stat_changed   = "bed_stat_changed"
-'''
+# for ref_fasta_chrom_dict_list
+genome_total_len   = "genome_total_len"
 
 ##########################################
 # bed_thal
@@ -121,7 +112,6 @@ bed_stat_changed   = "bed_stat_changed"
 
 # bam_bed
 min_max_ext        = ".mMin_xMax"
-
 bam_bed_ext        = ".bb.bed"
 bam_bed_tmp_ext    = ".bed_tmp"
 
@@ -129,12 +119,13 @@ bam_bed_tmp_ext    = ".bed_tmp"
 bed_thal_prefix    = "bed_thal_"
 bed_thal_ext       = ".bta.bed"
 bed_thal_tmp_ext   = ".bed_thal_sort"
+bed_thal_merge_ext = ".bed_thal_merge"
 
 na_group_names     = "GRP_NA"
 
 
 ##########################################
-NO_GROUP    = "no_group"    # group name for "no_group"
+AUTO_GROUP  = "auto_group"  # group name for "auto_group"
 ALL_MEMBER  = "all"         # indicate all vcf sample member
 
 # group name list ["a", "b", ... "z"]

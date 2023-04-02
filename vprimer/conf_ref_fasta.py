@@ -260,7 +260,10 @@ class ConfRefFasta(object):
         # convert to [tsv]
         print_list = ['\t'.join(map(str, print_header))]
 
+        genome_total_len = 0
         # 20210922
+
+        chrom_dict = dict()
         #for row in df_fai.itertuples():
         for index, row in df_fai.iterrows():
             #row[0]: chrom, 'chr01'
@@ -273,7 +276,6 @@ class ConfRefFasta(object):
             start = int(1)
             end = int(length)
 
-            chrom_dict = dict()
             chrom_dict = {
                 # string
                 'chrom': chrom,
@@ -281,6 +283,9 @@ class ConfRefFasta(object):
                 'end': end,
                 'length': length,
             }
+
+            # add length to total
+            genome_total_len += length
             ref_fasta_chrom_dict_list.append(chrom_dict)
 
             # print_line
@@ -291,6 +296,17 @@ class ConfRefFasta(object):
             ref_fasta_chrom_list.append(chrom)
             region = "{}:{}-{}".format(chrom, start, end)
             ref_fasta_chrom_region_list.append(region)
+
+        # add total length information
+        # can get as 'genome_total_len'
+        chrom_dict = {
+            # string
+            'chrom': glv.genome_total_len,
+            'start': 1,
+            'end': genome_total_len,
+            'length': genome_total_len,
+        }
+        ref_fasta_chrom_dict_list.append(chrom_dict)
 
         # self.ref_bgzip_chrom_txt
         if self.ref_bgzip_chrom_txt_path.exists():

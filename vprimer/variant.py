@@ -77,15 +77,15 @@ class Variant(object):
         # start time
         start = utl.get_start_time()
         # logging current target
-        utl.print_distin_grp("variant", distin_gdct, reg, proc_cnt)
+        utl.print_dg("variant", distin_gdct, reg, proc_cnt)
 
         # File name to export variant data
         out_txt_path = distin_gdct['variant']['fn'][reg]['out_path']
         # If there is old data with the same name, back it up
         utl.save_to_tmpfile(out_txt_path)
 
-        # header: if glv.conf.is_no_group, remove last 2 columns
-        header_txt = utl.remove_nogrp_header_txt(
+        # header: if glv.conf.is_auto_group, remove last 2 columns
+        header_txt = utl.remove_autogrp_header_txt(
             distin_gdct['variant']['hdr_text'])
 
         # pick mode and indel length
@@ -198,7 +198,7 @@ class Variant(object):
 
         reverse_group = False
 
-        if not glv.conf.is_no_group:
+        if not glv.conf.is_auto_group:
             # 固定グループならば、グループ通りに分離しているかどうか調査する
             skip, reverse_group = self.judge_fixed_group_segregation(
                 vcf_grtpl_list, vcf_mem_dict, distin_gdct)

@@ -72,11 +72,11 @@ class Param(object):
             help="[required] reference fasta (txt or gz)")
 
         # required (3) group definition -------------------
-        # --no_group 
-        parser.add_argument('--no_group', action='store',
+        # --auto_group 
+        parser.add_argument('--auto_group', action='store',
             type=str, metavar='sample',   # default="",
             nargs='*',
-            help="analysis by no grouping")
+            help="analysis by auto grouping")
 
         # --sample_a
         parser.add_argument('--a_sample', action='store',
@@ -161,11 +161,16 @@ class Param(object):
             type=str, metavar='file',
             help="primer3 parameter file for amplicon specific")
 
+        # --amplicon_param
+        parser.add_argument('--amplicon_param', action='store',
+            type=str, metavar='file',
+            help="parameter for amplicon(SNP). Ftag,Rtag[,HrTM,DyTM]")
+
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         # --bed_thal
-        parser.add_argument('--bed_thal', action='store',
-            type=str, metavar='file',
-            help="bed_thal file")
+        #parser.add_argument('--bed_thal', action='store',
+        #    type=str, metavar='file',
+        #    help="bed_thal file")
 
         # --bam_table
         parser.add_argument('--bam_table', action='store',
@@ -173,12 +178,12 @@ class Param(object):
             help="Correspondence table between sample names and bam files")
 
         # --bed_bams
-        parser.add_argument('--bed_bams', action='store',
-            type=str, metavar='bam',
-            nargs='*',
-            help="All specified bam are used for thin align judgment")
-        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        #parser.add_argument('--bed_bams', action='store',
+        #    type=str, metavar='bam',
+        #    nargs='*',
+        #    help="All specified bam are used for thin align judgment")
 
+        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         # --min_max_depth
         parser.add_argument('--min_max_depth', action='store',

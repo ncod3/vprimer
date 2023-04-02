@@ -41,6 +41,9 @@ class InoutPrimer3(object):
             self.p3_output_dict['PRIMER_ERROR']
 
         self.primer_region = ''
+        self.left_primer_region = ''
+        self.right_primer_region = ''
+
         self.left_fasta_id = ''
         self.right_fasta_id = ''
 
@@ -175,14 +178,18 @@ class InoutPrimer3(object):
                 self.PRIMER_ERROR = str(value)
 
             elif tag == 'PRIMER_LEFT_0':
-                primer_region_list.append(value)
+                self.left_primer_region = value
+                primer_region_list.append(self.left_primer_region)
+
             elif tag == 'PRIMER_RIGHT_0':
                 end_rel_pos, length = map(int, value.split(','))
                 # 525,5 => 521,5
                 # 521...5
                 plus_rel_pos = end_rel_pos - length + 1
-                primer_region_list.append("{},{}".format(
-                    plus_rel_pos, length))
+                # 29221222 ncod3
+                self.right_primer_region = "{},{}".format(
+                    plus_rel_pos, length)
+                primer_region_list.append(self.right_primer_region)
 
             if len(primer_region_list) != 0:
                 self.primer_region = ' '.join(primer_region_list)
@@ -273,11 +280,11 @@ class InoutPrimer3(object):
         self.FRtags_Hp_Dm = \
             "ACACTGACGACATGGTTCTACA,TACGGTAGCAGAGACTTGGTCT,45,40"
 
-        self.amplicon_forward_tag, \
-        self.amplicon_reverse_tag, \
-        hairpin_tm, \
-        dimer_tm = \
-            self.FRtags_Hp_Dm.split(',')
+        # from parameter
+        self.amplicon_forward_tag = glv.conf.amplicon_forward_tag
+        self.amplicon_reverse_tag = glv.conf.amplicon_reverse_tag
+        hairpin_tm = glv.conf.hairpin_tm
+        dimer_tm = glv.conf.dimer_tm
 
         self.hairpin_tm = float(hairpin_tm)
         self.dimer_tm = float(dimer_tm)
@@ -285,8 +292,10 @@ class InoutPrimer3(object):
         left_primer = self.get_primer_left_seq()
         right_primer = self.get_primer_right_seq()
 
+        #################################################
         l_seq = self.amplicon_forward_tag + left_primer
         r_seq = self.amplicon_reverse_tag + right_primer
+        #################################################
 
         #print("l_seq={}, r_seq={}".format(l_seq, r_seq))
 

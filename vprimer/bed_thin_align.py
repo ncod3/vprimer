@@ -6,6 +6,7 @@ import time
 import datetime
 
 from pathlib import Path
+import pandas as pd
 
 import logging
 log = logging.getLogger(__name__)
@@ -53,7 +54,7 @@ class BedThinAlign(object):
         self.ref = glv.conf.user_ref_path
         self.vcf = glv.conf.user_vcf_path
 
-        self.now_datetime       = utl.datetime_str()
+        #self.now_datetime       = utl.datetime_str()
 
         # bed_thal
         # 解析で指定されたbam_bedの情報
@@ -62,7 +63,8 @@ class BedThinAlign(object):
         self.uname = "{}, {}".format(os.uname()[0], os.uname()[2])
         self.hostname = os.uname()[1]
 
-        # for header
+
+        # header for bam_bed
         self.h_bbed = {
             'vcf_sample':       'vcf_sample',
             'bam_bed_name':     'bam_bed_name',
@@ -70,7 +72,7 @@ class BedThinAlign(object):
             'min_max_depth':    'min_max_depth',
 
             'associated_bam':   'associated_bam',
-            'bam_path':         'bam_path',
+            'user_bam_path':    'user_bam_path',
             'bam_mtime':        'bam_mtime',
             'bam_size':         'bam_size',
             'bam_md5':          'bam_md5',
@@ -80,22 +82,45 @@ class BedThinAlign(object):
 
             'uname':            'uname',
             'hostname':         'hostname',
+            #-----------------------------------
+
+            'genome_total_len':             'genome_total_len',
+            'width_coverage_nozero':        'width_coverage_nozero',
+            'width_coverage_nozero_rate':   'width_coverage_nozero_rate',
 
             'width_coverage_valid':         'width_coverage_valid',
             'width_coverage_valid_rate':    'width_coverage_valid_rate',
-            'width_coverage_zero':          'width_coverage_zero',
-            'width_coverage_thin':          'width_coverage_thin',
-            'width_coverage_thick':         'width_coverage_thick',
-            'width_coverage_total':         'width_coverage_total',
 
-            'depth_valid':      'depth_valid',
-            'depth_valid_av':   'depth_valid_av',
+            'width_coverage_thin':          'width_coverage_thin',
+            'width_coverage_thin_rate':     'width_coverage_thin_rate',
+
+            'width_coverage_zero':          'width_coverage_zero',
+            'width_coverage_thick':         'width_coverage_thick',
+
+            #-----------------------------------
+
+            'depth_valid_average':   'depth_valid_average',
+            'depth_thin_average':    'depth_thin_average',
+
             'depth_zero':       'depth_zero',
             'depth_thin':       'depth_thin',
             'depth_thick':      'depth_thick',
+            'depth_valid':      'depth_valid',
             'depth_total':      'depth_total',
+
+            #-----------------------------------
+            'bed_thal_valid_length':    'bed_thal_valid_length',
+            'bed_thal_valid_rate':      'bed_thal_valid_rate',
         }
 
+        # header for bed_thal
+        self.h_bthl = {
+            'bam_bed_path':             'bam_bed_path',
+            #-----------------------------------------------
+            'groups_id':                'groups_id',
+            'sorted_samples':           'sorted_samples',
+            'bta_min_max_depth':        'bta_min_max_depth',
+        }
 
         self.user_bam_table_path = glv.conf.user_bam_table_path
         self.min_depth = glv.conf.min_depth
@@ -108,32 +133,16 @@ class BedThinAlign(object):
         self.bta_min_max_depth = glv.conf.min_max_depth
 
         # for bam stat
-        self.count_dict = {
-            'width_coverage': {
-                glv.bed_now_zero: 0,
-                glv.bed_now_thin: 0,
-                glv.bed_now_valid: 0,
-                glv.bed_now_thick: 0,
-                'wdc_rate': 0.00,
-                'total': 0,
-            },
-            'depth': {
-                glv.bed_now_zero: 0,
-                glv.bed_now_thin: 0,
-                glv.bed_now_valid: 0,
-                glv.bed_now_thick: 0,
-                'av_depth': 0.00,
-                'total': 0,
-            }
-        }
+        self.count_dict = dict()
 
 
+    #~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#
+    # 1/6. make_bam_table_dict, from conf_bed_file.py 
     def make_bam_table_dict(self):
         '''
         '''
 
-        # これは、本来外部からやってくる
-        ### sorted_samples_list = list()
+        log.info("start 1/6 bta.make_bam_table_dict")
 
         log.info("read {}".format(self.user_bam_table_path))
         with self.user_bam_table_path.open('r', encoding='utf-8') as f:
@@ -153,8 +162,8 @@ class BedThinAlign(object):
                 ### sorted_samples_list.append(vcf_sample)
 
                 # init
-                user_bam_path = "-"
-                bam_bed_path = "-"
+                user_bam_path = "-"              # ユーザ指定bamのPath
+                bam_bed_path = "-"          # 変換後のbam_bedのPath
                 bta_min_max_depth = "-"
 
                 if associated_bam != "-":
@@ -170,7 +179,7 @@ class BedThinAlign(object):
                         sys.exit(1)
 
                     # make bed file name and get pathlib
-                    bam_bed_path = self.get_bam_bed_path_name(
+                    bam_bed_path = self.make_name_bam_bed_path(
                         user_bam_path, self.min_depth, self.max_depth)
 
                 # dictionary
@@ -178,13 +187,12 @@ class BedThinAlign(object):
                     'vcf_sample': vcf_sample,
                     'associated_bam': associated_bam,
                     'user_bam_path': user_bam_path,
-                    'slink_bam_path': user_bam_path,
+                    #'slink_bam_path': bam_path,
                     'min_max_depth': bta_min_max_depth,
                     'bam_bed_path': bam_bed_path,
                 }
 
         vcf_sample_cnt = len(self.bam_table_dict.keys())
-        log.info("required bam cnt is {}".format(vcf_sample_cnt))
 
         # - も含みで、全エントリを辞書化
 
@@ -192,29 +200,8 @@ class BedThinAlign(object):
         #sorted_samples_str = ','.join(sorted(set(sorted_samples_list)))
         #return sorted_samples_str
 
-
-    def get_bam_bed_path_name(self, bam_path, min_depth, max_depth):
-        '''
-        '''
-        bam_bed_ext = self.get_bam_bed_ext(min_depth, max_depth)
-        bam_bed_path = Path("{}{}".format(
-            self.bed_dir_path / bam_path.name, bam_bed_ext)).resolve()
-        return bam_bed_path
-
-
-    def get_bam_bed_ext(self, min_depth, max_depth):
-        ''' bedの拡張子は、depthのしきい値、Min, Maxを含んでいる。
-        '''
-        # glv.min_max_ext        = ".mMin_xMax"
-        # glv.bam_bed_ext        = ".bb.bed"
-
-        # substitute .mMin_xMax.bed => .m8_x300.bed
-        bam_bed_ext = glv.min_max_ext + glv.bam_bed_ext
-        bam_bed_ext = re.sub('Min', str(min_depth), bam_bed_ext)
-        bam_bed_ext = re.sub('Max', str(max_depth), bam_bed_ext)
-        return bam_bed_ext
-
-
+    #~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#
+    # 2/6. get_require_bam_bed_list, from conf_bed_file.py 
     def get_require_bam_bed_list(self, sorted_samples_str):
         '''
         bam_bed_dict = {
@@ -223,17 +210,21 @@ class BedThinAlign(object):
             'vcf_sample': vcf_sample,
             'associated_bam': associated_bam,
             'user_bam_path': user_bam_path,
-            'bam_path': slink_bam_path,
+            #'bam_path': slink_bam_path,
             'bam_bed_path': bam_bed_path,
             'min_depth': min_depth,
             'max_depth': max_depth,
         }
         '''
 
+        log.info("start 2/6 bta.get_require_bam_bed_list")
+
         # リストに変換
         sorted_samples_list = sorted_samples_str.split(',')
         # bam_bed の要作成リストの構築
         bam_num = 1
+        # num of not '-'
+        bam_exist = 0
 
         # 調査対象の、sorted_samples_list にて
         for vcf_sample in sorted_samples_list:
@@ -244,11 +235,13 @@ class BedThinAlign(object):
             # it doesn't have a bam file
             if associated_bam == '-':
                 continue
+            else:
+                bam_exist += 1
 
             user_bam_path = \
                 self.bam_table_dict[vcf_sample]['user_bam_path']
-            slink_bam_path = \
-                 self.bam_table_dict[vcf_sample]['slink_bam_path']
+            #slink_bam_path = \
+            #     self.bam_table_dict[vcf_sample]['slink_bam_path']
             bam_bed_path = self.bam_table_dict[vcf_sample]['bam_bed_path']
 
             # すでに、指定のファイル名のbedがあれば、何もしない
@@ -256,13 +249,14 @@ class BedThinAlign(object):
                 log.info("bam_bed {} already exist.".format(bam_bed_path))
                 continue
 
+            #----------------------------------------------
             bam_bed_dict = {
                 'bam_num': bam_num,
                 'ttl_num': 0,
                 'vcf_sample': vcf_sample,
                 'associated_bam': associated_bam,
                 'user_bam_path': user_bam_path,
-                'bam_path': slink_bam_path,
+                #'bam_path': slink_bam_path,
                 'bam_bed_path': bam_bed_path,
                 'min_depth': self.min_depth,
                 'max_depth': self.max_depth,
@@ -270,22 +264,28 @@ class BedThinAlign(object):
             self.require_bam_bed_list.append(bam_bed_dict)
             bam_num += 1
 
+        if bam_exist == 0:
+            # all the bam missed
+            err = "There are {} samples for analyse: {}, ".format(
+                len(sorted_samples_list), sorted_samples_str)
+            err += "but no bam is specified (-). "
+            err += "Please check bam_table file. "
+            err += "exit."
+            log.info(err)
+            sys.exit(1)
+
         # set total num
         self.set_total_num(self.require_bam_bed_list)
 
 
-    def set_total_num(self, require_list):
-        '''
-        '''
-        # 辞書の中の ttl_num を更新
-        ttl_num = len(require_list)
-        for d_dict in require_list:
-            d_dict['ttl_num'] = ttl_num
-
-
+    #~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#
+    # 3/6. build_bam_bed, from conf_bed_file.py 
     def build_bam_bed(self):
         '''
         '''
+
+        log.info("start 3/6 bta.build_bam_bed")
+
         reqcnt = len(self.require_bam_bed_list)
         #self.parallel_cnt
         if reqcnt == 0:
@@ -343,6 +343,315 @@ class BedThinAlign(object):
             utl.elapse_str(start)))
 
 
+    #~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#
+    # 4/6. pick_provenance_with_depth, from conf_bed_file.py 
+    def pick_provenance_with_depth(self, sorted_samples_str, groups_id):
+        '''
+        '''
+
+        log.info("start 4/6 bta.pick_provenance_with_depth")
+
+        # リストにする
+        sorted_samples_list = sorted_samples_str.split(',')
+        #print(sorted_samples_list)
+
+        # it's one dict
+        self.bta_req_dict = {
+            'sorted_samples': sorted_samples_str,
+            'groups_id': groups_id,
+            'bta_min_max_depth': self.bta_min_max_depth,
+            'bam_bed_path_list': list(),
+            'prov_info': dict()
+        }
+
+        # for each vcf_sample
+        for vcf_sample in sorted_samples_list:
+
+            #print(vcf_sample)
+
+            user_bam_path = self.bam_table_dict[vcf_sample]['user_bam_path']
+            #print(user_bam_path)
+            min_max_depth = self.bam_table_dict[vcf_sample]['min_max_depth']
+            #print(min_max_depth)
+            bam_bed_path = self.bam_table_dict[vcf_sample]['bam_bed_path']
+            #print(bam_bed_path)
+
+            # dict: key => vcf_sample
+            prov_info = {
+                vcf_sample: {
+                    'user_bam_path': user_bam_path,
+                    'bam_md5': "",
+                    'min_max_depth': min_max_depth,
+                    'bam_bed_path': bam_bed_path,
+                    'width_coverage_valid_rate': 0.00,
+                    'depth_valid_av': 0.00,
+                }
+            }
+
+            # read bam_hed_header
+            with bam_bed_path.open('r', encoding='utf-8') as f:
+                for r_liner in f:
+                    r_line = r_liner.strip()    # ct, ws
+
+                    # continue if ^#
+                    if not r_line.startswith('#'):
+                        continue
+
+                    if not '\t' in r_line:
+                        continue
+
+                    # # and space, contine
+                    r_line = r_line.replace('#', '').strip()
+                    if r_line == '':
+                        continue
+
+                    # read header
+                    # # vcf_sample    Ginganoshizuku
+                    #print(r_line)
+
+                    key, val = r_line.split('\t')
+
+                    #print("key={}, val={}".format(key, val))
+                    if key == 'bam_md5' or \
+                        key == self.h_bbed['depth_valid_average'] or \
+                        key == self.h_bbed['width_coverage_valid_rate']:
+                        prov_info[vcf_sample][key] = val
+
+            # add tha bam_bed info to a bed_thal file
+            self.bta_req_dict['bam_bed_path_list'].append(
+                bam_bed_path)
+            self.bta_req_dict['prov_info'].update(prov_info)
+
+        mes = "finished pick_provenance_with_depth."
+        log.info(mes)
+
+
+    #~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#
+    # 5/6. find_suitable_bed_thal, from conf_bed_file.py 
+    def find_suitable_bed_thal(self):
+        '''
+        デプスが同一
+            ユーザ指定サンプル群の中で、bamがあるもの。
+            bed_thalのbam構成とデプスが同一構成のもの
+        
+        '''
+
+        log.info("start 5/6 bta.find_suitable_bed_thal")
+
+        found_bed_thal = False
+        bed_thal_path = ""
+
+        bta_bed_cnt = 0
+        # 今度は、bed_thal を１つづつ探す
+        for fpath in self.bed_dir_path.iterdir():
+
+            # glv.bed_thal_ext       = ".bta.bed"
+            if str(fpath).endswith(glv.bed_thal_ext):
+                bta_bed_cnt += 1
+
+                # .bta.bed ファイルから来歴を読み出す
+                bta_prov_dict = self.read_bta_provenance_info(fpath)
+
+                '''
+                bta_prov_dict = {
+                    'sorted_samples': "",
+                    'groups_id': "",
+                    'bta_min_max_depth': "",
+                    'prov_info': dict()
+                }
+                '''
+
+                # 来歴のチェック
+                # 既存の .bta.bed の来歴と、今作ろうとしている サンプルを
+                # 比較して、同じものならば、既存のファイルを用いる
+                found_bed_thal = self.check_bta_provenance(bta_prov_dict)
+
+                if found_bed_thal:
+                    bed_thal_path = Path(fpath).resolve()
+                    break
+
+        if not found_bed_thal:
+            bed_thal_path = self.make_name_bed_thal_path(
+                self.min_depth, self.max_depth)
+
+        return found_bed_thal, bed_thal_path
+
+
+    #~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#
+    # 6/6. build_bed_thal, from conf_bed_file.py 
+    def build_bed_thal(self, new_bed_thal_path):
+        '''
+        '''
+
+        log.info("start 6/6 bta.build_bed_thal")
+
+        # 使用する bam_bed のリスト pathlibから、fullpath textのリストへ
+        bam_bed_path_list = list(map(str,
+            self.bta_req_dict['bam_bed_path_list']))
+
+        # awk, sort処理後の、書き出し用bedファイル
+        # bed_thal_tmp_ext
+        new_bed_thal_tmp_path = \
+            Path(str(new_bed_thal_path) + glv.bed_thal_tmp_ext).resolve()
+
+        # make_header
+        header_bed_thal = self.ident_bed_thal_header()
+
+        #    groups, sorted_samples, bed_path_list,)
+        # (1) awk: remove line that include "(valid)", remain only $1~$3
+        '''
+        # [header]
+        chr01   0       1000    Z
+        chr01   1000    1005    thin
+        chr01   1005    29758   (valid)
+        chr01   29758   29761   thin
+        '''
+
+
+        cmd_awk = ['awk']
+        cmd_awk += ['-F', '\\t']
+        cmd_awk += \
+            ['$1!~/^#/ && $4!~/valid/ {printf("%s\\t%s\\t%s\\n",$1,$2,$3)}']
+        # argument: bam_bed files
+        cmd_awk += bam_bed_path_list
+
+        # (2) | sort: by first column "chrom" and second column position
+        cmd_sort = ['sort']
+        cmd_sort += ['-k', '1,1', '-k', '2,2n']
+
+        # (3) cmd_awk | cmd_sort > file
+        # cmd_redirect = ['>']
+        # cmd_redirect += ["{}".format(bed_thal_tmp_path)]
+        with new_bed_thal_tmp_path.open('w', encoding='utf-8') as f:
+            #f.write(header_bed_thal)
+            #f.write("{}".format(header_bed_thal)
+            # この内部でのエラーをピックアップできるか
+            # awk - awka にすると、エラーで止まる。
+            #p_awk = sbp.Popen(cmd_awk, stdout=sbp.PIPE, stderr=sbp.PIPE)
+            #print("(2) cmd_awk and cmd_sort")
+
+            p_awk = sbp.Popen(cmd_awk, stdout=sbp.PIPE)
+            p_sort = sbp.Popen(cmd_sort,
+                stdin=p_awk.stdout, stdout=f, stderr=sbp.PIPE)
+            p_awk.stdout.close()  # SIGPIPE if p2 exits.
+            # bed ファイルにエラーがあった場合
+            result, err = p_sort.communicate()
+            #print("(3) cmd_awk and cmd_sort end")
+            # エラーは確認しない。
+
+
+        #print("result={}, err={}".format(result, err))
+        #sys.exit(1)
+
+        #proc = sbp.Popen(cmd1, stdout=sbp.PIPE, stderr=sbp.PIPE, text=True)
+        #result = proc.communicate()
+
+        # (4) bedtools merge
+        cmd_bedtools = ['bedtools']
+        cmd_bedtools += ['merge']
+        cmd_bedtools += ['-nobuf']
+        cmd_bedtools += ['-i', '{}'.format(new_bed_thal_tmp_path)]
+
+        new_bed_thal_merge_path = \
+            Path(str(new_bed_thal_path) + glv.bed_thal_merge_ext).resolve()
+
+        # (5) cmd_bedtools > file
+        # エラーをキャプチャして、logに残す
+        with new_bed_thal_merge_path.open('w', encoding='utf-8') as f:
+            #print("(4) cmd_bedtools")
+            self.print_single(f, header_bed_thal)
+
+            p3 = sbp.Popen(cmd_bedtools, stdout=f, stderr=sbp.PIPE, text=True)
+            result, err = p3.communicate()
+            #print("(5) cmd_bedtools end")
+
+        if err != "":
+            log.error("bedtools says, {}".format(err))
+            log.error("It is serious error. exit.")
+            sys.exit(1)
+
+        # 再度読み込んで、statを作る
+        valid_statline = self.get_bed_thal_valid_stat(new_bed_thal_merge_path)
+
+        log.info("\n{}".format(valid_statline))
+
+        # statを追加する
+        with new_bed_thal_merge_path.open('a', encoding='utf-8') as f:
+            f.write(valid_statline)
+
+        # 終了したら、tmpを消す
+        new_bed_thal_tmp_path.unlink()
+        # 終了したら、mvする。
+        new_bed_thal_merge_path.rename(new_bed_thal_path)
+
+        log.info("finished, creating {}".format(new_bed_thal_path.name))
+
+
+    ######################################################################
+    # sub-routine
+    def make_name_bam_bed_path(self, user_bam_path, min_depth, max_depth):
+        '''
+        '''
+        # m8_x300.bb.bed
+        bam_bed_ext = self.get_bed_ext(glv.bam_bed_ext, min_depth, max_depth)
+        bam_bed_path = Path("{}{}".format(
+            self.bed_dir_path / user_bam_path.name, bam_bed_ext)).resolve()
+        return bam_bed_path
+
+
+    def make_name_bed_thal_path(self, min_depth, max_depth):
+        '''
+        '''
+
+        # m8_x300.bb.bed
+        bed_thal_ext = self.get_bed_ext(
+            glv.bed_thal_ext, min_depth, max_depth)
+
+        # now
+        dt = utl.datetime_str()
+
+        #
+        #print("make_name_bed_thal_path")
+        #sys.exit(1)
+
+        bed_thal = "{}/{}{}{}".format(
+            self.bed_dir_path,
+            glv.bed_thal_prefix,
+            dt,
+            bed_thal_ext)
+
+        # fullpath: pathlib
+        new_bed_thal_path = Path(bed_thal).resolve()
+
+        return new_bed_thal_path
+
+
+    def get_bed_ext(self, ext, min_depth, max_depth):
+        ''' bedの拡張子は、depthのしきい値、Min, Maxを含んでいる。
+        '''
+
+        # glv.min_max_ext        = ".mMin_xMax"
+        # glv.bam_bed_ext        = ".bb.bed"
+        # glv.bed_thal_ext       = ".bta.bed"
+
+        bed_ext = glv.min_max_ext + ext
+        # substitute .mMin_xMax.bed => .m8_x300.bed
+
+        bed_ext = re.sub('Min', str(min_depth), bed_ext)
+        bed_ext = re.sub('Max', str(max_depth), bed_ext)
+
+        return bed_ext
+
+
+    def set_total_num(self, require_list):
+        '''
+        '''
+        # 辞書の中の ttl_num を更新
+        ttl_num = len(require_list)
+        for d_dict in require_list:
+            d_dict['ttl_num'] = ttl_num
+
+
     def make_bam_bed_file(self, bam_bed_dict):
 
         '''
@@ -352,7 +661,7 @@ class BedThinAlign(object):
             'vcf_sample': vcf_sample,
             'associated_bam': associated_bam,
             'user_bam_path': user_bam_path,
-            'bam_path': slink_bam_path,
+            #'bam_path': slink_bam_path,
             'bam_bed_path': bam_bed_path,
             'min_depth': min_depth,
             'max_depth': max_depth,
@@ -365,7 +674,7 @@ class BedThinAlign(object):
         associated_bam = bam_bed_dict['associated_bam']
         user_bam_path = bam_bed_dict['user_bam_path']
 
-        bam_path = bam_bed_dict['bam_path']
+        #bam_path = bam_bed_dict['bam_path']
         bam_bed_path = bam_bed_dict['bam_bed_path']
         min_depth = bam_bed_dict['min_depth']
         max_depth = bam_bed_dict['max_depth']
@@ -376,7 +685,7 @@ class BedThinAlign(object):
         # add header to bam_bed
         bam_bed_header = self.ident_bam_bed_header(
             vcf_sample, associated_bam,
-            bam_path, min_depth, max_depth, bam_bed_path)
+            user_bam_path, min_depth, max_depth, bam_bed_path)
 
         start = utl.get_start_time()
         log.info("start ({}/{}){}".format(
@@ -388,59 +697,92 @@ class BedThinAlign(object):
             # bedが作られたときのログ。作成コマンドまでたどり着くこと。
             self.print_single(f, bam_bed_header)
             self.calc_bam_depth(
-                f, vcf_sample, associated_bam, bam_path,
+                f, vcf_sample, associated_bam, user_bam_path,
                 min_depth, max_depth, bam_num, ttl_num, start)
 
-
         # ここで、書き出せる
-        wdc_zero = self.count_dict['width_coverage'][glv.bed_now_zero]
-        wdc_thin = self.count_dict['width_coverage'][glv.bed_now_thin]
-        wdc_valid = self.count_dict['width_coverage'][glv.bed_now_valid]
-        wdc_thick = self.count_dict['width_coverage'][glv.bed_now_thick]
-        wdc_total = self.count_dict['width_coverage']['total']
-        wdc_rate = float(self.count_dict['width_coverage']['wdc_rate'])
 
+        # get chrom total length
+        chrom_info_list = glv.conf.get_chrom_info(glv.genome_total_len)
+        genome_total_len = chrom_info_list[2]
+
+        # --------------------------------------------------------------
+        wdc_total = self.count_dict['width_coverage']['total']
+
+        wdc_valid = self.count_dict['width_coverage'][glv.bed_now_valid]
+        wdc_valid_r = self.wdc_rate(wdc_valid, genome_total_len)
+
+        wdc_thin = self.count_dict['width_coverage'][glv.bed_now_thin]
+        wdc_thin_r = self.wdc_rate(wdc_thin, genome_total_len)
+
+        wdc_zero = self.count_dict['width_coverage'][glv.bed_now_zero]
+        wdc_thick = self.count_dict['width_coverage'][glv.bed_now_thick]
+
+        wdc_nozero = wdc_total- wdc_zero
+
+        # exclude zero
+        wdc_nozero_r = self.wdc_rate(wdc_nozero, genome_total_len)
+
+        # --------------------------------------------------------------
         dep_zero = self.count_dict['depth'][glv.bed_now_zero]
         dep_thin = self.count_dict['depth'][glv.bed_now_thin]
-        dep_valid = self.count_dict['depth'][glv.bed_now_valid]
         dep_thick = self.count_dict['depth'][glv.bed_now_thick]
+        dep_valid = self.count_dict['depth'][glv.bed_now_valid]
         dep_total = self.count_dict['depth']['total']
-        av_depth = float(self.count_dict['depth']['av_depth'])
+
+        dep_valid_ave = self.depth_ave(dep_valid, wdc_valid)
+        dep_thin_ave = self.depth_ave(dep_thin, wdc_valid)
+
 
         # 追加書き出し
-        bam_statistics = ""
+        # here document https://qiita.com/ykhirao/items/c7cba73a3a563be5eac6
 
-        bam_statistics += "# {}\t{}\n".format(
-            self.h_bbed['width_coverage_valid'], wdc_valid)
-        bam_statistics += "# {}\t{:.02f}\n".format(
-            self.h_bbed['width_coverage_valid_rate'], wdc_rate)
-        bam_statistics += "# {}\t{}\n".format(
-            self.h_bbed['width_coverage_zero'], wdc_zero)
-        bam_statistics += "# {}\t{}\n".format(
-            self.h_bbed['width_coverage_thin'], wdc_thin)
-        bam_statistics += "# {}\t{}\n".format(
-            self.h_bbed['width_coverage_thick'], wdc_thick)
-        bam_statistics += "# {}\t{}\n".format(
-            self.h_bbed['width_coverage_total'], wdc_total)
+        bam_stat = ""
+        bam_stat += "# [{}]\n".format(bam_bed_dict['associated_bam'])
 
-        bam_statistics += "# {}\t{}\n".format(
-            self.h_bbed['depth_valid'], dep_valid)
-        bam_statistics += "# {}\t{:.02f}\n".format(
-            self.h_bbed['depth_valid_av'], av_depth)
-        bam_statistics += "# {}\t{}\n".format(
-            self.h_bbed['depth_zero'], dep_zero)
-        bam_statistics += "# {}\t{}\n".format(
-            self.h_bbed['depth_thin'], dep_thin)
-        bam_statistics += "# {}\t{}\n".format(
-            self.h_bbed['depth_thick'], dep_thick)
-        bam_statistics += "# {}\t{}\n".format(
-            self.h_bbed['depth_total'], dep_total)
+        bam_stat += "# {}\t{:,}\n".format(
+            self.h_bbed['genome_total_len'],            genome_total_len)
+
+        bam_stat += "# {}\t{:,}\n".format(
+            self.h_bbed['width_coverage_nozero'],       wdc_nozero)
+        bam_stat += "# {}\t{}%\n".format(
+            self.h_bbed['width_coverage_nozero_rate'],  wdc_nozero_r)
+        bam_stat += "# {}\t{:,}\n".format(
+            self.h_bbed['width_coverage_valid'],        wdc_valid)
+        bam_stat += "# {}\t{}%\n".format(
+            self.h_bbed['width_coverage_valid_rate'],   wdc_valid_r)
+        bam_stat += "# {}\t{:,}\n".format(
+            self.h_bbed['width_coverage_thin'],         wdc_thin)
+        bam_stat += "# {}\t{}%\n".format(
+            self.h_bbed['width_coverage_thin_rate'],    wdc_thin_r)
+        bam_stat += "# {}\t{:,}\n".format(
+            self.h_bbed['width_coverage_zero'],         wdc_zero)
+        bam_stat += "# {}\t{:,}\n".format(
+            self.h_bbed['width_coverage_thick'],        wdc_thick)
+        bam_stat += "#\n"
+
+        bam_stat += "# {}\t{}\n".format(
+            self.h_bbed['depth_valid_average'],         dep_valid_ave)
+        bam_stat += "# {}\t{}\n".format(
+            self.h_bbed['depth_thin_average'],          dep_thin_ave)
+        bam_stat += "#\n"
+
+        bam_stat += "# {}\t{:,}\n".format(
+            self.h_bbed['depth_total'],                 dep_total)
+        bam_stat += "# {}\t{:,}\n".format(
+            self.h_bbed['depth_valid'],                 dep_valid)
+        bam_stat += "# {}\t{:,}\n".format(
+            self.h_bbed['depth_thin'],                  dep_thin)
+        bam_stat += "# {}\t{:,}\n".format(
+            self.h_bbed['depth_thick'],                 dep_thick)
+        bam_stat += "# {}\t{:,}\n".format(
+            self.h_bbed['depth_zero'],                  dep_zero)
 
         # 追加書き込み
         with bam_bed_tmp_path.open('a',  encoding='utf-8') as f:
-            self.print_single(f, bam_statistics)
+            self.print_single(f, bam_stat)
 
-        log.info("\n\n{}".format(bam_statistics))
+        log.info("\n\n{}".format(bam_stat))
         
         # 終了したら、mvする。
         bam_bed_tmp_path.rename(bam_bed_path)
@@ -448,11 +790,29 @@ class BedThinAlign(object):
         log.info("finished ({}/{}){}, {}".format(
             bam_num, ttl_num, vcf_sample, utl.elapse_str(start)))
 
-        #sys.exit(1)
+
+    def wdc_rate(self, area, total):
+
+        rate = 0.00
+
+        if total != 0:
+            rate = "{:.2f}".format(100 * area / total)
+
+        return rate
+
+
+    def depth_ave(self, depth, area):
+
+        ave_dep = 0.00
+
+        if area != 0:
+            ave_dep = "{:.2f}".format(depth / area)
+
+        return ave_dep
 
 
     def ident_bam_bed_header(self, vcf_sample, associated_bam,
-        bam_path, min_depth, max_depth, bam_bed_path):
+        user_bam_path, min_depth, max_depth, bam_bed_path):
 
         # ログを見れば、作成の際のコマンドまでたどり着くこと。
         # bamと、bed_thal は全く異なるコンピュータ環境で
@@ -464,7 +824,7 @@ class BedThinAlign(object):
         # bamの情報
         #   vcf_sample
         #   associated_bam(on bam_table)
-        #   bam_path
+        #   user_bam_path
         #   ls -l information(size, and date)
         #   bam_md5_value
 
@@ -472,10 +832,10 @@ class BedThinAlign(object):
         ref = self.ref
         vcf = self.vcf
 
-        bam_mtime = utl.get_path_mtime(bam_path)
-        bam_size = utl.get_path_size(bam_path)
+        bam_mtime = utl.get_path_mtime(user_bam_path)
+        bam_size = utl.get_path_size(user_bam_path)
 
-        bam_md5 = self.get_MD5(vcf_sample, bam_path)
+        bam_md5 = self.get_MD5(vcf_sample, user_bam_path)
 
         # 9 keys
         bam_bed_header = ""
@@ -499,7 +859,7 @@ class BedThinAlign(object):
         bam_bed_header += "# {}\t{}\n".format(
             self.h_bbed['associated_bam'], associated_bam)
         bam_bed_header += "# {}\t{}\n".format(
-            self.h_bbed['bam_path'], bam_path)
+            self.h_bbed['user_bam_path'], user_bam_path)
         bam_bed_header += "# {}\t{}\n".format(
             self.h_bbed['bam_mtime'], bam_mtime)
         bam_bed_header += "# {}\t{}\n".format(
@@ -518,12 +878,12 @@ class BedThinAlign(object):
         return bam_bed_header
 
 
-    def get_MD5(self, vcf_sample, bam_path):
+    def get_MD5(self, vcf_sample, user_bam_path):
         '''
         Calculates md5 hash of a file
         '''
         mes = "calcurate the md5 of bam {} ({}). ".format(
-            bam_path.name, vcf_sample)
+            user_bam_path.name, vcf_sample)
         mes += "It will take some time."
         log.info(mes)
 
@@ -533,7 +893,7 @@ class BedThinAlign(object):
 
         # using os.open
         #print(hash.block_size)  # block_size=64, 131072
-        with open(bam_path, "rb") as f:
+        with open(user_bam_path, "rb") as f:
             while True:
                 chunk = f.read(2048 * hash.block_size)
                 if len(chunk) == 0:
@@ -543,17 +903,35 @@ class BedThinAlign(object):
         path_hash = hash.hexdigest()
 
         mes = "finished calcurating md5 of bam {} ({}) {}".format(
-            bam_path.name, vcf_sample, path_hash)
+            user_bam_path.name, vcf_sample, path_hash)
         log.info(mes)
 
         return path_hash
 
 
     def calc_bam_depth(self,
-        f, vcf_sample, associated_bam, bam_path,
+        f, vcf_sample, associated_bam, user_bam_path,
         min_depth, max_depth, bam_num, ttl_num, stt):
         '''
         '''
+
+        # init
+        self.count_dict = {
+            'width_coverage': {
+                glv.bed_now_zero: 0,
+                glv.bed_now_thin: 0,
+                glv.bed_now_valid: 0,
+                glv.bed_now_thick: 0,
+                'total': 0,
+            },
+            'depth': {
+                glv.bed_now_zero: 0,
+                glv.bed_now_thin: 0,
+                glv.bed_now_valid: 0,
+                glv.bed_now_thick: 0,
+                'total': 0,
+            }
+        }
 
         # 最初はサンプルのスタート
         start = stt
@@ -561,6 +939,10 @@ class BedThinAlign(object):
         # glv
         last_stat = glv.bed_now_nop
         last_chrom = ""
+
+        # always check
+        chrom_start = 0
+        chrom_end = 0
 
         # for bed
         bed_close_stt = 1
@@ -571,7 +953,7 @@ class BedThinAlign(object):
 
         # as generate function
         # Code that runs in parallel depending on each argument
-        for r_depth_line in self.genfunc_samtools_depth(bam_path):
+        for r_depth_line in self.genfunc_samtools_depth(user_bam_path):
 
             # 単純に、samtools depth から出力された行を読み込むだけでも、
             # processが早い
@@ -593,8 +975,6 @@ class BedThinAlign(object):
             # count depth by now_stat
             self.count_dict['depth'][now_stat] += depth
             self.count_dict['depth']['total'] += depth
-            # av_depth
-            self.count_dict['depth']['av_depth'] = self.av_depth()
 
             # next chromosome start
             if stat_changed == glv.bed_stat_init:
@@ -602,8 +982,9 @@ class BedThinAlign(object):
                 # if end of chromosome,
                 if last_chrom != "":
                     # get last_chrom's length
-                    region_def, chrom_start, chrom_end, chrom_length = \
-                        glv.conf.get_chrom_info(last_chrom)
+                    chrom_info_list = glv.conf.get_chrom_info(last_chrom)
+                    chrom_start = chrom_info_list[0]
+                    chrom_end = chrom_info_list[1]
 
                     # if chromosome end is Z,
                     if (expected_pos - 1) != chrom_end:
@@ -671,13 +1052,16 @@ class BedThinAlign(object):
 
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         # もし、ここで最後のbpが出てない時は、ZERO
-        region_def, chrom_start, chrom_end, chrom_length = \
-            glv.conf.get_chrom_info(last_chrom)
+
+        chrom_info_list = glv.conf.get_chrom_info(last_chrom)
+        chrom_start = chrom_info_list[0]
+        chrom_end = chrom_info_list[1]
 
         if bed_close_end != chrom_end:
             # fill by glv.bed_now_zero
             self.print_line(f, glv.bed_now_zero,
-                last_chrom, bed_close_end + 1, chrom_end, glv.bed_now_zero)
+                last_chrom, bed_close_end + 1,
+                chrom_end, glv.bed_now_zero)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         self.print_single(f, "#end {} 1-{}\n".format(last_chrom, chrom_end))
@@ -762,10 +1146,39 @@ class BedThinAlign(object):
         '''
         '''
 
+        chrom_info_list = glv.conf.get_chrom_info(chrom)
+        chrom_end = chrom_info_list[1]
+
         if self.open_pos:
             bed_open_stt = bed_close_stt - 1
         else:
             bed_open_stt = bed_close_stt
+
+        if chrom_end > 0:
+            # chech over position
+            #-----------------------------------
+            # 長さを超えてる
+            if bed_open_stt > chrom_end and  bed_close_end > chrom_end:
+                #print("bed_open_stt {}".format(bed_open_stt))
+                #print("bed_close_end {}".format(bed_close_end))
+                #print("case 1")
+                #print("")
+                return
+
+            elif bed_open_stt > chrom_end:
+                #print("bed_open_stt {}".format(bed_open_stt))
+                #print("bed_close_end {}".format(bed_close_end))
+                #print("case 2")
+                #print("")
+                return
+
+            elif bed_close_end > chrom_end:
+                #print("bed_open_stt {}".format(bed_open_stt))
+                #print("bed_close_end {}".format(bed_close_end))
+                #print("case 3")
+                #print("")
+                bed_close_end = chrom_end
+            #-----------------------------------
 
         # dont show valid line
         if self.dont_show_valid:
@@ -793,250 +1206,42 @@ class BedThinAlign(object):
         width_coverage = length
         self.count_dict['width_coverage'][comment] += width_coverage
         self.count_dict['width_coverage']['total'] += width_coverage
-        # wdc_rate
-        self.count_dict['width_coverage']['wdc_rate'] = self.wdc_rate()
 
 
-    def wdc_rate(self):
+    def get_bed_thal_valid_stat(self, merge_path):
 
-        rate = 0.00
+        bed_thal_stat = ""
 
-        if self.count_dict['width_coverage']['total'] != 0:
-            rate = "{:.2f}".format(
-                100 * (self.count_dict['width_coverage'][glv.bed_now_valid] /
-                self.count_dict['width_coverage']['total']))
+        bed_thal_header = ['chrom', 'start', 'end']
 
-        return rate
+        # read bed into pandas
+        df_merge = pd.read_csv(merge_path, sep='\t', header=None, comment='#')
+        df_merge.columns = bed_thal_header
+        df_merge = df_merge.astype({'start': int, 'end': int})
 
+        # thin_lengthを得る
+        thin_length = (df_merge['end'] - df_merge['start']).sum()
 
-    def av_depth(self):
+        # genomeの全長
+        chrom_info_list = glv.conf.get_chrom_info(glv.genome_total_len)
+        genome_total_len = chrom_info_list[2]
 
-        av_dep = 0.00
-        
-        if self.count_dict['width_coverage'][glv.bed_now_valid] != 0:
-            av_dep = "{:.2f}".format(
-                self.count_dict['depth'][glv.bed_now_valid] /
-                self.count_dict['width_coverage'][glv.bed_now_valid])
+        valid_length = genome_total_len - thin_length
 
-        return av_dep
+        valid_r = "{:.02f}".format(100*(valid_length / genome_total_len))
 
-
-    def pick_provenance_with_depth(self, sorted_samples_str, groups_id):
-        '''
-        '''
-
-        mes = "start pick_provenance_with_depth."
-        log.info(mes)
-
-        # リストにする
-        sorted_samples_list = sorted_samples_str.split(',')
-        print(sorted_samples_list)
+        bed_thal_stat = ""
+        bed_thal_stat += "#\n"
+        bed_thal_stat += "# {}\t{:,}\n".format(
+            self.h_bbed['genome_total_len'],        genome_total_len)
+        bed_thal_stat += "# {}\t{:,}\n".format(
+            self.h_bbed['bed_thal_valid_length'],   valid_length)
+        bed_thal_stat += "# {}\t{}%\n".format(
+            self.h_bbed['bed_thal_valid_rate'],     valid_r)
+        bed_thal_stat += "#\n"
 
 
-        # it's one dict
-        self.bta_req_dict = {
-            'sorted_samples': sorted_samples_str,
-            'groups_id': groups_id,
-            'bta_min_max_depth': self.bta_min_max_depth,
-            'bam_bed_path_list': list(),
-            'prov_info': dict()
-        }
-
-        # for each vcf_sample
-        for vcf_sample in sorted_samples_list:
-
-            #print(vcf_sample)
-
-            user_bam_path = self.bam_table_dict[vcf_sample]['user_bam_path']
-            #print(user_bam_path)
-            min_max_depth = self.bam_table_dict[vcf_sample]['min_max_depth']
-            #print(min_max_depth)
-            bam_bed_path = self.bam_table_dict[vcf_sample]['bam_bed_path']
-            #print(bam_bed_path)
-
-            # dict: key => vcf_sample
-            prov_info = {
-                vcf_sample: {
-                    'user_bam_path': user_bam_path,
-                    'bam_md5': "",
-                    'min_max_depth': min_max_depth,
-                    'bam_bed_path': bam_bed_path,
-                    'width_coverage_valid_rate': 0.00,
-                    'depth_valid_av': 0.00,
-                }
-            }
-
-            # read bam_hed_header
-            with bam_bed_path.open('r', encoding='utf-8') as f:
-                for r_liner in f:
-                    r_line = r_liner.strip()    # ct, ws
-
-                    # continue if ^#
-                    if not r_line.startswith('#'):
-                        continue
-
-                    # #end .. end of chromosome, continue
-                    if r_line.startswith('#end'):
-                        continue
-
-                    # # and space, contine
-                    r_line = r_line.replace('#', '').strip()
-                    if r_line == '':
-                        continue
-
-                    # read header
-                    # # vcf_sample    Ginganoshizuku
-                    print(r_line)
-                    key, val = r_line.split('\t')
-
-                    #print("key={}, val={}".format(key, val))
-                    if key == 'bam_md5' or \
-                        key == 'width_coverage_valid_rate' or \
-                        key == 'depth_valid_av':
-                        prov_info[vcf_sample][key] = val
-
-            # add tha bam_bed info to a bed_thal file
-            self.bta_req_dict['bam_bed_path_list'].append(
-                bam_bed_path)
-            self.bta_req_dict['prov_info'].update(prov_info)
-
-        mes = "finished pick_provenance_with_depth."
-        log.info(mes)
-
-
-    def find_suitable_bed_thal(self):
-
-        mes = "start find_suitable_bed_thal."
-        log.info(mes)
-
-        found_bed_thal = False
-        bed_thal_path = ""
-
-        bta_bed_cnt = 0
-        # 今度は、bed_thal を１つづつ探す
-        for fpath in self.bed_dir_path.iterdir():
-
-            # glv.bed_thal_ext       = ".bta.bed"
-            if str(fpath).endswith(glv.bed_thal_ext):
-                bta_bed_cnt += 1
-
-                # 見つかった .bta.bed ファイルから来歴を読み出す
-                bta_prov_dict = self.read_bta_provenance_info(fpath)
-                # 来歴のチェック
-                # 既存の .bta.bed の来歴と、今作ろうとしている サンプルを
-                # 比較して、同じものならば、既存のファイルを用いる
-                found_bed_thal = self.check_bta_provenance(bta_prov_dict)
-
-                if found_bed_thal:
-                    bed_thal_path = Path(fpath).resolve()
-                    break
-
-        if not found_bed_thal:
-            bed_thal_path = self.make_new_bed_thal_path()
-
-        return found_bed_thal, bed_thal_path
-
-
-    def make_new_bed_thal_path(self):
-
-        bed_thal = "{}/{}{}_{}{}".format(
-            self.bed_dir_path,
-            glv.bed_thal_prefix,
-            glv.na_group_names,
-            self.now_datetime,
-            glv.bed_thal_ext)
-
-        # fullpath: pathlib
-        new_bed_thal_path = Path(bed_thal).resolve()
-
-        return new_bed_thal_path
-
-
-    def build_bed_thal(self, new_bed_thal_path):
-
-        # 使用する bam_bed のリスト pathlibから、fullpath textのリストへ
-        bam_bed_path_list = list(map(str,
-            self.bta_req_dict['bam_bed_path_list']))
-
-        # awk, sort処理後の、書き出し用bedファイル
-        new_bed_thal_tmp_path = \
-            Path(str(new_bed_thal_path) + glv.bed_thal_tmp_ext).resolve()
-
-        # make_header
-        header_bed_thal = self.ident_bed_thal_header()
-
-        #    groups, sorted_samples, bed_path_list,)
-        # (1) awk: remove line that include "(valid)", remain only $1~$3
-        '''
-        # [header]
-        chr01   0       1000    Z
-        chr01   1000    1005    thin
-        chr01   1005    29758   (valid)
-        chr01   29758   29761   thin
-        '''
-
-
-        cmd_awk = ['awk']
-        cmd_awk += ['-F', '\\t']
-        cmd_awk += \
-            ['$1!~/^#/ && $4!~/valid/ {printf("%s\\t%s\\t%s\\n",$1,$2,$3)}']
-        # argument: bam_bed files
-        cmd_awk += bam_bed_path_list
-
-        # (2) | sort: by first column "chrom" and second column position
-        cmd_sort = ['sort']
-        cmd_sort += ['-k', '1,1', '-k', '2,2n']
-
-        # (3) cmd_awk | cmd_sort > file
-        # cmd_redirect = ['>']
-        # cmd_redirect += ["{}".format(bed_thal_tmp_path)]
-        with new_bed_thal_tmp_path.open('w', encoding='utf-8') as f:
-            #f.write(header_bed_thal)
-            #f.write("{}".format(header_bed_thal)
-            # この内部でのエラーをピックアップできるか
-            # awk - awka にすると、エラーで止まる。
-            #p_awk = sbp.Popen(cmd_awk, stdout=sbp.PIPE, stderr=sbp.PIPE)
-            #print("(2) cmd_awk and cmd_sort")
-
-            p_awk = sbp.Popen(cmd_awk, stdout=sbp.PIPE)
-            p_sort = sbp.Popen(cmd_sort,
-                stdin=p_awk.stdout, stdout=f, stderr=sbp.PIPE)
-            p_awk.stdout.close()  # SIGPIPE if p2 exits.
-            # bed ファイルにエラーがあった場合
-            result, err = p_sort.communicate()
-            #print("(3) cmd_awk and cmd_sort end")
-            # エラーは確認しない。
-
-
-        #print("result={}, err={}".format(result, err))
-        #sys.exit(1)
-
-        #proc = sbp.Popen(cmd1, stdout=sbp.PIPE, stderr=sbp.PIPE, text=True)
-        #result = proc.communicate()
-
-        # (4) bedtools merge
-        cmd_bedtools = ['bedtools']
-        cmd_bedtools += ['merge']
-        cmd_bedtools += ['-nobuf']
-        cmd_bedtools += ['-i', '{}'.format(new_bed_thal_tmp_path)]
-
-        # (5) cmd_bedtools > file
-        # エラーをキャプチャして、logに残す
-        with new_bed_thal_path.open('w', encoding='utf-8') as f:
-            #print("(4) cmd_bedtools")
-            self.print_single(f, header_bed_thal)
-
-            p3 = sbp.Popen(cmd_bedtools, stdout=f, stderr=sbp.PIPE, text=True)
-            result, err = p3.communicate()
-            #print("(5) cmd_bedtools end")
-
-        if err != "":
-            log.info("bedtools={}".format(err))
-
-        # 終了したら、tmpを消す
-        new_bed_thal_tmp_path.unlink()
-
-        log.info("finished, creating {}".format(new_bed_thal_path.name))
+        return bed_thal_stat
 
 
     def ident_bed_thal_header(self):
@@ -1052,15 +1257,30 @@ class BedThinAlign(object):
         bta_min_max_depth = self.bta_req_dict['bta_min_max_depth']
 
         #
-        bed_thal_header = ""
-        bed_thal_header += "# date\t{}\n".format(date)
-        bed_thal_header += "# uname\t{}\n".format(self.uname)
-        bed_thal_header += "# hostname\t{}\n".format(self.hostname)
-        bed_thal_header += "# ref\t{}\n".format(ref)
-        bed_thal_header += "# vcf\t{}\n".format(vcf)
-        bed_thal_header += "# groups_id\t{}\n".format(groups_id)
-        bed_thal_header += "# sorted_samples\t{}\n".format(sorted_samples)
-        bed_thal_header += "# bta_min_max_depth\t{}\n".format(
+        bta_header = ""
+        bta_header += "# {}\t{}\n".format(
+            self.h_bbed['date'], date)
+
+        bta_header += "# {}\t{}\n".format(
+            self.h_bbed['uname'], self.uname)
+
+        bta_header += "# {}\t{}\n".format(
+            self.h_bbed['hostname'], self.hostname)
+
+        bta_header += "# {}\t{}\n".format(
+            self.h_bbed['ref'], ref)
+
+        bta_header += "# {}\t{}\n".format(
+            self.h_bbed['vcf'], vcf)
+
+        bta_header += "# {}\t{}\n".format(
+            self.h_bthl['groups_id'], groups_id)
+
+        bta_header += "# {}\t{}\n".format(
+            self.h_bthl['sorted_samples'], sorted_samples)
+
+        bta_header += "# {}\t{}\n".format(
+            self.h_bthl['bta_min_max_depth'], 
             bta_min_max_depth)
 
         #----------------
@@ -1074,32 +1294,55 @@ class BedThinAlign(object):
                 self.bta_req_dict['prov_info'][vcf_sample]['bam_md5']
             user_bam_path = \
                 self.bta_req_dict['prov_info'][vcf_sample]['user_bam_path']
+
             width_coverage_valid_rate = \
                 self.bta_req_dict[
-                    'prov_info'][vcf_sample]['width_coverage_valid_rate']
-            depth_valid_av = \
-                self.bta_req_dict['prov_info'][vcf_sample]['depth_valid_av']
+                    'prov_info'][vcf_sample][
+                        self.h_bbed['width_coverage_valid_rate']]
 
-            bed_thal_header += "#\n"
-            bed_thal_header += "# vcf_sample\t{}\n".format(vcf_sample)
-            bed_thal_header += "# min_max_depth\t{}\n".format(min_max_depth)
-            bed_thal_header += "# bam_bed_path\t{}\n".format(bam_bed_path)
-            bed_thal_header += "# bam_md5\t{}\n".format(bam_md5)
-            bed_thal_header += "# user_bam_path\t{}\n".format(user_bam_path)
-            bed_thal_header += "# width_coverage_valid_rate\t{}\n".format(
+            depth_valid_average = \
+                self.bta_req_dict['prov_info'][vcf_sample][
+                    self.h_bbed['depth_valid_average']]
+
+
+            bta_header += "#\n"
+            bta_header += "# {}\t{}\n".format(
+                self.h_bbed['vcf_sample'], vcf_sample)
+
+            bta_header += "# {}\t{}\n".format(
+                self.h_bbed['min_max_depth'], min_max_depth)
+
+            # *****
+            bta_header += "# {}\t{}\n".format(
+                self.h_bthl['bam_bed_path'], bam_bed_path)
+
+            bta_header += "# {}\t{}\n".format(
+                self.h_bbed['bam_md5'], bam_md5)
+
+            bta_header += "# {}\t{}\n".format(
+                self.h_bbed['user_bam_path'], user_bam_path)
+
+            bta_header += "# {}\t{}\n".format(
+                self.h_bbed['width_coverage_valid_rate'],
                 width_coverage_valid_rate)
-            bed_thal_header += "# depth_valid_av\t{}\n".format(depth_valid_av)
+
+            bta_header += "# {}\t{}\n".format(
+                self.h_bbed['depth_valid_average'],
+                depth_valid_average)
 
             # add header
 
-        bed_thal_header += "#\n"
+        bta_header += "#\n"
 
-        return bed_thal_header
+        return bta_header
 
 
     def read_bta_provenance_info(self, bed_thal_path):
+        '''
+        '''
 
-        # from copy from self.bta_req_dict
+        # from pick_provenance_with_depth, cp self.bta_req_dict
+        # return this dict
         bta_prov_dict = {
             'sorted_samples': "",
             'groups_id': "",
@@ -1208,9 +1451,11 @@ class BedThinAlign(object):
 
                 # bamごとに指定されたmin_max_depth
                 s_req_dep = \
-                    self.bta_req_dict['prov_info'][vcf_sample]['min_max_depth']
+                    self.bta_req_dict[
+                        'prov_info'][vcf_sample]['min_max_depth']
                 s_bta_dep = \
-                    bta_prov_dict['prov_info'][vcf_sample]['min_max_depth']
+                    bta_prov_dict[
+                        'prov_info'][vcf_sample]['min_max_depth']
 
                 if s_req_dep != s_bta_dep:
                     # depthが違う場合、NG

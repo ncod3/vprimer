@@ -69,7 +69,7 @@ class Primer(object):
             proc_cnt += 1
 
             # logging current target
-            utl.print_distin_grp("primer", distin_gdct, reg, proc_cnt)
+            utl.print_dg("primer", distin_gdct, reg, proc_cnt)
 
             marker_file = distin_gdct['marker']['fn'][reg]['out_path']
             log.info("marker_file {}".format(marker_file))
@@ -190,7 +190,7 @@ class Primer(object):
             # distin_file に、pick_mode がなければならない。
             if distin_gdct['pick_mode'] == glv.MODE_SNP:
 
-                print("hairpin_check")
+                #print("hairpin_check")
 
                 l_primer_ok, r_primer_ok = \
                     prinfo.iopr3.check_p3_pairpin_dimer()
@@ -363,11 +363,11 @@ class Primer(object):
         l_list += [prinfo.iopr3.get_sequence_excluded_region()]
         l_list += [prinfo.seq_template_ref]
 
-        # nogrp
+        # autogrp
         # formtxt.py format_product
-        if glv.conf.is_no_group:
-            l_list += [prinfo.nogrp0]
-            l_list += [prinfo.nogrp1]
+        if glv.conf.is_auto_group:
+            l_list += [prinfo.autogrp0]
+            l_list += [prinfo.autogrp1]
 
         #print(">{}<".format(','.join(map(str, l_list))))
         #sys.exit(1)
@@ -468,7 +468,7 @@ class PrimerInfo(object):
     def prepare_from_marker_file(self, distin_gdct, marker_df_row):
 
         #hdr_dict = distin_file['marker']['hdr_dict']
-        hdr_dict = utl.remove_deepcopy_nogrp_header_dict(
+        hdr_dict = utl.remove_deepcopy_autogrp_header_dict(
             distin_gdct['marker']['hdr_dict'])
 
         # basic
@@ -492,8 +492,8 @@ class PrimerInfo(object):
         self.digest_pattern, \
         self.target_gno, \
         self.target_len, \
-        self.nogrp0, \
-        self.nogrp1 = \
+        self.autogrp0, \
+        self.autogrp1 = \
             utl.get_basic_primer_info(marker_df_row, hdr_dict)
 
         self.g0_seq_target_len = \
@@ -571,7 +571,7 @@ class PrimerInfo(object):
             excludeするファイルが別
         '''
 
-        print("in get_excluded_region={}".format(bed_thal_path))
+        #print("in get_excluded_region={}".format(bed_thal_path))
 
         self.SEQUENCE_EXCLUDED_REGION = ""
         list_SEQUENCE_EXCLUDED_REGION = list()
@@ -583,7 +583,7 @@ class PrimerInfo(object):
             self.abs_frag_pad_aft_end)
             # self.seq_template_ref_len
 
-        print("region={}".format(region))
+        #print("region={}".format(region))
 
         # ['123-456', '789'-1011']
         if bed_thal_path != "-":
@@ -595,7 +595,7 @@ class PrimerInfo(object):
                 self.abs_frag_pad_pre_stt,
                 self.abs_frag_pad_aft_end)
 
-            print("exclude_region_list={}".format(exclude_region_list))
+            #print("exclude_region_list={}".format(exclude_region_list))
 
             #print("exclude_region_list={}\n".format(exclude_region_list))
 
@@ -620,8 +620,8 @@ class PrimerInfo(object):
                 list_SEQUENCE_EXCLUDED_REGION.append(
                     "{},{}".format(rel_start, rel_len))
 
-            print("list_SEQUENCE_EXCLUDED_REGION={}".format(
-                list_SEQUENCE_EXCLUDED_REGION))
+            #print("list_SEQUENCE_EXCLUDED_REGION={}".format(
+            #    list_SEQUENCE_EXCLUDED_REGION))
         #total_group_member_list = list()
         # メンバ名のリストを作り、gtがREF以外ならSNPありなので、excludeする
         #total_group_member_list = glv.conf.group_members_dict[self.g0_name]
@@ -659,13 +659,13 @@ class PrimerInfo(object):
             #print("glv.conf.group_members_dict[self.g1_name]")
             #pprint.pprint(glv.conf.group_members_dict[self.g1_name])
 
-            if not glv.conf.is_no_group:
+            if not glv.conf.is_auto_group:
                 all_samples = \
                     glv.conf.group_members_dict[self.g0_name]['sn_lst'] + \
                     glv.conf.group_members_dict[self.g1_name]['sn_lst']
             else:
                 all_samples = \
-                    glv.conf.group_members_dict[glv.NO_GROUP]['sn_lst']
+                    glv.conf.group_members_dict[glv.AUTO_GROUP]['sn_lst']
 
             #print("get_excluded_region all_samples={}".format(all_samples))
             #sys.exit(1)
@@ -735,7 +735,7 @@ class PrimerInfo(object):
 
     def search_bed(self, bed_thal_path, chrom, abs_start, abs_end):
 
-        print("search_bed {} {} {}".format(chrom, abs_start, abs_end))
+        #print("search_bed {} {} {}".format(chrom, abs_start, abs_end))
 
         exclude_list = list()
 
@@ -746,19 +746,19 @@ class PrimerInfo(object):
             abs_start,
             abs_end)
 
-        print("{} {}".format(1, q))
+        #print("{} {}".format(1, q))
 
-        print("bed_thal_path={}".format(bed_thal_path))
-        print("glv.conf.bed_thal_dict[bed_thal_path][chrom]")
+        #print("bed_thal_path={}".format(bed_thal_path))
+        #print("glv.conf.bed_thal_dict[bed_thal_path][chrom]")
 
-        print(glv.conf.bed_thal_dict[bed_thal_path][chrom])
-        print("end")
+        #print(glv.conf.bed_thal_dict[bed_thal_path][chrom])
+        #print("end")
 
         df_s = glv.conf.bed_thal_dict[bed_thal_path][chrom].query(q)
 
-        print("df_s")
-        print(df_s)
-        print("end")
+        #print("df_s")
+        #print(df_s)
+        #print("end")
 
         #df_s = glv.conf.bed_dict[chrom].query(q)
 
@@ -779,14 +779,14 @@ class PrimerInfo(object):
             abs_start,
             abs_end)
 
-        print()
-        print("{} {}".format(2, q))
+        #print()
+        #print("{} {}".format(2, q))
         #df_s = glv.conf.bed_dict[chrom].query(q)
         df_s = glv.conf.bed_thal_dict[bed_thal_path][chrom].query(q)
 
-        print("df_s")
-        print(df_s)
-        print("end")
+        #print("df_s")
+        #print(df_s)
+        #print("end")
         
         if len(df_s) > 0:
             for row in df_s.itertuples():
@@ -805,14 +805,14 @@ class PrimerInfo(object):
             abs_end,
             abs_end)
 
-        print()
-        print("{} {}".format(3, q))
+        #print()
+        #print("{} {}".format(3, q))
         #df_s = glv.conf.bed_dict[chrom].query(q)
         df_s = glv.conf.bed_thal_dict[bed_thal_path][chrom].query(q)
 
-        print("df_s")
-        print(df_s)
-        print("end")
+        #print("df_s")
+        #print(df_s)
+        #print("end")
 
         if len(df_s) > 0:
             for row in df_s.itertuples():
@@ -826,14 +826,14 @@ class PrimerInfo(object):
             abs_start,
             abs_end)
 
-        print()
-        print("{} {}".format(4, q))
+        #print()
+        #print("{} {}".format(4, q))
         #df_s = glv.conf.bed_dict[chrom].query(q)
         df_s = glv.conf.bed_thal_dict[bed_thal_path][chrom].query(q)
 
-        print("df_s")
-        print(df_s)
-        print("end")
+        #print("df_s")
+        #print(df_s)
+        #print("end")
 
         if len(df_s) > 0:
             for row in df_s.itertuples():

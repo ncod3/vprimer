@@ -62,7 +62,7 @@ class EvalVariant(object):
         # hdr_dict is a dictionary for translaing the header names
         # to row column_no
         ### hdr_dict = distin_file['variant']['hdr_dict']
-        hdr_dict = utl.remove_deepcopy_nogrp_header_dict(
+        hdr_dict = utl.remove_deepcopy_autogrp_header_dict(
             distin_gdct['variant']['hdr_dict'])
 
 
@@ -88,8 +88,8 @@ class EvalVariant(object):
         self.digest_pattern, \
         self.target_gno, \
         self.target_len, \
-        self.nogrp0, \
-        self.nogrp1 = \
+        self.autogrp0, \
+        self.autogrp1 = \
             utl.get_basic_primer_info(variant_df_row, hdr_dict)
 
         self.gname_gno = [self.g0_name, self.g1_name]
@@ -666,10 +666,10 @@ class EvalVariant(object):
             # 5) seq_template_ref
             l_list += [l_seq_t_ref[num]]
 
-            # nogrp
-            if glv.conf.is_no_group:
-                l_list += [self.nogrp0]
-                l_list += [self.nogrp1]
+            # autogrp
+            if glv.conf.is_auto_group:
+                l_list += [self.autogrp0]
+                l_list += [self.autogrp1]
 
             line_for_each_enzyme.append('\t'.join(map(str, l_list)))
 

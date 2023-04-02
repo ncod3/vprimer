@@ -45,14 +45,20 @@ class ConfBedFile(object):
 
         # 一時ファイルを消す
         for fpath in self.bed_dir_path.iterdir():
-            if str(fpath).endswith(glv.bed_tmp_ext):
+
+            if str(fpath).endswith(glv.bam_bed_tmp_ext):
                 log.info("delete leftover tmp file ({}), {}.".format(
-                    glv.bed_tmp_ext, fpath))
+                    glv.bam_bed_tmp_ext, fpath))
                 fpath.unlink()
 
             if str(fpath).endswith(glv.bed_thal_tmp_ext):
                 log.info("delete leftover tmp file ({}), {}.".format(
                     glv.bed_thal_tmp_ext, fpath))
+                fpath.unlink()
+
+            if str(fpath).endswith(glv.bed_thal_merge_ext):
+                log.info("delete leftover tmp file ({}), {}.".format(
+                    glv.bed_thal_merge_ext, fpath))
                 fpath.unlink()
 
         bed_thal_path_list = list()
@@ -97,8 +103,11 @@ class ConfBedFile(object):
         #print("bed_thal_path={}".format(bed_thal_path))
         # 起動オプションで指定されていない場合、- である。
 
+        # *******************************************************
         # BedThinAlignクラスのインスタンスを作成して処理
         bta = BedThinAlign()
+        # *******************************************************
+
         log.info("start, depth mode: {}.".format(self.depth_mode))
 
         if self.depth_mode == glv.depth_bam_table:
@@ -223,81 +232,3 @@ class ConfBedFile(object):
         mes += "self.bed_thal_dict[{}], ".format(bed_thal_path)
         mes += "chrom={}".format(chrom_name)
 
-#        log.info("finished prepare self.bed_thal_dict, path={}, chrom={}".format(
-#            len(chrom_name)))
-
-# 
-#     def search_bed(self, chrom, abs_start, abs_end):
-#         #print("search_bed {} {} {}".format(chrom, abs_start, abs_end))
-# 
-#         exclude_list = list()
-# 
-#         # 1) Wrap the whole
-#         # start------------------end
-#         #    abs_start  abs_end
-#         q = 'start < {} and {} < end'.format(
-#             abs_start,
-#             abs_end)
-# 
-#         #print("{} {}".format(1, q))
-#         df_s = glv.conf.bed_dict[chrom].query(q)
-#         if len(df_s) > 0:
-#             for row in df_s.itertuples():
-#                 pos_str = "{}-{}".format(row[2], row[3])
-#             exclude_list.append(pos_str)
-# 
-#         # 2) Sandwich the start
-#         # start-------end
-#         #    abs_start       abs_end
-#         #
-#         # 2) start < 30551
-#         #    30551 <= end
-#         #    end <= 31591
-#         q = 'start < {} and {} <= end and end <= {}'.format(
-#             abs_start,
-#             abs_start,
-#             abs_end)
-# 
-#         #print("{} {}".format(2, q))
-#         df_s = glv.conf.bed_dict[chrom].query(q)
-#         if len(df_s) > 0:
-#             for row in df_s.itertuples():
-#                 pos_str = "{}-{}".format(row[2], row[3])
-#             exclude_list.append(pos_str)
-# 
-#         # 3) Sandwich the end
-#         #                start-------end
-#         #    abs_start       abs_end
-#         #
-#         # 3) 30551 <= start
-# 	    #    start <= 31591
-# 	    #    31591 < end
-#         q = '{} <= start and start <= {} and {} < end'.format(
-#             abs_start,
-#             abs_end,
-#             abs_end)
-# 
-#         #print("{} {}".format(3, q))
-#         df_s = glv.conf.bed_dict[chrom].query(q)
-#         if len(df_s) > 0:
-#             for row in df_s.itertuples():
-#                 pos_str = "{}-{}".format(row[2], row[3])
-#             exclude_list.append(pos_str)
-# 
-#         # 4) inner
-#         #            start-end
-#         # abs_start              abs_end
-#         q = '{} <= start and {} >= end'.format(
-#             abs_start,
-#             abs_end)
-# 
-#         #print("{} {}".format(4, q))
-#         df_s = glv.conf.bed_dict[chrom].query(q)
-#         if len(df_s) > 0:
-#             for row in df_s.itertuples():
-#                 pos_str = "{}-{}".format(row[2], row[3])
-#             exclude_list.append(pos_str)
-# 
-#         return exclude_list
-# 
-# 

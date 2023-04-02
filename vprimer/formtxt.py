@@ -90,7 +90,7 @@ class FormTxt(object):
                 # logging current target
                 sub_proc = "{}_{}".format(proc, complete)
                 # simple logging (last True)
-                utl.print_distin_grp(
+                utl.print_dg(
                     sub_proc, distin_gdct, reg, proc_cnt, True)
 
                 # complete >= 1
@@ -142,8 +142,8 @@ class FormTxt(object):
                     start = utl.get_start_time()
 
                     header_txt = distin_gdct['formpass']['hdr_text']
-                    # if glv.conf.is_no_group, remove last 2 columns
-                    header_txt = utl.remove_nogrp_header_txt(header_txt)
+                    # if glv.conf.is_auto_group, remove last 2 columns
+                    header_txt = utl.remove_autogrp_header_txt(header_txt)
 
                     if (proc == "formpass"):
 
@@ -154,7 +154,7 @@ class FormTxt(object):
                         # Members of the specified group come first
                         # (same as variant.py:_iterate_vcf)
                         # 20221122
-                        if glv.conf.is_no_group:
+                        if glv.conf.is_auto_group:
                             gr_list = [distin_gdct[0]]
                         else:
                             gr_list = [distin_gdct[0], distin_gdct[1]]
@@ -483,8 +483,8 @@ class FormTxt(object):
         self.digest_pattern, \
         self.target_gno, \
         self.target_len, \
-        self.nogrp0, \
-        self.nogrp1 = \
+        self.autogrp0, \
+        self.autogrp1 = \
             utl.get_basic_primer_info(primer_df_row, hdr_dict)
 
         self.g0_vseq, self.g1_vseq = self.vseq_gno_str.split(",")
@@ -607,11 +607,11 @@ class FormTxt(object):
         line_list += [self.right_primer_id]
         line_list += [self.PRIMER_RIGHT_0_SEQUENCE]
 
-        # nogrp
+        # autogrp
         # primer.py primer_complete_to_line
-        if glv.conf.is_no_group:
-            line_list += [self.nogrp0]
-            line_list += [self.nogrp1]
+        if glv.conf.is_auto_group:
+            line_list += [self.autogrp0]
+            line_list += [self.autogrp1]
 
         return '\t'.join(map(str, line_list))
 
