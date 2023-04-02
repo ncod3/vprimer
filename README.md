@@ -27,6 +27,10 @@ $ conda install pandas vcfpy pysam joblib samtools bcftools tabix primer3 primer
 ~~~
 
 ~~~
+$ pip uninstall vprimer
+~~~
+
+~~~
 $ pip install git+https://github.com/ncod3/vprimer
 ~~~
 
