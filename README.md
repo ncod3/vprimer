@@ -9,6 +9,9 @@ vprimer 1.00
 ## Requirement
 
 ## Installation
+~~~
+$ git clone https://github.com/ncod3/vprimer
+~~~
 
 ## Getting Started
 
