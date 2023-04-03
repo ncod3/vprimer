@@ -7,6 +7,10 @@ vprimer 1.00
 ## Contents
 
 ## Requirement
+<dl>
+<dt>term</dt>
+<dd>word</dd>
+</dl>
 
 ## Installation
 

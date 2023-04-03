@@ -602,9 +602,27 @@ class FormTxt(object):
         line_list += [self.gts_segr_lens]
 
         line_list += [self.left_primer_id]
+        # v 1.0.1 2023.04.22
+        #if glv.conf.is_auto_group:
+        #    line_list += ["{}{}".format(
+        #        glv.conf.amplicon_forward_tag,
+        #        self.PRIMER_LEFT_0_SEQUENCE)]
+        #else:
         line_list += [self.PRIMER_LEFT_0_SEQUENCE]
 
+
+        #print(self.PRIMER_LEFT_0_SEQUENCE)
+        #print(glv.conf.amplicon_forward_tag)
+        #print()
+        #sys.exit(1)
+
         line_list += [self.right_primer_id]
+        # v 1.0.1 2023.04.22
+        #if glv.conf.is_auto_group:
+        #    line_list += ["{}{}",format(
+        #        self.amplicon_reverse_tag,
+        #        self.PRIMER_RIGHT_0_SEQUENCE)]
+        #else:
         line_list += [self.PRIMER_RIGHT_0_SEQUENCE]
 
         # autogrp

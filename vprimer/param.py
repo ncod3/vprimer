@@ -61,36 +61,21 @@ class Param(object):
 
         # required (1) ------------------------------------
         # --vcf
+        hlp = "[required] vcf file (text or gz)"
+        metavar = "vcf_file"
         parser.add_argument('--vcf', action='store',
-            type=str, metavar='vcf_file',
-            help="[required] vcf file (text or gz)")
+            type=str, metavar="{}".format(metavar),
+            help="{}".format(hlp))
 
         # required (2) ------------------------------------
         # --ref
+        hlp = "[required] reference fasta (txt or gz)"
+        metavar = "ref_fasta"
         parser.add_argument('--ref', action='store',
-            type=str, metavar='ref_fasta',
-            help="[required] reference fasta (txt or gz)")
+            type=str, metavar="{}".format(metavar),
+            help="{}".format(hlp))
 
-        # required (3) group definition -------------------
-        # --auto_group 
-        parser.add_argument('--auto_group', action='store',
-            type=str, metavar='sample',   # default="",
-            nargs='*',
-            help="analysis by auto grouping")
-
-        # --sample_a
-        parser.add_argument('--a_sample', action='store',
-            type=str, metavar='sample',   # default="",
-            nargs='*',
-            help="group A sample names")
-
-        # --sample_b
-        parser.add_argument('--b_sample', action='store',
-            type=str, metavar='sample',   # default="",
-            nargs='*',
-            help="group B sample names")
-        # -------------------------------------------------
-
+        # required (3) ------------------------------------
         # --target
         '''
         Format:
@@ -100,71 +85,112 @@ class Param(object):
             region_def  ::= target_name | target_name:scope
             regions     ::= region_def | regions region_def
         '''
+
+        hlp = "scope := chrom_name | chrom_name:range_str"
+        metavar = "scope"
         parser.add_argument('--target', action='store',
-            type=str, metavar='scope',
             nargs='*',
-            help="scope := chrom_name | chrom_name:range_str")
+            type=str, metavar="{}".format(metavar),
+            help="{}".format(hlp))
+
+        # --pick_mode
+        hlp = "mode for picking up markers: indel / caps / snp"
+        metavar = "mode"
+        parser.add_argument('--pick_mode', action='store',
+            nargs='*',
+            type=str, metavar="{}".format(metavar),
+            help="{}".format(hlp))
+
+        # for preparation ---------------------------------
+        # --show_samples
+        hlp = "show sample names embedded in VCF files"
+        parser.add_argument('--show_samples', action='store_true',
+            help="{}".format(hlp))
+
+        # --show_fasta
+        hlp = "show fasta chromosomal information."
+        parser.add_argument('--show_fasta', action='store_true',
+            help="{}".format(hlp))
+
+
+        # selection required ------------------------------
+        # --auto_group 
+        hlp = "analysis by auto grouping"
+        metavar = "sample_name"
+        parser.add_argument('--auto_group', action='store',
+            nargs='*',
+            type=str, metavar="{}".format(metavar),
+            help="{}".format(hlp))
+
+        # --sample_a
+        hlp = "group A sample names"
+        metavar = "sample_name"
+        parser.add_argument('--a_sample', action='store',
+            nargs='*',
+            type=str, metavar="{}".format(metavar),
+            help="{}".format(hlp))
+
+        # --sample_b
+        hlp = "group B sample names"
+        metavar = "sample_name"
+        parser.add_argument('--b_sample', action='store',
+            nargs='*',
+            type=str, metavar="{}".format(metavar),
+            help="{}".format(hlp))
 
         #-------------------------------------------------------------
-        # --pick_mode
-        parser.add_argument('--pick_mode', action='store',
-            type=str, metavar='mode',
-            nargs='*',
-            # indel, caps, snp
-            help="mode for picking up markers: indel / caps / snp")
 
         # --indel_size
+        hlp = "target indel size, min-max"
+        metavar = 'min-max'
         parser.add_argument('--indel_size', action='store',
-            type=str, metavar='min-max',
-            help="target indel size, min-max")
+            type=str, metavar="{}".format(metavar),
+            help="{}".format(hlp))
 
         # --product_size
+        hlp = "PCR product size, min-max"
+        metavar = 'min-max'
         parser.add_argument('--product_size', action='store',
-            type=str, metavar='min-max',
-            help="PCR product size, min-max")
+            type=str, metavar="{}".format(metavar),
+            help="{}".format(hlp))
 
         #---------------------------------------------------------
-        # --out_dir
-        parser.add_argument('--out_dir', action='store',
-            type=str, metavar='dir',
-            help="dir name for data output")
-
-        # --thread
-        parser.add_argument('--thread', action='store',
-            type=int, metavar='int',
-            help="thread number: default 2")
-
-        # --ini_file
-        parser.add_argument('--ini_file', action='store',
-            type=str, metavar='file',
-            help="ini file [optional]")
-
         # --enzyme
+        hlp = "enzyme name list"
+        metavar = "enzyme_name"
         parser.add_argument('--enzyme', action='store',
-            type=str, metavar='enzyme_name',
             nargs='*',
-            help="enzyme name list")
+            type=str, metavar="{}".format(metavar),
+            help="{}".format(hlp))
 
         # --enzyme_file
+        hlp = "enzyme file list, separate by comma"
+        metavar = "file"
         parser.add_argument('--enzyme_file', action='store',
-            type=str, metavar='file',
             nargs='*',
-            help="enzyme file list, separate by comma")
+            type=str, metavar="{}".format(metavar),
+            help="{}".format(hlp))
 
         # --p3_normal
+        hlp = "primer3 parameter file"
+        metavar = "file"
         parser.add_argument('--p3_normal', action='store',
-            type=str, metavar='file',
-            help="primer3 parameter file")
+            type=str, metavar="{}".format(metavar),
+            help="{}".format(hlp))
 
         # --p3_amplicon
+        hlp = "primer3 parameter file for amplicon specific"
+        metavar = "file"
         parser.add_argument('--p3_amplicon', action='store',
-            type=str, metavar='file',
-            help="primer3 parameter file for amplicon specific")
+            type=str, metavar="{}".format(metavar),
+            help="{}".format(hlp))
 
         # --amplicon_param
+        hlp = "parameter for amplicon(SNP). Ftag,Rtag[,HrTM,DyTM]"
+        metavar = "parameter"
         parser.add_argument('--amplicon_param', action='store',
-            type=str, metavar='file',
-            help="parameter for amplicon(SNP). Ftag,Rtag[,HrTM,DyTM]")
+            type=str, metavar="{}".format(metavar),
+            help="{}".format(hlp))
 
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         # --bed_thal
@@ -173,9 +199,11 @@ class Param(object):
         #    help="bed_thal file")
 
         # --bam_table
+        hlp = "Correspondence table between sample names and bam files"
+        metavar = "file"
         parser.add_argument('--bam_table', action='store',
-            type=str, metavar='file',
-            help="Correspondence table between sample names and bam files")
+            type=str, metavar="{}".format(metavar),
+            help="{}".format(hlp))
 
         # --bed_bams
         #parser.add_argument('--bed_bams', action='store',
@@ -186,91 +214,128 @@ class Param(object):
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         # --min_max_depth
+        hlp = ""
+        metavar = "min-max"
         parser.add_argument('--min_max_depth', action='store',
-            type=str, metavar='min-max',
-            help="")
+            type=str, metavar="{}".format(metavar),
+            help="{}".format(hlp))
 
-        # --show_samples
-        parser.add_argument('--show_samples', action='store_true',
-            #type=str, metavar='',
-            help="show sample names embedded in VCF files")
+        # --out_dir
+        hlp = "dir name for data output"
+        metavar = "dir_name"
+        parser.add_argument('--out_dir', action='store',
+            type=str, metavar="{}".format(metavar),
+            help="{}".format(hlp))
 
-        # --show_fasta
-        parser.add_argument('--show_fasta', action='store_true',
-            #type=str, metavar='',
-            help="show fasta chromosomal information.")
+        # --thread
+        hlp = "thread number: default 2"
+        metavar = "num"
+        parser.add_argument('--thread', action='store',
+            type=int, metavar="{}".format(metavar),
+            help="{}".format(hlp))
 
         # ===================================================================
         # debug, etc.
         # --progress
+        hlp = "progress start point, prepare/variant/marker/primer/formfail"
+        metavar = "start_point"
         parser.add_argument('--progress', action='store',
-            type=str, metavar='',
-            help="progress start point, prepare/variant/marker/primer/formfail")
+            type=str, metavar="{}".format(metavar),
+            help="{}".format(hlp))
 
         # --stop
+        hlp = "progress stop point, prepare/variant/marker/primer"
+        metavar = "stop_point"
         parser.add_argument('--stop', action='store',
-            type=str, metavar='',
-            help="progress stop point, prepare/variant/marker/primer")
-
-        # --use_joblib_threading
-        parser.add_argument('--use_joblib_threading', action='store',
-            type=str, metavar='yes/no',
-            help="use or not threading yes/no default yes")
+            type=str, metavar="{}".format(metavar),
+            help="{}".format(hlp))
 
         return parser
+
+
+
+        # --ini_file
+        hlp = "ini file"
+        metavar = "file"
+        parser.add_argument('--ini_file', action='store',
+            type=str, metavar="{}".format(metavar),
+            help="{}".format(hlp))
+
+        # --use_joblib_threading
+        hlp="use or not threading yes/no default yes"
+        metavar = "yes/no"
+        parser.add_argument('--use_joblib_threading', action='store',
+            type=str, metavar="{}".format(metavar),
+            help="{}".format(hlp))
 
         # ===================================================================
         # in ini_file
         # --fragment_pad_len int
+        hlp = ""
+        metavar = "num"
         parser.add_argument('--fragment_pad_len', action='store',
-            type=int, metavar='int',
-            help="")
+            type=str, metavar="{}".format(metavar),
+            help="{}".format(hlp))
 
         # --blast_distance int
+        hlp = ""
+        metavar = "num"
         parser.add_argument('--blast_distance', action='store',
-            type=str, metavar='int',
-            help="")
+            type=str, metavar="{}".format(metavar),
+            help="{}".format(hlp))
 
         # --blast_word_size int
+        hlp = ""
+        metavar = "num"
         parser.add_argument('--blast_word_size', action='store',
-            type=str, metavar='int',
-            help="")
+            type=str, metavar="{}".format(metavar),
+            help="{}".format(hlp))
 
         # --snp_marker_diff_len int
+        hlp = ""
+        metavar = "num"
         parser.add_argument('--snp_marker_diff_len', action='store',
-            type=str, metavar='int',
-            help="")
+            type=str, metavar="{}".format(metavar),
+            help="{}".format(hlp))
 
 
         # --analyse_caps
+        hlp = "print caps info"
         parser.add_argument('--analyse_caps', action='store_true',
-            help="print caps info")
+            help="{}".format(hlp))
 
 
         # --ini_version
+        hlp = "ini file version"
+        metavar = "float"
         parser.add_argument('--ini_version', action='store',
-            type=str, metavar='float',
-            help="ini file version")
+            type=str, metavar="{}".format(metavar),
+            help="{}".format(hlp))
 
         # Full mode ===============================================
         # --regions
+        hlp = "region_def ::= target_name | target_name:scope"
+        metavar = "region_def"
         parser.add_argument('--regions', action='store',
-            type=str, metavar='region_def',
             nargs='*',
-            help="region_def ::= target_name | target_name:scope")
+            type=str, metavar="{}".format(metavar),
+            help="{}".format(hlp))
 
         # --group_members
+        hlp = "group_members full description"
+        metavar = "what"
         parser.add_argument('--group_members', action='store',
-            type=str, metavar='what',
             nargs='*',
-            help="group_members full description")
+            type=str, metavar="{}".format(metavar),
+            help="{}".format(hlp))
 
         # --distinguish_groups
+        hlp = "distinguish_groups full description"
+        metavar = "what"
         parser.add_argument('--distinguish_groups', action='store',
-            type=str, metavar='what',
             nargs='*',
-            help="distinguish_groups full description")
-
+            type=str, metavar="{}".format(metavar),
+            help="{}".format(hlp))
 
         return parser
 
