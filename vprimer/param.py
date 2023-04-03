@@ -250,16 +250,14 @@ class Param(object):
             type=str, metavar="{}".format(metavar),
             help="{}".format(hlp))
 
-        return parser
-
-
-
         # --ini_file
         hlp = "ini file"
         metavar = "file"
         parser.add_argument('--ini_file', action='store',
             type=str, metavar="{}".format(metavar),
             help="{}".format(hlp))
+
+        return parser
 
         # --use_joblib_threading
         hlp="use or not threading yes/no default yes"
