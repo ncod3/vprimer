@@ -158,7 +158,7 @@ vcfファイルを指定する。
 </dl>
 
 <dl>
-**--pick_mode** mode
+--pick_mode mode
 
 ピックアップするマーカーの種類を指定する。
 </dl>
