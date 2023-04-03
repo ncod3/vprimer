@@ -145,7 +145,7 @@ reference fastaを指定する。
 </dl>
 
 <dl>
-<dt>--vcf** vcf_file</dt>
+<dt>--vcf vcf_file</dt>
 <dd>
 vcfファイルを指定する。
 </dd>
