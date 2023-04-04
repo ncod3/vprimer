@@ -97,7 +97,7 @@ Successfully installed vprimer-1.0.1
 この作業ディレクトリに、動作デモ用データをダウンロードします。
 
 ```
-$ git clone https://github.com/ncod3/data_vprimer
+(vprimer) $ git clone https://github.com/ncod3/data_vprimer
 ```
 data_vprimer というディレクトリが作成され、データがダウンロードされています。
 
