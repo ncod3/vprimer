@@ -115,9 +115,13 @@ data_vprimer の下の、test_script というディレクトリに準備され�
 
 refs というディレクトリが作成され、vprimerの解析の準備ができました。
 
-VCFを作成した際のサンプルbamファイルを利用して、sequenceの張り付きの薄い箇所を計測するため、refs/MP2_6_TDr96_F1.vcf.gz_GTonly.vcf.gz_sample_bam_table.txt というフィアルに、サンプルに対応するbamファイルのパスを記述します。
+VCFを作成した際のサンプルbamファイルを利用して、sequenceの張り付きの薄い箇所を計測するため、
 
-この動作デモでは、すでに準備してあるファイルを、refsの下のファイルに、overwriteします。
+refs/MP2_6_TDr96_F1.vcf.gz_GTonly.vcf.gz_sample_bam_table.txt
+
+というファイルを編集し、サンプルに対応するbamファイルのパスを記述します。
+
+この動作デモでは、catコマンドを使用して、すでに内容が準備してあるファイルを refsの下のファイルに overwriteします。
 
 ```
 (vprimer) $ cat data_vprimer/bams/MP2_6_TDr96_F1.vcf.gz_GTonly.vcf.gz_sample_bam_table.txt_filled > refs/MP2_6_TDr96_F1.vcf.gz_GTonly.vcf.gz_sample_bam_table.txt
@@ -127,13 +131,11 @@ VCFを作成した際のサンプルbamファイルを利用して、sequenceの
 
 ```
 (vprimer) $ sh ./020.6samples_indel.sh
-(vprimer) $ sh ./010.show_samples.sh
-(vprimer) $ sh ./020.6samples_indel.sh
 (vprimer) $ sh ./021.6samples_caps.sh
 (vprimer) $ sh ./022.6samples_snp.sh
-(vprimer) $ sh ./030.nogroup_indel.sh
-(vprimer) $ sh ./031.nogroup_caps.sh
-(vprimer) $ sh ./032.nogroup_snp.sh
+(vprimer) $ sh ./030.auto_group_indel.sh
+(vprimer) $ sh ./031.auto_group_caps.sh
+(vprimer) $ sh ./032.auto_group_snp.sh
 
 ```
 
