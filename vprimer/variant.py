@@ -77,7 +77,7 @@ class Variant(object):
         # start time
         start = utl.get_start_time()
         # logging current target
-        utl.print_dg("variant", distin_gdct, reg, proc_cnt)
+        utl.pr_dg("variant", distin_gdct, reg, proc_cnt)
 
         # File name to export variant data
         out_txt_path = distin_gdct['variant']['fn'][reg]['out_path']

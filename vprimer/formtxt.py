@@ -90,7 +90,7 @@ class FormTxt(object):
                 # logging current target
                 sub_proc = "{}_{}".format(proc, complete)
                 # simple logging (last True)
-                utl.print_dg(
+                utl.pr_dg(
                     sub_proc, distin_gdct, reg, proc_cnt, True)
 
                 # complete >= 1

@@ -24,26 +24,28 @@ vprimer
 
 ## Installation (インストール)
 
-conda を用いて環境を作成し、pipを用いて この githubサイトから vprimer をインストールします。
+conda を用いて動作環境を作成し、pipを用いてこの githubサイトから vprimer をインストールします。
 
 まず、各種condaのツールをインストールするための channel の設定を確認します。highest priority と、lowest priority が、以下のように設定されているならば問題はありません。
 
 ```
 $ conda config --get channels
---add channels 'defaults'   # lowest priority
+
+--add channels 'conda-forge'   # lowest priority
 --add channels 'bioconda'
---add channels 'conda-forge'   # highest priority
+--add channels 'defaults'   # highest priority
 ```
 
 もし、上記の設定となっていない場合は、以下の３行を実行してください。
 
 ```
-$ conda config --add channels 'defaults'
-$ conda config --add channels 'bioconda'
 $ conda config --add channels 'conda-forge'
+$ conda config --add channels 'bioconda'
+$ conda config --add channels 'defaults'
+
 ```
 
-最初に、condaを用いて、"vprimer" と名付けた仮想環境を作成します。
+最初に、conda を用いて、"vprimer" と名付けた仮想環境を作成します。
 
 ```
 $ conda create -n vprimer python 'biopython==1.76'

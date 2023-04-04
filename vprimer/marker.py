@@ -66,7 +66,7 @@ class Marker(object):
             proc_cnt += 1
 
             # logging current target
-            utl.print_dg("marker", distin_gdct, reg, proc_cnt)
+            utl.pr_dg("marker", distin_gdct, reg, proc_cnt)
 
             # read variant file 
             variant_file = distin_gdct['variant']['fn'][reg]['out_path']

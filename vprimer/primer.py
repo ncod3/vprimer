@@ -69,7 +69,7 @@ class Primer(object):
             proc_cnt += 1
 
             # logging current target
-            utl.print_dg("primer", distin_gdct, reg, proc_cnt)
+            utl.pr_dg("primer", distin_gdct, reg, proc_cnt)
 
             marker_file = distin_gdct['marker']['fn'][reg]['out_path']
             log.info("marker_file {}".format(marker_file))

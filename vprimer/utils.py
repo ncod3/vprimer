@@ -479,20 +479,20 @@ def write_df_to_csv(dataframe, out_file, index=True, force=True):
 
 #    return stat
 
-def print_dg(proc_name, distin_gdct, reg, proc_cnt, simple=False):
+def pr_dg(proc_name, distin_gdct, reg, proc_cnt, simple=False):
 
     reg_dict = glv.conf.regions_dict[reg]
 
     # ここは全処理数が必要だ
     log.info("")
-    log.info("proc:        {}, {} / {}".format(proc_name, proc_cnt,
+    log.info("proc:         {}, {} / {}".format(proc_name, proc_cnt,
         glv.conf.all_proc_cnt))
 
     if simple == True:
-        log.info("distin_str   {}\n".format(distin_gdct['distin_str']))
+        log.info("distin_str    {}\n".format(distin_gdct['distin_str']))
         return
     else:
-        log.info("distin_str   {}".format(distin_gdct['distin_str']))
+        log.info("distin_str    {}".format(distin_gdct['distin_str']))
 
     log.info("now_region    {}".format(reg))
     log.info("all_regions   {}".format(distin_gdct['regions']))

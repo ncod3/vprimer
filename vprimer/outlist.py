@@ -105,11 +105,16 @@ class OutList(object):
         """
         """
 
+        # if auto_group, group_pair_name is only 'auto_group'
+        group_vs = distin_0
+        if group_vs != glv.AUTO_GROUP:
+            group_vs = "{}~{}".format(distin_0, distin_1)
+
         #distin~gHitomebore~gKaluheenati~rg0~all~50-200.txt
-        basename = "{}~{}~{}~{}~{}~i{}-{}~p{}-{}".format(
+        #basename = "{}~{}~{}~{}~{}~i{}-{}~p{}-{}".format(
+        basename = "{}~{}~{}~{}~i{}-{}~p{}-{}".format(
                 outf_pref,
-                distin_0,
-                distin_1,
+                group_vs,
                 rg,
                 pick_mode,
                 glv.conf.min_indel_len,

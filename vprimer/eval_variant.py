@@ -380,10 +380,15 @@ class EvalVariant(object):
         abs_around_seq_aft_end = \
             abs_around_seq_aft_stt + glv.AROUND_SEQ_LEN - 1
         # preの切り出し
+
+        #for ch in glv.conf.refseq.keys():
+        #    print("chrom={}".format(ch))
+
         around_seq_pre = glv.conf.pick_refseq(
             self.chrom,
             abs_around_seq_pre_stt,
             abs_around_seq_pre_end).upper()
+        #sys.exit(1)
 
         # aftの切り出し
         around_seq_aft = glv.conf.pick_refseq(
