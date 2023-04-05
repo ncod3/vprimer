@@ -139,7 +139,7 @@ Execute the demo shell script in order.
 
 ## Usage
 
-### required
+### ** required
 <dl>
 <dt>
 --ref ref_file
