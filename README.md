@@ -176,7 +176,7 @@ Type of marker to pick up. [ indel | caps | snp ]
 </dd>
 </dl>
 
-### for preparation
+### ** for preparation
 
 <dl>
 <dt>
@@ -196,7 +196,7 @@ Prepare VCF, display VCF information and exit.
 </dd>
 </dl>
 
-### selection required
+### ** selection required
 
 <dl>
 <dt>
@@ -211,7 +211,7 @@ When analyzing by genotype-based auto group, list the samples in auto_group.
 </dd>
 </dl>
 
-### optional
+### ** optional
 
 <dl>
 <dt>
