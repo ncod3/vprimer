@@ -733,7 +733,7 @@ def sort_file(
         # header
     header_txt = distin_gdct[proc]['hdr_text']
     # if glv.conf.is_auto_group, remove last 2 columns
-    header_txt = remove_autogrp_header_txt(header_txt)
+    #header_txt = remove_auto_grp_header_txt(header_txt)
 
     with out_txt_header_path.open('w', encoding='utf-8') as f:
         f.write("{}\n".format(header_txt))
@@ -778,9 +778,9 @@ def get_specified_sample_list(group_list, add_remain=False):
 
     if add_remain:
 
-        autogrp_nickname_list = list()
-        autogrp_basename_list = list()
-        autogrp_fullname_list = list()
+        auto_grp_nickname_list = list()
+        auto_grp_basename_list = list()
+        auto_grp_fullname_list = list()
 
         # Add members other than the nickname specified in the group
         # to the end of ordered_list
@@ -789,13 +789,13 @@ def get_specified_sample_list(group_list, add_remain=False):
             fullname = get_fullname(nickname)
 
             if nickname not in sample_nickname_ordered_list:
-                autogrp_nickname_list += [nickname]
-                autogrp_basename_list += [basename]
-                autogrp_fullname_list += [fullname]
+                auto_grp_nickname_list += [nickname]
+                auto_grp_basename_list += [basename]
+                auto_grp_fullname_list += [fullname]
 
-        sample_nickname_ordered_list += autogrp_nickname_list
-        sample_basename_ordered_list += autogrp_basename_list
-        sample_fullname_ordered_list += autogrp_fullname_list
+        sample_nickname_ordered_list += auto_grp_nickname_list
+        sample_basename_ordered_list += auto_grp_basename_list
+        sample_fullname_ordered_list += auto_grp_fullname_list
 
     return \
         sample_nickname_ordered_list, \
@@ -931,8 +931,14 @@ def get_fullname(sample_name):
 
 def get_basic_primer_info(df_row, hdr_dict):
 
+
+    # get_basic_primer_info
+    #print("in get_basic_primer_info")
+    #print()
     #print(df_row)
+    #print()
     #print(hdr_dict)
+    #sys.exit(1)
 
     marker_id = ""
     if 'marker_id' in hdr_dict.keys():
@@ -1015,11 +1021,12 @@ def get_basic_primer_info(df_row, hdr_dict):
         vseq_lens_ano_str = str(df_row[hdr_dict['vseq_lens_ano_str']])
 
     # when glv.conf.is_auto_group, get group string separated by ,.
-    autogrp0 = ""
-    autogrp1 = ""
-    if glv.conf.is_auto_group:
-        autogrp0 = str(df_row[hdr_dict['autogrp0']])
-        autogrp1 = str(df_row[hdr_dict['autogrp1']])
+    #auto_grp0 = "-"
+    #auto_grp1 = "-"
+    #if glv.conf.is_auto_group:
+
+    auto_grp0 = str(df_row[hdr_dict['auto_grp0']])
+    auto_grp1 = str(df_row[hdr_dict['auto_grp1']])
 
     return \
         marker_id, \
@@ -1042,8 +1049,8 @@ def get_basic_primer_info(df_row, hdr_dict):
         digest_pattern, \
         target_gno, \
         target_len, \
-        autogrp0, \
-        autogrp1
+        auto_grp0, \
+        auto_grp1
 
 def flip_gno(gno):
 
@@ -1140,32 +1147,33 @@ def is_need_update(src_pathlib, dist_pathlib):
         return do_update
 
 
-def remove_autogrp_header_txt(header_txt):
-    ''' autogrp0, autogrp1
-        When grouped, remove the last two headers autogrp0 and autogrp1
-    '''
+#def remove_auto_grp_header_txt(header_txt):
+#    ''' auto_grp0, auto_grp1
+#        When grouped, remove the last two headers auto_grp0 and auto_grp1
+#    '''
+#
+#    # grouped
+#    if not glv.conf.is_auto_group:
+#
+#        # Remove the last two items: auto_grp0 auto_grp1 for sample list
+#        header_list = header_txt.split('\t')
+#        del header_list[-2:]
+#        header_txt = '\t'.join(header_list)
+#
+#    return header_txt
+
+
+#def remove_deepcopy_auto_grp_header_dict(header_dict):
+#def deepcopy_grp_header_dict(header_dict):
+
+#    hdr_dict = copy.deepcopy(header_dict)
 
     # grouped
-    if not glv.conf.is_auto_group:
+    #if not glv.conf.is_auto_group:
+    #    rm_dict = hdr_dict.pop('auto_grp0')
+    #    rm_dict = hdr_dict.pop('auto_grp1')
 
-        # Remove the last two items: autogrp0 autogrp1 for sample list
-        header_list = header_txt.split('\t')
-        del header_list[-2:]
-        header_txt = '\t'.join(header_list)
-
-    return header_txt
-
-
-def remove_deepcopy_autogrp_header_dict(header_dict):
-
-    hdr_dict = copy.deepcopy(header_dict)
-
-    # grouped
-    if not glv.conf.is_auto_group:
-        rm_dict = hdr_dict.pop('autogrp0')
-        rm_dict = hdr_dict.pop('autogrp1')
-
-    return hdr_dict
+#    return hdr_dict
 
 
 class UserFormatErrorUtl(Exception):

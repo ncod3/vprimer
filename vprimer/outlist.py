@@ -159,8 +159,8 @@ class OutList(object):
             hd_l, hd_d, i = self.mkmap('vseq_ano_str',         hd_l, hd_d, i)
 
             # if grouped, these two items are removed
-            hd_l, hd_d, i = self.mkmap('autogrp0',             hd_l, hd_d, i)
-            hd_l, hd_d, i = self.mkmap('autogrp1',             hd_l, hd_d, i)
+            hd_l, hd_d, i = self.mkmap('auto_grp0',            hd_l, hd_d, i)
+            hd_l, hd_d, i = self.mkmap('auto_grp1',            hd_l, hd_d, i)
 
         elif type == 'marker':
             # Sync with eval_variant.py
@@ -200,12 +200,12 @@ class OutList(object):
             hd_l, hd_d, i = self.mkmap('seq_template_ref',     hd_l, hd_d, i)
 
             # if grouped, these two items are removed
-            hd_l, hd_d, i = self.mkmap('autogrp0',             hd_l, hd_d, i)
-            hd_l, hd_d, i = self.mkmap('autogrp1',             hd_l, hd_d, i)
+            hd_l, hd_d, i = self.mkmap('auto_grp0',            hd_l, hd_d, i)
+            hd_l, hd_d, i = self.mkmap('auto_grp1',            hd_l, hd_d, i)
 
         elif type == 'primer':  # there is no header
 
-            # Synchronize with primer.py _primer_complete_to_line
+            # Synchronize with primer.py primer_complete_to_line
             hd_l, hd_d, i = self.mkmap('marker_id',            hd_l, hd_d, i)
             # --------------
             hd_l, hd_d, i = self.mkmap('chrom',                hd_l, hd_d, i)
@@ -256,12 +256,12 @@ class OutList(object):
             hd_l, hd_d, i = self.mkmap('SEQUENCE_TEMPLATE',    hd_l, hd_d, i)
 
             # if grouped, these two items are removed
-            hd_l, hd_d, i = self.mkmap('autogrp0',             hd_l, hd_d, i)
-            hd_l, hd_d, i = self.mkmap('autogrp1',             hd_l, hd_d, i)
+            hd_l, hd_d, i = self.mkmap('auto_grp0',            hd_l, hd_d, i)
+            hd_l, hd_d, i = self.mkmap('auto_grp1',            hd_l, hd_d, i)
 
         elif type == 'formpass':
 
-            # Synchronize with formtxt.py _format_product
+            # Synchronize with formtxt.py format_product
 
             hd_l, hd_d, i = self.mkmap('chrom',                hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('pos',                  hd_l, hd_d, i)
@@ -302,13 +302,20 @@ class OutList(object):
             hd_l, hd_d, i = self.mkmap('PRIMER_RIGHT_0_SEQUENCE',
                                                                hd_l, hd_d, i)
             # if grouped, these two items are removed
-            hd_l, hd_d, i = self.mkmap('autogrp0',             hd_l, hd_d, i)
-            hd_l, hd_d, i = self.mkmap('autogrp1',             hd_l, hd_d, i)
+            hd_l, hd_d, i = self.mkmap('auto_grp0',            hd_l, hd_d, i)
+            hd_l, hd_d, i = self.mkmap('auto_grp1',            hd_l, hd_d, i)
 
             #Allele string '00' information for each sample will be added
 
 
         hd_str = '\t'.join(map(str, hd_l))
+
+        #print(type)
+        #print(hd_str)
+        #print(hd_l)
+        #print(hd_d)
+        #sys.exit(1)
+
         return hd_str, hd_l, hd_d
 
 

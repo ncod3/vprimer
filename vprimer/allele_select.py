@@ -424,17 +424,24 @@ class AlleleSelect(object):
         variant_line_list += [set_n]
         variant_line_list += [len_g0g1_dif_long]
         variant_line_list += [self.vseq_ano_str.upper()]
+
         # ---------------------
         # add members for auto_group
+        auto_grp0 = "-"
+        auto_grp1 = "-"
+
         if glv.conf.is_auto_group:
 
             gname = self.group_list[0]
-            autogrp0 = [",".join(self.member_dict[gname])]
-            variant_line_list += autogrp0
+            auto_grp0 = [",".join(self.member_dict[gname])]
+            variant_line_list += auto_grp0
 
             gname = self.group_list[1]
-            autogrp1 = [",".join(self.member_dict[gname])]
-            variant_line_list += autogrp1
+            auto_grp1 = [",".join(self.member_dict[gname])]
+
+        variant_line_list += auto_grp0
+        variant_line_list += auto_grp1
+
 
         return var_type, '\t'.join(map(str, variant_line_list))
 

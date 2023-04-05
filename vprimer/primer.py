@@ -363,11 +363,11 @@ class Primer(object):
         l_list += [prinfo.iopr3.get_sequence_excluded_region()]
         l_list += [prinfo.seq_template_ref]
 
-        # autogrp
+        # auto_grp
         # formtxt.py format_product
-        if glv.conf.is_auto_group:
-            l_list += [prinfo.autogrp0]
-            l_list += [prinfo.autogrp1]
+        #if glv.conf.is_auto_group:
+        l_list += [prinfo.auto_grp0]
+        l_list += [prinfo.auto_grp1]
 
         #print(">{}<".format(','.join(map(str, l_list))))
         #sys.exit(1)
@@ -467,9 +467,11 @@ class PrimerInfo(object):
 
     def prepare_from_marker_file(self, distin_gdct, marker_df_row):
 
-        #hdr_dict = distin_file['marker']['hdr_dict']
-        hdr_dict = utl.remove_deepcopy_autogrp_header_dict(
-            distin_gdct['marker']['hdr_dict'])
+        hdr_dict = distin_gdct['marker']['hdr_dict']
+        #hdr_dict = utl.remove_deepcopy_auto_grp_header_dict(
+        #    distin_gdct['marker']['hdr_dict'])
+        #hdr_dict = utl.deepcopy_grp_header_dict(
+        #    distin_gdct['marker']['hdr_dict'])
 
         # basic
         self.marker_id, \
@@ -492,8 +494,8 @@ class PrimerInfo(object):
         self.digest_pattern, \
         self.target_gno, \
         self.target_len, \
-        self.autogrp0, \
-        self.autogrp1 = \
+        self.auto_grp0, \
+        self.auto_grp1 = \
             utl.get_basic_primer_info(marker_df_row, hdr_dict)
 
         self.g0_seq_target_len = \

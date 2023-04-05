@@ -85,8 +85,7 @@ class Variant(object):
         utl.save_to_tmpfile(out_txt_path)
 
         # header: if glv.conf.is_auto_group, remove last 2 columns
-        header_txt = utl.remove_autogrp_header_txt(
-            distin_gdct['variant']['hdr_text'])
+        header_txt = distin_gdct['variant']['hdr_text']
 
         # pick mode and indel length
         pick_mode = distin_gdct['pick_mode']

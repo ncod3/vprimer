@@ -82,7 +82,7 @@ class Marker(object):
             # header
             header_txt = distin_gdct['marker']['hdr_text']
             # if glv.conf.is_auto_group, remove last 2 columns
-            header_txt = utl.remove_autogrp_header_txt(header_txt)
+            #header_txt = utl.remove_auto_grp_header_txt(header_txt)
 
             with out_txt_path.open('a', encoding='utf-8') as f:
 

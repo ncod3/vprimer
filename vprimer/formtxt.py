@@ -143,7 +143,7 @@ class FormTxt(object):
 
                     header_txt = distin_gdct['formpass']['hdr_text']
                     # if glv.conf.is_auto_group, remove last 2 columns
-                    header_txt = utl.remove_autogrp_header_txt(header_txt)
+                    #header_txt = utl.remove_auto_grp_header_txt(header_txt)
 
                     if (proc == "formpass"):
 
@@ -484,8 +484,8 @@ class FormTxt(object):
         self.digest_pattern, \
         self.target_gno, \
         self.target_len, \
-        self.autogrp0, \
-        self.autogrp1 = \
+        self.auto_grp0, \
+        self.auto_grp1 = \
             utl.get_basic_primer_info(primer_df_row, hdr_dict)
 
         self.g0_vseq, self.g1_vseq = self.vseq_gno_str.split(",")
@@ -624,11 +624,11 @@ class FormTxt(object):
             line_list += [self.right_primer_id]
             line_list += [self.PRIMER_RIGHT_0_SEQUENCE]
  
-        # autogrp
+        # auto_grp
         # primer.py primer_complete_to_line
-        if glv.conf.is_auto_group:
-            line_list += [self.autogrp0]
-            line_list += [self.autogrp1]
+        #if glv.conf.is_auto_group:
+        line_list += [self.auto_grp0]
+        line_list += [self.auto_grp1]
 
         return '\t'.join(map(str, line_list))
 
