@@ -139,9 +139,10 @@ Execute the demo shell script in order.
 
 ## Usage
 
-### ***<span style="color: #FF4D00; ">required</span>***
+### required
 <dl>
-<dt style="font-style:normal;">--ref <span style="font-weight:normal;">ref_file</span>
+<dt>
+--ref ref_file
 </dt>
 <dd>
 Reference fasta.
@@ -149,7 +150,8 @@ Reference fasta.
 </dl>
 
 <dl>
-<dt style="font-style:normal;">--vcf <span style="font-weight:normal;">vcf_file</span>
+<dt>
+--vcf vcf_file
 </dt>
 <dd>
 VCF file.
@@ -157,8 +159,8 @@ VCF file.
 </dl>
 
 <dl>
-<dt style="font-style:normal;">--target <span style="font-weight:normal;">all | chr | chr:stt-end | chr:stt-[,…​]
-</span>
+<dt>
+--target all | chr | chr:stt-end | chr:stt-[,…​]
 </dt>
 <dd>
 Comma- or Space-separated list of regions.
@@ -166,17 +168,19 @@ Comma- or Space-separated list of regions.
 </dl>
 
 <dl>
-<dt style="font-style:normal;">--pick_mode <span style="font-weight:normal;">mode</span>
+<dt>
+--pick_mode mode
 </dt>
 <dd>
 Type of marker to pick up. [ indel | caps | snp ]
 </dd>
 </dl>
 
-### ***<span style="color: #FF4D00; ">for preparation</span>***
+### for preparation
 
 <dl>
-<dt style="font-style:normal;">--show_fasta</span>
+<dt>
+--show_fasta
 </dt>
 <dd>
 Prepare fasta, display fasta information and exit.
@@ -184,24 +188,22 @@ Prepare fasta, display fasta information and exit.
 </dl>
 
 <dl>
-<dt style="font-style:normal;"> --show_samples</span>
+<dt>
+--show_samples
 </dt>
 <dd>
 Prepare VCF, display VCF information and exit.
 </dd>
 </dl>
 
-### ***<span style="color: #FF4D00; "> selection required </span>***
+### selection required
 
 <dl>
-<dt style="font-style:normal;">
---a_sample <span style="font-weight:normal;">[sample [sample ...]]</span><br>
---b_sample <span style="font-weight:normal;">[sample [sample ...]]
-<br>
+<dt>
+--a_sample [sample [sample ...]]<br>
+--b_sample [sample [sample ...]]<br>
  or <br>
-</span>
---auto_group <span style="font-weight:normal;">[sample [sample ...]]
-</span>
+--auto_group [sample [sample ...]]
 </dt>
 <dd>
 If you already have two groups to compare, list the samples in a_sample and b_sample.
@@ -209,10 +211,11 @@ When analyzing by genotype-based auto group, list the samples in auto_group.
 </dd>
 </dl>
 
-### ***<span style="color: #FF4D00; "> optional</span>***
+### optional
 
 <dl>
-<dt style="font-style:normal;">--indel_size <span style="font-weight:normal;"> min-max </span>
+<dt>
+--indel_size min-max
 </dt>
 <dd>
 The range of InDel size.
@@ -220,7 +223,8 @@ The range of InDel size.
 </dl>
 
 <dl>
-<dt style="font-style:normal;">--product_size <span style="font-weight:normal;">min-max</span>
+<dt>
+--product_size min-max
 </dt>
 <dd>
 The range of product size for designing primer.
@@ -228,7 +232,8 @@ The range of product size for designing primer.
 </dl>
 
 <dl>
-<dt style="font-style:normal;">--enzyme <span style="font-weight:normal;">enzyme_name</span>
+<dt>
+--enzyme enzyme_name
 </dt>
 <dd>
 Restriction enzyme names used in CAPS marker.
@@ -236,7 +241,8 @@ Restriction enzyme names used in CAPS marker.
 </dl>
 
 <dl>
-<dt style="font-style:normal;">--enzyme_file <span style="font-weight:normal;"> file </span>
+<dt>
+--enzyme_file file
 </dt>
 <dd>
 File that listing restriction enzyme names for use in CAPS marker.
@@ -244,7 +250,8 @@ File that listing restriction enzyme names for use in CAPS marker.
 </dl>
 
 <dl>
-<dt style="font-style:normal;">--p3_normal <span style="font-weight:normal;"> file </span>
+<dt>
+--p3_normal file
 </dt>
 <dd>
 File that listing parameters to set Primer3 for InDel or CAPS marker.
@@ -252,7 +259,8 @@ File that listing parameters to set Primer3 for InDel or CAPS marker.
 </dl>
 
 <dl>
-<dt style="font-style:normal;">--p3_amplicon <span style="font-weight:normal;"> file </span>
+<dt>
+--p3_amplicon file
 </dt>
 <dd>
 File that listing parameters to set Primer3 for SNP marker.
@@ -260,7 +268,8 @@ File that listing parameters to set Primer3 for SNP marker.
 </dl>
 
 <dl>
-<dt style="font-style:normal;">--amplicon_param <span style="font-weight:normal;"> parameter </span>
+<dt>
+--amplicon_param parameter
 </dt>
 <dd>
 Parameters for designing SNP markers.
@@ -268,7 +277,8 @@ Parameters for designing SNP markers.
 </dl>
 
 <dl>
-<dt style="font-style:normal;">--bam_table <span style="font-weight:normal;">file</span>
+<dt>
+--bam_table file
 </dt>
 <dd>
 File that that associates bam file names with VCF sample names.
@@ -276,7 +286,8 @@ File that that associates bam file names with VCF sample names.
 </dl>
 
 <dl>
-<dt style="font-style:normal;">--out_dir <span style="font-weight:normal;"> dir_name </span>
+<dt>
+--out_dir dir_name
 </dt>
 <dd>
 Directory name for outputting results.
@@ -284,7 +295,8 @@ Directory name for outputting results.
 </dl>
 
 <dl>
-<dt style="font-style:normal;">--thread <span style="font-weight:normal;">num</span>
+<dt>
+--thread num
 </dt>
 <dd>
 Number of CPUs used.
