@@ -25,13 +25,13 @@ from vprimer.formtxt import FormTxt
 def main():
 
 
-    log.info('program started at {}'.format(glv.now_datetime_form))
+    log.info('vprimer started at {}'.format(glv.now_datetime_form))
 
     # run
     vpr = VPrimer()
     vpr.run()
 
-    log.info("program finished {}\n".format(utl.elapse_epoch()))
+    log.info("vprimer finished {}\n".format(utl.elapse_epoch()))
 
 
 class VPrimer(object):

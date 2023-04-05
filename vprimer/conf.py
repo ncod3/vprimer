@@ -66,7 +66,7 @@ class ConfBase(object):
             #
             'indel_size':   {'dtype': 'str',    'default': '20-200'},
             'product_size': {'dtype': 'str',    'default': '200-500'},
-            'pick_mode':    {'dtype': 'str',    'default': 'indel'},
+            'pick_mode':    {'dtype': 'str',    'default': glv.MODE_INDEL},
 
             #
             'out_dir':      {'dtype': 'str',    'default': 'out_vprimer'},
@@ -511,6 +511,7 @@ class ConfBase(object):
         self.dimer_tm = 0
 
         self.amplicon_param = self.selected_value('amplicon_param')
+
         # check and separate
         if self.amplicon_param != "":
             self.amplicon_forward_tag, self.amplicon_reverse_tag, \

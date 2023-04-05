@@ -185,7 +185,8 @@ class FormTxt(object):
                         # ********************************************
                         # duplicate_pos_dict: format duplicate line
                         #
-                        line = self.format_product(duplicate_pos_dict)
+                        line = self.format_product(
+                            distin_gdct, duplicate_pos_dict)
                         # ********************************************
 
                         # For formpass, append the allele string to the end
@@ -535,7 +536,7 @@ class FormTxt(object):
             str(primer_df_row[hdr_dict['product_gc_contents']])
 
 
-    def format_product(self, duplicate_pos_dict):
+    def format_product(self, distin_gdct, duplicate_pos_dict):
 
         if self.PRIMER_PAIR_0_PRODUCT_SIZE == 0:
             product_size_0 = -1
@@ -601,30 +602,28 @@ class FormTxt(object):
         line_list += [self.marker_id]
         line_list += [self.gts_segr_lens]
 
-        line_list += [self.left_primer_id]
-        # v 1.0.1 2023.04.22
-        #if glv.conf.is_auto_group:
-        #    line_list += ["{}{}".format(
-        #        glv.conf.amplicon_forward_tag,
-        #        self.PRIMER_LEFT_0_SEQUENCE)]
-        #else:
-        line_list += [self.PRIMER_LEFT_0_SEQUENCE]
 
+        # for amplicon
+        if distin_gdct['pick_mode'] == glv.MODE_SNP and \
+            self.PRIMER_LEFT_0_SEQUENCE != "-" and \
+            self.PRIMER_RIGHT_0_SEQUENCE != "-":
 
-        #print(self.PRIMER_LEFT_0_SEQUENCE)
-        #print(glv.conf.amplicon_forward_tag)
-        #print()
-        #sys.exit(1)
+            line_list += [self.left_primer_id]
+            line_list += ["{}{}".format(
+                glv.conf.amplicon_forward_tag,
+                self.PRIMER_LEFT_0_SEQUENCE)]
 
-        line_list += [self.right_primer_id]
-        # v 1.0.1 2023.04.22
-        #if glv.conf.is_auto_group:
-        #    line_list += ["{}{}",format(
-        #        self.amplicon_reverse_tag,
-        #        self.PRIMER_RIGHT_0_SEQUENCE)]
-        #else:
-        line_list += [self.PRIMER_RIGHT_0_SEQUENCE]
+            line_list += [self.right_primer_id]
+            line_list += ["{}{}".format(
+                glv.conf.amplicon_reverse_tag,
+                self.PRIMER_RIGHT_0_SEQUENCE)]
 
+        else:
+            line_list += [self.left_primer_id]
+            line_list += [self.PRIMER_LEFT_0_SEQUENCE]
+            line_list += [self.right_primer_id]
+            line_list += [self.PRIMER_RIGHT_0_SEQUENCE]
+ 
         # autogrp
         # primer.py primer_complete_to_line
         if glv.conf.is_auto_group:

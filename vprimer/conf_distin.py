@@ -164,11 +164,16 @@ class ConfDistinG(object):
             # pick_mode
             pick_mode = self.pick_mode
 
+            #print("in init_distinguish_groups_str")
+            #print(self.pick_mode)
+
             # indel_size
             indel_size = self.indel_size
 
             distinguish_groups_str = "{}/{}:{}:{}:{}".format(
                 group0, group1, region_name, pick_mode, indel_size)
+
+            #print(distinguish_groups_str)
 
         else:
             distinguish_groups_str = \
@@ -486,6 +491,9 @@ class ConfDistinG(object):
                 # remove space and tab to cp
                 distin_str_cp = re.sub(r"\s", "", distin_str)
 
+                #print("in rectify_distinguish_groups_str")
+                #print(distin_str_cp)
+
                 # -----------------------------------
                 # 0. check field_cnt
                 field_cnt = len(distin_str_cp.split(':'))
@@ -565,22 +573,27 @@ class ConfDistinG(object):
 
                 # -----------------------------------
                 # 3. check pick_mode
-                if pick_mode == "":
-                    # default setting
-                    pick_mode = self.pick_mode
+                #if pick_mode == "":
+                #    # default setting
+                #    pick_mode = self.pick_mode
 
                 # check if it's in the list
-                for pm_str in pick_mode.split(','):
-                    # separator of pick_mode is '+'
-                    for pm in pm_str.split('+'):
-                    
-                        if pm not in glv.pick_mode_list:
-                            ng = 1
-                            er_m = "Pick mode ({}) must be ".format(
-                                pick_mode)
-                            er_m += "one of these {}.".format(
-                                glv.pick_mode_list)
-                            raise UserFormatErrorDistin(er_m)
+                # 複数のpick_modeのチェック
+                #print("before, i{}".format(pick_mode))
+                
+                # separator of pick_mode is '+'
+                for pm in pick_mode.split('+'):
+                    #print(pm)
+                    if pm not in glv.pick_mode_list:
+                        er_m = "Pick mode ({}) must be ".format(
+                            pick_mode)
+                        er_m += "one of these {}.".format(
+                            glv.pick_mode_list)
+                        raise UserFormatErrorDistin(er_m)
+
+                if '+' in pick_mode and glv.MODE_SNP in pick_mode:
+                    er_m = "Only pick_mode snp must be used alone, exit."
+                    raise UserFormatErrorDistin(er_m)
 
                 # -----------------------------------
                 # 4. check indel_size

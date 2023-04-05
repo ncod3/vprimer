@@ -1,8 +1,8 @@
 # V-primer
 
-V-primerは、VCF(variant call format)形式の genotyping データから、全ゲノム規模のInDelマーカーとSNPマーカーを効率的に設計するためのソフトウェアです。
+V-primer is a software written in Python3 for the efficient design of genome-wide InDel, CAPS, and SNP markers from multi-sample variant call format (VCF) genotyping data obtained by NGS.
 
-## SYNOPSIS (書式)
+## SYNOPSIS
 ```
 vprimer
 	[-h | --help] [--version]
@@ -18,15 +18,15 @@ vprimer
 	[--thread]
 ```
 
-## Description (概要)
+## Description
 
-複数のサンプルbamから作成されたVCFファイルを用いて、２つのサンプル群を識別可能なIndelマーカーもしくはSNPマーカーを設計します。サンプル群の指定方法は次の２種類があります。１）比較したい２種類のサンプル群をユーザ指定する方法、２）指定されたサンプル群範囲の中でVCFのgenotypeにより自動的に２グループが生成される方法、です。
+V-primer designs Indel, CAPS and SNP markers that can distinguish between two sample groups using a VCF file created from multiple sample BAM files. There are two ways to specify the sample groups: 1) by user-specified selection of two groups to be compared, and 2) by automatically generating two groups based on the genotype of the VCF file within the entire user-specified set of samples.
 
-## Installation (インストール)
+## Installation
 
-conda を用いて動作環境を作成し、pipを用いてこの githubサイトから vprimer をインストールします。
+Create a working environment using conda and install vprimer from this GitHub site using pip.
 
-まず、各種condaのツールをインストールするための channel の設定を確認します。highest priority と、lowest priority が、以下のように設定されているならば問題はありません。
+First, check the settings for channels to install various conda tools. If the highest priority and lowest priority are set as follows, there is no problem:
 
 ```
 $ conda config --get channels
@@ -36,7 +36,7 @@ $ conda config --get channels
 --add channels 'defaults'   # highest priority
 ```
 
-もし、上記の設定となっていない場合は、以下の３行を実行してください。
+If the settings are not as described above, run the following three lines:
 
 ```
 $ conda config --add channels 'conda-forge'
@@ -45,32 +45,33 @@ $ conda config --add channels 'defaults'
 
 ```
 
-最初に、conda を用いて、"vprimer" と名付けた仮想環境を作成します。
+Next, create a virtual environment named "vprimer" using conda.
 
 ```
 $ conda create -n vprimer python 'biopython==1.76'
 ```
 
-作成した仮想環境を activate します。
+Activate the created virtual environment.
 
 ```
 $ conda activate vprimer
 ```
 
-残りの必要環境を conda install コマンドで準備します。
+Prepare the remaining required environments using the conda install command.
 
 ```
 (vprimer) $ conda install pandas vcfpy pysam joblib samtools bcftools bedtools tabix primer3 primer3-py blast
 ```
 
-vprimerをインストールします。まず最初に、uninstall をしてみます。
+Install vprimer. First, try uninstalling.
 
 ```
 (vprimer) $ pip uninstall vprimer
 WARNING: Skipping vprimer as it is not installed.
 ```
 
-インストールされていない場合、上記のメッセージが出ますので、インストールを続けます。
+If it is not installed, the message above will appear, so continue the installation.
+
 
 ```
 (vprimer) $ pip install git+https://github.com/ncod3/vprimer
@@ -80,54 +81,51 @@ Collecting git+https://github.com/ncod3/vprimer
 Successfully installed vprimer-1.0.1
 ```
 
-"Successfully" のメッセージが出たならば、インストール完了です。
+If the message "Successfully" appears, the installation is complete.
 
 
-## Demo (動作デモ)
+## Demo
 
-任意の場所に、デモ作業用ディレクトリを作成し、動作デモ用データをダウンロードします。次のURLにデータが置いてあります。( https://github.com/ncod3/data_vprimer )。
+Create a demo working directory anywhere you like and download the demonstration data. The data can be found at the following URL: ( https://github.com/ncod3/data_vprimer ).
 
-任意のディレクトリ名で、作業ディレクトリを作成し、移動します。
+Create a working directory with any name and move to it.
 
 ```
 (vprimer) $ mkdir test_vprimer
 (vprimer) $ cd test_vprimer
 ```
 
-この作業ディレクトリに、動作デモ用データをダウンロードします。
+Download the demonstration data to this working directory.
 
 ```
 (vprimer) $ git clone https://github.com/ncod3/data_vprimer
 ```
-data_vprimer というディレクトリが作成され、データがダウンロードされています。
 
-data_vprimer の下の、test_script というディレクトリに準備された、デモ用シェルスクリプトを、カレントディレクトリにシンボリックリンクします。
+The "data_vprimer" directory will be created and the data will be downloaded.
+
+Create a symbolic link to the demo shell script prepared in the test_script directory under data_vprimer in the current directory.
 
 ```
 (vprimer) $ ln -s data_vprimer/test_script/*.sh .
 ```
 
-以下のように、010.show_samples.sh というシェルスクリプトを実行します。
+Run the shell script named 010.show_samples.sh as follows.
 
 ```
 (vprimer) $ sh ./010.show_samples.sh
 ```
 
-refs というディレクトリが作成され、vprimerの解析の準備ができました。
+The "refs" directory will be created and the vprimer analysis will be prepared.
 
-VCFを作成した際のサンプルbamファイルを利用して、sequenceの張り付きの薄い箇所を計測するため、
+To measure areas with low coverage of sequences using the sample bam files used to create the VCF, edit the file named "refs/MP2_6_TDr96_F1.vcf.gz_GTonly.vcf.gz_sample_bam_table.txt" and describe the path to the corresponding bam file for each sample.
 
-refs/MP2_6_TDr96_F1.vcf.gz_GTonly.vcf.gz_sample_bam_table.txt
-
-というファイルを編集し、サンプルに対応するbamファイルのパスを記述します。
-
-この動作デモでは、catコマンドを使用して、すでに内容が準備してあるファイルを refsの下のファイルに overwriteします。
+In this demo, the cat command is used to overwrite the files under refs with files that have already been prepared.
 
 ```
 (vprimer) $ cat data_vprimer/bams/MP2_6_TDr96_F1.vcf.gz_GTonly.vcf.gz_sample_bam_table.txt_filled > refs/MP2_6_TDr96_F1.vcf.gz_GTonly.vcf.gz_sample_bam_table.txt
 ```
 
-順次、デモ用シェルスクリプトを実行します。
+Execute the demo shell script in order.
 
 ```
 (vprimer) $ sh ./020.6samples_indel.sh
@@ -139,179 +137,178 @@ refs/MP2_6_TDr96_F1.vcf.gz_GTonly.vcf.gz_sample_bam_table.txt
 
 ```
 
-## Usage (使用法)
-### required（必須項目）
+## Usage
+
+### ***<span style="color: #FF4D00; ">required</span>***
 <dl>
-<dt>--ref ref_file</dt>
-<dd>
-reference fastaを指定する。
-</dd>
-</dl>
-
-<dl>
-<dt>--vcf vcf_file</dt>
-<dd>
-vcfファイルを指定する。
-</dd>
-</dl>
-
-<dl>
---target [scope [scope ...]]
-
-解析するfastaの範囲を指定する。
-</dl>
-
-<dl>
---pick_mode mode
-
-ピックアップするマーカーの種類を指定する。
-</dl>
-
-### for preparation（準備）
-
-<dl>
-<dt>
---show_fasta
+<dt style="font-style:normal;">--ref <span style="font-weight:normal;">ref_file</span>
 </dt>
 <dd>
-fastaの情報を表示する。
+Reference fasta.
 </dd>
 </dl>
 
 <dl>
-<dt>
---show_samples
+<dt style="font-style:normal;">--vcf <span style="font-weight:normal;">vcf_file</span>
 </dt>
 <dd>
-VCFファイルの内容を表示する。
-</dd>
-</dl>
-
-### selection required（必須選択項目）
-
-<dl>
-<dt>
---auto_group [sample [sample ...]]<br>
-もしくは <br>
---a_sample [sample [sample ...]]<br>
---b-sample [sample [sample ...]]
-</dt>
-<dd>
-サンプル群の指定方法と使用するサンプル群範囲を指定する。
-</dd>
-</dl>
-
-### optional（任意項目）
-
-<dl>
-<dt>
---indel_size min-max
-</dt>
-<dd>
-InDelのサイズを指定する。
+VCF file.
 </dd>
 </dl>
 
 <dl>
-<dt>
---product_size min-max
+<dt style="font-style:normal;">--target <span style="font-weight:normal;">all | chr | chr:stt-end | chr:stt-[,…​]
+</span>
 </dt>
 <dd>
-プロダクトサイズを指定する。
+Comma- or Space-separated list of regions.
 </dd>
 </dl>
 
 <dl>
-<dt>
---enzyme enzyme_name
+<dt style="font-style:normal;">--pick_mode <span style="font-weight:normal;">mode</span>
 </dt>
 <dd>
-CAPSマーカーで使用する制限酵素名を指定する。
+Type of marker to pick up. [ indel | caps | snp ]
+</dd>
+</dl>
+
+### ***<span style="color: #FF4D00; ">for preparation</span>***
+
+<dl>
+<dt style="font-style:normal;">--show_fasta</span>
+</dt>
+<dd>
+Prepare fasta, display fasta information and exit.
 </dd>
 </dl>
 
 <dl>
-<dt>
---enzyme_file file
+<dt style="font-style:normal;"> --show_samples</span>
 </dt>
 <dd>
-CAPSマーカーで使用する制限酵素名が書かれたファイルを指定する。
+Prepare VCF, display VCF information and exit.
+</dd>
+</dl>
+
+### ***<span style="color: #FF4D00; "> selection required </span>***
+
+<dl>
+<dt style="font-style:normal;">
+--a_sample <span style="font-weight:normal;">[sample [sample ...]]</span><br>
+--b_sample <span style="font-weight:normal;">[sample [sample ...]]
+<br>
+ or <br>
+</span>
+--auto_group <span style="font-weight:normal;">[sample [sample ...]]
+</span>
+</dt>
+<dd>
+If you already have two groups to compare, list the samples in a_sample and b_sample.
+When analyzing by genotype-based auto group, list the samples in auto_group.
+</dd>
+</dl>
+
+### ***<span style="color: #FF4D00; "> optional</span>***
+
+<dl>
+<dt style="font-style:normal;">--indel_size <span style="font-weight:normal;"> min-max </span>
+</dt>
+<dd>
+The range of InDel size.
 </dd>
 </dl>
 
 <dl>
-<dt>
---p3_normal file
+<dt style="font-style:normal;">--product_size <span style="font-weight:normal;">min-max</span>
 </dt>
 <dd>
-Primer3に設定するパラメータが書かれたファイルの指定。InDelもしくはCAPS用。
+The range of product size for designing primer.
 </dd>
 </dl>
 
 <dl>
-<dt>
---p3_amplicon file
+<dt style="font-style:normal;">--enzyme <span style="font-weight:normal;">enzyme_name</span>
 </dt>
 <dd>
-Primer3に設定するパラメータが書かれたファイルの指定。SNP用。
+Restriction enzyme names used in CAPS marker.
 </dd>
 </dl>
 
 <dl>
-<dt>
---amplicon_param parameter
+<dt style="font-style:normal;">--enzyme_file <span style="font-weight:normal;"> file </span>
 </dt>
 <dd>
-SNPマーカー構築の際のパラメータを指定する。
+File that listing restriction enzyme names for use in CAPS marker.
 </dd>
 </dl>
 
 <dl>
-<dt>
---bam_table file
+<dt style="font-style:normal;">--p3_normal <span style="font-weight:normal;"> file </span>
 </dt>
 <dd>
-シーケンスが薄い張り付きの部分を避けてプライマー設計を行うために、VCF内サンプル名に対応するbamファイルのパスが書かれたファイルを指定する。
+File that listing parameters to set Primer3 for InDel or CAPS marker.
 </dd>
 </dl>
 
 <dl>
-<dt>
---out_dir dir_name
+<dt style="font-style:normal;">--p3_amplicon <span style="font-weight:normal;"> file </span>
 </dt>
 <dd>
-結果が出力されるディレクトリを指定する。
+File that listing parameters to set Primer3 for SNP marker.
 </dd>
 </dl>
 
 <dl>
-<dt>
---thread num
+<dt style="font-style:normal;">--amplicon_param <span style="font-weight:normal;"> parameter </span>
 </dt>
 <dd>
-使用するCPU数を指定する。
+Parameters for designing SNP markers.
+</dd>
+</dl>
+
+<dl>
+<dt style="font-style:normal;">--bam_table <span style="font-weight:normal;">file</span>
+</dt>
+<dd>
+File that that associates bam file names with VCF sample names.
+</dd>
+</dl>
+
+<dl>
+<dt style="font-style:normal;">--out_dir <span style="font-weight:normal;"> dir_name </span>
+</dt>
+<dd>
+Directory name for outputting results.
+</dd>
+</dl>
+
+<dl>
+<dt style="font-style:normal;">--thread <span style="font-weight:normal;">num</span>
+</dt>
+<dd>
+Number of CPUs used.
 </dd>
 </dl>
 	
 
-
-## Authors (著者)
+## Authors
 - Satoshi Natsume s-natsume@ibrc.or.jp
 
 See also the list of contributors who participated in this project.
 
-## Licence (ライセンス)
+## Licence
 
 Copyright (c) 2023 Satoshi Natsume
 Released under the MIT license
 https://github.com/YukinobuKurata/YouTubeMagicBuyButton/blob/master/MIT-LICENSS
 E.txt
 
-## Changelog (更新履歴)
+## Changelog
 - 2023-04-03
-	- 1.0.1 パラメータ指定修正
+	- 1.0.1 Modify parameter settings.
 - 2023-04-02 
-	- 1.0.0 公開
+	- vprimer 1.0.0 released.
 
 
 
