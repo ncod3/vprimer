@@ -7,7 +7,12 @@
 1: chrom
 </dt>
 <dd>
-word
+<p>word</p>
+
+| common |
+:----:|
+| chrom_01 |
+
 </dd>
 </dl>
 
