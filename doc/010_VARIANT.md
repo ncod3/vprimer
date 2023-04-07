@@ -1,3 +1,5 @@
+[Description](DESCRIPTION.md)
+
 # 010_variant
 
 13項目です。
@@ -128,3 +130,6 @@ word
 
 </dd>
 </dl>
+
+[Description](DESCRIPTION.md)
+

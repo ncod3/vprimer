@@ -1,3 +1,5 @@
+[Description](DESCRIPTION.md)
+
 # 030_primer
 
 35項目です。
@@ -195,3 +197,6 @@ word
 
 </dd>
 </dl>
+
+[Description](DESCRIPTION.md)
+
