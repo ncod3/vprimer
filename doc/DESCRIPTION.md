@@ -9,7 +9,7 @@ First, specify the VCF file and Fasta file, and instruct vprimer on the analysis
 
 The refs directory has the following structure:
 
-(Description of the refs directory structure)
+[Description of the refs directory structure](REFSDIRECTORY.md)
 
 The results will be written to the specified output directory (out_dir). The analysis proceeds in the following five steps, and the name of each step corresponds to the prefix of the file name that will be output in that step.
 
