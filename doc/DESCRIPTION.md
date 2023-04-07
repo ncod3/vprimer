@@ -1,5 +1,8 @@
 [../README.md](../README.md)
 
+# Usage
+
+[Usage](USAGE.md)
 
 # Detail description
 
@@ -33,7 +36,5 @@ The results will be written to the specified output directory (out_dir). The ana
 
 [Detail output for 050_formatP](050_FORMATP.md)
 
-## Usage
 
-[Usage](USAGE.md)
 
