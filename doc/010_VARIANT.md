@@ -29,6 +29,7 @@ targ_grp, targ_ano
 <p><p>
 比較しているグループ名(カンマ区切り)
 </p>
+
 "2 groups" mode, "auto group" mode:
 
 
@@ -49,9 +50,9 @@ vseq_gno_str
 <p><p>
 word
 </p>
-
 </dd>
 </dl>
+
 
 <dl>
 <dt>
@@ -61,9 +62,9 @@ gts_segr_lens
 <p><p>
 word
 </p>
-
 </dd>
 </dl>
+
 
 <dl>
 <dt>
@@ -91,9 +92,9 @@ set_n
 <p><p>
 word
 </p>
-
 </dd>
 </dl>
+
 
 <dl>
 <dt>
@@ -103,9 +104,9 @@ len_g0g1_dif_long
 <p><p>
 word
 </p>
-
 </dd>
 </dl>
+
 
 <dl>
 <dt>
@@ -115,9 +116,9 @@ vseq_ano_str
 <p><p>
 word
 </p>
-
 </dd>
 </dl>
+
 
 <dl>
 <dt>
@@ -127,9 +128,9 @@ auto_grp0, auto_grp1
 <p><p>
 word
 </p>
-
 </dd>
 </dl>
+
 
 [Description](DESCRIPTION.md)
 

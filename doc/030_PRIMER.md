@@ -12,7 +12,6 @@ chrom, pos, targ_grp, targ_ano, vseq_gno_str, gts_segr_lens, var_type, mk_type, 
 <p><p>
 (010_variantより引き継ぎ)
 </p>
-
 </dd>
 </dl>
 
@@ -25,7 +24,6 @@ marker_id, set_enz_cnt, marker_info, vseq_lens_ano_str, g0_seq_target_len, g0_se
 <p><p>
 (020_markerより引き継ぎ)
 </p>
-
 </dd>
 </dl>
 
@@ -38,9 +36,9 @@ try_cnt
 <p><p>
 word
 </p>
-
 </dd>
 </dl>
+
 
 <dl>
 <dt>
@@ -50,9 +48,9 @@ complete
 <p><p>
 word
 </p>
-
 </dd>
 </dl>
+
 
 <dl>
 <dt>
@@ -62,9 +60,9 @@ blast_check
 <p><p>
 word
 </p>
-
 </dd>
 </dl>
+
 
 <dl>
 <dt>
@@ -74,9 +72,9 @@ PRIMER_PAIR_0_PRODUCT_SIZE
 <p><p>
 word
 </p>
-
 </dd>
 </dl>
+
 
 <dl>
 <dt>
@@ -86,9 +84,9 @@ product_gc_contents
 <p><p>
 word
 </p>
-
 </dd>
 </dl>
+
 
 <dl>
 <dt>
@@ -98,9 +96,9 @@ PRIMER_LEFT_0
 <p><p>
 word
 </p>
-
 </dd>
 </dl>
+
 
 <dl>
 <dt>
@@ -110,9 +108,9 @@ left_primer_id
 <p><p>
 word
 </p>
-
 </dd>
 </dl>
+
 
 <dl>
 <dt>
@@ -122,9 +120,9 @@ PRIMER_LEFT_0_SEQUENCE
 <p><p>
 word
 </p>
-
 </dd>
 </dl>
+
 
 <dl>
 <dt>
@@ -134,9 +132,9 @@ PRIMER_RIGHT_0
 <p><p>
 word
 </p>
-
 </dd>
 </dl>
+
 
 <dl>
 <dt>
@@ -146,9 +144,9 @@ right_primer_id
 <p><p>
 word
 </p>
-
 </dd>
 </dl>
+
 
 <dl>
 <dt>
@@ -158,9 +156,9 @@ PRIMER_RIGHT_0_SEQUENCE
 <p><p>
 word
 </p>
-
 </dd>
 </dl>
+
 
 <dl>
 <dt>
@@ -170,9 +168,9 @@ SEQUENCE_TARGET
 <p><p>
 word
 </p>
-
 </dd>
 </dl>
+
 
 <dl>
 <dt>
@@ -182,9 +180,9 @@ SEQUENCE_EXCLUDED_REGION
 <p><p>
 word
 </p>
-
 </dd>
 </dl>
+
 
 <dl>
 <dt>
@@ -194,9 +192,9 @@ SEQUENCE_TEMPLATE
 <p><p>
 word
 </p>
-
 </dd>
 </dl>
+
 
 [Description](DESCRIPTION.md)
 

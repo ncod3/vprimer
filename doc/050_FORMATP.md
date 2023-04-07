@@ -4,13 +4,12 @@
 
 <dl>
 <dt>
-chrom, pos, var_type, mk_type, auto_grp0, auto_grp1
+chrom, pos, var_type, mk_type, gts_segr_lens , auto_grp0, auto_grp1
 </dt>
 <dd>
 <p><p>
 (010_variantより引き継ぎ)
 </p>
-
 </dd>
 </dl>
 
@@ -23,7 +22,18 @@ marker_id
 <p><p>
 (020_markerより引き継ぎ)
 </p>
+</dd>
+</dl>
 
+
+<dl>
+<dt>
+try_cnt, complete
+</dt>
+<dd>
+<p><p>
+(030_markerより引き継ぎ)
+</p>
 </dd>
 </dl>
 
@@ -66,9 +76,9 @@ comment
 <p><p>
 １つのpositionで複数のマーカーが設計された場合や、template sequence内にバリアントが確認される場合、注意をうながすためにnoteが書かれる。
 </p>
-
 </dd>
 </dl>
+
 
 <dl>
 <dt>
@@ -79,9 +89,9 @@ enzyme
 <p>
 CAPSマーカーで使用される制限酵素。
 </p>
-
 </dd>
 </dl>
+
 
 <dl>
 <dt>
@@ -97,9 +107,9 @@ name|indel|caps|snp
 g0_product_size |389|334|365
 g1_product_size |361|334|365
 
-
 </dd>
 </dl>
+
 
 <dl>
 <dt>
@@ -109,9 +119,9 @@ product_gc_contents
 <p><p>
 REFから切り出してきた配列における両プライマー間のProductにおけるGC contents (%).
 </p>
-
 </dd>
 </dl>
+
 
 <dl>
 <dt>
@@ -126,9 +136,9 @@ name|indel|caps|snp
 ---|:---:|:---:|:---:|
 diff_length|28|0|0
 
-
 </dd>
 </dl>
+
 
 <dl>
 <dt>
@@ -148,43 +158,21 @@ g1_product_size |334/267/67
 <p>
 g0側はdigestされないためPCRの結果、334bpの長さが１本になる。一方、g1側は、一方のアリルは切断されず、もう一方のアリルだけが切断されるため 334/267/67 の３本のバンドがあらわれる。
 </p>
-
 </dd>
 </dl>
+
 
 <dl>
 <dt>
 digested_gno, digested_ano
 </dt>
 <dd>
-<p>word</p>
-
-</dd>
-</dl>
-
-
-<dl>
-<dt>
-try_cnt, complete
-</dt>
-<dd>
-<p>word</p>
-
-</dd>
-</dl>
-
-
-<dl>
-<dt>
-gts_segr_lens
-</dt>
-<dd>
 <p><p>
 word
 </p>
-
 </dd>
 </dl>
+
 
 <dl>
 <dt>
