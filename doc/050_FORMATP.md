@@ -2,32 +2,27 @@
 
 # 050_formatP
 
-プライマー設計のチェックをすべて通過した結果です。
-
-基本は31項目です。うち、8項目が 010_variant からの引き継ぎです。
-
-- chrom, pos, targ\_ano, var\_type, mk\_type, gts\_segr\_lens, auto\_grp0, auto\_grp1
-
-1項目が 020\_marker からの引き継ぎです。
-
-- 24: marker\_id
-
-加えて、末尾にサンプルの genotype が追加されます。
-
----
-
 <dl>
 <dt>
-chrom, pos
+chrom, pos, var_type, mk_type, auto_grp0, auto_grp1
 </dt>
 <dd>
 <p><p>
-chromosome名と、position。
+(010_variantより引き継ぎ)
 </p>
 
-chrom | pos
-:---:|:---:
-chrom_01 | 62651
+</dd>
+</dl>
+
+
+<dl>
+<dt>
+marker_id
+</dt>
+<dd>
+<p><p>
+(020_markerより引き継ぎ)
+</p>
 
 </dd>
 </dl>
@@ -58,24 +53,6 @@ gX_vseqは、バリアントの配列。ここでは indel, caps, snp の時の�
 |:---:|:---:|:---:|:---:|
 | 0 |GACCATTACTCGCTTACTCGCTTGTATGCTCCA |G|G
 | 1 |ACCA|A|T
-
-</dd>
-</dl>
-
-
-<dl>
-<dt>
-var_type, mk_type
-</dt>
-<dd>
-<p><p>
-var_typeは、indelを核としたvariantの種類。mk_typeはvariantをどのマーカーとして扱っているか。
-</p>
-
-|name|indel|caps|snp|
-|:---:|:---:|:---:|:---:|
-| var_type |indel|snp|snp|
-| mk_type |INDEL|CAPS|SNP|
 
 </dd>
 </dl>
@@ -196,17 +173,6 @@ try_cnt, complete
 </dd>
 </dl>
 
-<dl>
-<dt>
-marker_id
-</dt>
-<dd>
-<p><p>
-word
-</p>
-
-</dd>
-</dl>
 
 <dl>
 <dt>
@@ -235,24 +201,6 @@ left_primer_id |chrom_01:62446-62470:plus
 PRIMER_LEFT_0_SEQUENCE|TTCTCCAAGATCGATTCACTCTGTT
 right_primer_id |chrom_01:62810-62834:minus
 PRIMER_RIGHT_0_SEQUENCE |TACCTGCTAGTCCAAGCTAATTTGT
-
-</dd>
-</dl>
-
-<dl>
-<dt>
-auto_grp0, auto_grp1
-</dt>
-<dd>
-<p><p>
-word
-</p>
-
-
-name|value|
----|---|
-auto_grp0 |MP2_012,MP2_013,MP2_014
-auto_grp1 |MP2_015,MP2_018,MP2_020
 
 </dd>
 </dl>
