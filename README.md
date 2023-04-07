@@ -22,7 +22,7 @@ vprimer
 
 V-primer designs Indel, CAPS and SNP markers that can distinguish between two sample groups using a VCF file created from multiple sample BAM files. There are two ways to specify the sample groups: 1) by user-specified selection of two groups to be compared, and 2) by automatically generating two groups based on the genotype of the VCF file within the entire user-specified set of samples.
 
-[Description Detail](doc/DESCRIPTION.md)
+[Detail description](doc/DESCRIPTION.md)
 
 
 ## Installation
