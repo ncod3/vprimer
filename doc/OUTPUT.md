@@ -78,7 +78,7 @@ var_typeは、indelを核としたvariantの種類。mk_typeはvariantをどの�
 
 <dl>
 <dt>
-10: comment
+comment
 </dt>
 <dd>
 <p><p>
