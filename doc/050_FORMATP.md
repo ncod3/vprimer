@@ -24,6 +24,11 @@ chrom, pos
 <p><p>
 chromosome名と、position。
 </p>
+
+chrom | pos
+:---:|:---:
+chrom_01 | 62651
+
 </dd>
 </dl>
 
