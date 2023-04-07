@@ -6,5 +6,5 @@
 
 ## Usage
 
-[Usage](USAGE.me)
+[Usage](USAGE.md)
 
