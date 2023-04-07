@@ -15,15 +15,23 @@ The results will be written to the specified output directory (out_dir). The ana
 
 ## 010_variant
 
+[Detail output for 010_variant](010_VARIANT.md)
+
 ## 020_marker
+
+[Detail output for 020_marker](020_MARKER.md)
 
 ## 030_primer
 
+[Detail output for 030_primer](030_PRIMER.md)
+
 ## 040_formatF
+
+[Detail output for 040_formatF](040_FORMATF.md)
 
 ## 050_formatP
 
-[Detail output format](OUTPUT.md)
+[Detail output for 050_formatP](050_FORMATP.md)
 
 ## Usage
 
