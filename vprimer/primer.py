@@ -704,9 +704,43 @@ class PrimerInfo(object):
                 #    record.REF, record.ALT))
     
                 #if gt_char2 != "00":
-                if alstr != "00":
-                    # 自分以外のpositionなら、excludeに登録
-                    if self.pos != record.POS:
+                # 自分以外のpositionなら、excludeに登録
+                if alstr != "00" and self.pos != record.POS:
+
+                    #print("in get_excluded_region")
+                    #print("alstr={}".format(alstr))
+                    #print("self.pos={}".format(self.pos))
+                    #print("record.POS={}".format(record.POS))
+                    #print("member_name={}".format(member_name))
+
+
+                    #print()
+                    #print("self.abs_frag_pad_pre_stt={}".format(
+                    #    self.abs_frag_pad_pre_stt))
+                    #print("self.abs_frag_pad_pre_end={}".format(
+                    #    self.abs_frag_pad_pre_end))
+                    #print("** self.abs_around_seq_pre_stt={}".format(
+                    #    self.abs_around_seq_pre_stt))
+                    #print("self.abs_around_seq_pre_end={}".format(
+                    #    self.abs_around_seq_pre_end))
+                    #print("self.abs_pos={}".format(
+                    #    self.abs_pos))
+                    #print("self.abs_around_seq_aft_stt={}".format(
+                    #    self.abs_around_seq_aft_stt))
+                    #print("** self.abs_around_seq_aft_end={}".format(
+                    #    self.abs_around_seq_aft_end))
+                    #print("self.abs_frag_pad_aft_stt={}".format(
+                    #    self.abs_frag_pad_aft_stt))
+                    #print("self.abs_frag_pad_aft_end={}".format(
+                    #    self.abs_frag_pad_aft_end))
+
+                    #sys.exit(1)
+
+                    #if stt <= pos <= end:
+                    if 0:
+                        pass
+
+                    else:
                         rel_pos = self.get_relpos(record.POS) #
                         # variantのref側の長さ この分を避ける
                         region_len = len(record.REF)
@@ -723,7 +757,10 @@ class PrimerInfo(object):
 
                         list_SEQUENCE_EXCLUDED_REGION += [
                             "{},{}".format(rel_pos, region_len)]
-                        break
+                        #breakでいいのか？
+                        #break continue????
+                        continue
+                        #break
 
         self.SEQUENCE_EXCLUDED_REGION = \
             " ".join(list_SEQUENCE_EXCLUDED_REGION)

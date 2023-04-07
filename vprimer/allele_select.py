@@ -434,7 +434,6 @@ class AlleleSelect(object):
 
             gname = self.group_list[0]
             auto_grp0 = [",".join(self.member_dict[gname])]
-            variant_line_list += auto_grp0
 
             gname = self.group_list[1]
             auto_grp1 = [",".join(self.member_dict[gname])]

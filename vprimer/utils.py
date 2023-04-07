@@ -931,15 +931,6 @@ def get_fullname(sample_name):
 
 def get_basic_primer_info(df_row, hdr_dict):
 
-
-    # get_basic_primer_info
-    #print("in get_basic_primer_info")
-    #print()
-    #print(df_row)
-    #print()
-    #print(hdr_dict)
-    #sys.exit(1)
-
     marker_id = ""
     if 'marker_id' in hdr_dict.keys():
         marker_id = str(df_row[hdr_dict['marker_id']])

@@ -152,6 +152,8 @@ https://github.com/YukinobuKurata/YouTubeMagicBuyButton/blob/master/MIT-LICENSS
 E.txt
 
 ## Changelog
+- 2023-04-09
+	- 1.0.2 Fixed a bug that stopped at auto_group
 - 2023-04-03
 	- 1.0.1 Modify parameter settings.
 - 2023-04-02 
