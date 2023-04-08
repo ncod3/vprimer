@@ -83,7 +83,7 @@ class ConfCurrSet(object):
             #line = self.convert_setting_ini(current_setting_ini)
             #f.write("{}\n".format("\n".join(current_setting_ini)))
 
-            pprint.pprint(current_setting_ini)
+            #pprint.pprint(current_setting_ini)
             line = self.convert_setting_ini(current_setting_ini)
             f.write("{}\n".format(line))
 

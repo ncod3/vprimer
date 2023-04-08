@@ -578,7 +578,7 @@ class PrimerInfo(object):
         self.SEQUENCE_EXCLUDED_REGION = ""
         list_SEQUENCE_EXCLUDED_REGION = list()
 
-        # get now search region
+        # get now search region from vcf
         region = "{}:{}-{}".format(
             self.chrom,
             self.abs_frag_pad_pre_stt,
@@ -591,16 +591,14 @@ class PrimerInfo(object):
         if bed_thal_path != "-":
             # search thin_region_list from bed
             exclude_region_list = self.search_bed(
-                # ここで、個別の辞書が使えるように
+                # bed_thal_path にて登録された辞書を使う
                 bed_thal_path,
                 self.chrom,
-                self.abs_frag_pad_pre_stt,
-                self.abs_frag_pad_aft_end)
+                self.abs_frag_pad_pre_stt,  # templateの開始
+                self.abs_frag_pad_aft_end)  # templateの終了
 
-            #print("exclude_region_list={}".format(exclude_region_list))
-
-            #print("exclude_region_list={}\n".format(exclude_region_list))
-
+            # 返ってきた thin リージョンそれぞれについて
+            # 絶対posを、相対posに変換
             for ex in exclude_region_list:
                 start, end = map(int, ex.split('-'))
 
@@ -608,6 +606,7 @@ class PrimerInfo(object):
                 rel_start = self.get_relpos(start)
                 rel_end = self.get_relpos(end)
 
+                # 開始点、終了点を調整
                 # 1-{self.seq_template_ref_len}
                 if rel_start < 1: # also 0
                     rel_start = 1
@@ -622,12 +621,14 @@ class PrimerInfo(object):
                 list_SEQUENCE_EXCLUDED_REGION.append(
                     "{},{}".format(rel_start, rel_len))
 
-            #print("list_SEQUENCE_EXCLUDED_REGION={}".format(
-            #    list_SEQUENCE_EXCLUDED_REGION))
-        #total_group_member_list = list()
         # メンバ名のリストを作り、gtがREF以外ならSNPありなので、excludeする
-        #total_group_member_list = glv.conf.group_members_dict[self.g0_name]
-        #total_group_member_list += glv.conf.group_members_dict[self.g1_name]
+        if not glv.conf.is_auto_group:
+            all_samples = \
+                glv.conf.group_members_dict[self.g0_name]['sn_lst'] + \
+                glv.conf.group_members_dict[self.g1_name]['sn_lst']
+        else:
+            all_samples = \
+                glv.conf.group_members_dict[glv.AUTO_GROUP]['sn_lst']
 
         reader = vcfpy.Reader.from_path(glv.conf.vcf_gt_path)
         vcf_ittr = reader.fetch(region)
@@ -635,132 +636,44 @@ class PrimerInfo(object):
         # access to vcf using iterater
         for record in vcf_ittr:
 
-            #total_group_member_list = list()
-            #total_group_member_list = \
-            #    glv.conf.group_members_dict[self.g0_name]
-            #total_group_member_list += \
-            #    glv.conf.group_members_dict[self.g1_name]
-
-            #total_group_member_list = list()
-
-            #print()
-            #print(glv.conf.group_members_dict)
-            #print(self.g0_name)
-            #print(glv.conf.group_members_dict[self.g0_name])
-            #print(self.g1_name)
-            #print(glv.conf.group_members_dict[self.g1_name])
-
-            #print()
-
-            #print("in get_excluded_region")
-            #print("self.g0_name={}".format(self.g0_name))
-            #print("self.g1_name={}".format(self.g1_name))
-
-            #print("glv.conf.group_members_dict[self.g0_name]")
-            #pprint.pprint(glv.conf.group_members_dict[self.g0_name])
-            #print("glv.conf.group_members_dict[self.g1_name]")
-            #pprint.pprint(glv.conf.group_members_dict[self.g1_name])
-
-            if not glv.conf.is_auto_group:
-                all_samples = \
-                    glv.conf.group_members_dict[self.g0_name]['sn_lst'] + \
-                    glv.conf.group_members_dict[self.g1_name]['sn_lst']
-            else:
-                all_samples = \
-                    glv.conf.group_members_dict[glv.AUTO_GROUP]['sn_lst']
-
-            #print("get_excluded_region all_samples={}".format(all_samples))
-            #sys.exit(1)
-
-            '''
-            for member_name in \
-                glv.conf.group_members_dict[self.g0_name] + \
-                glv.conf.group_members_dict[self.g1_name]:
-            '''
             for member_name in all_samples:
 
                 fullname = utl.get_fullname(member_name)
-
                 alstr = AlleleSelect.record_call_for_sample(record, fullname)
-                #s_0, s_1 = AlleleSelect.record_call_for_sample(
-                #    record, fullname)
-                #gt_0 = "."
-                #gt_1 = "."
 
-                # summer
-                #if s_0 is not None:
-                #    gt_0 = s_0
-
-                #if s_1 is not None:
-                #    gt_1 = s_1
-
-                #gt_char2 = "{}{}".format(gt_0, gt_1)
-
-                #print("{}, {}, {}, {}, {}, {}, {}".format(
-                #    self.pos, record.POS,
-                #    gt_char2,
-                #    self.get_relpos(record.POS),
-                #    member_name,
-                #    record.REF, record.ALT))
-    
-                #if gt_char2 != "00":
-                # 自分以外のpositionなら、excludeに登録
                 if alstr != "00" and self.pos != record.POS:
-
-                    #print("in get_excluded_region")
-                    #print("alstr={}".format(alstr))
-                    #print("self.pos={}".format(self.pos))
-                    #print("record.POS={}".format(record.POS))
-                    #print("member_name={}".format(member_name))
-
-
-                    #print()
-                    #print("self.abs_frag_pad_pre_stt={}".format(
-                    #    self.abs_frag_pad_pre_stt))
-                    #print("self.abs_frag_pad_pre_end={}".format(
-                    #    self.abs_frag_pad_pre_end))
-                    #print("** self.abs_around_seq_pre_stt={}".format(
-                    #    self.abs_around_seq_pre_stt))
-                    #print("self.abs_around_seq_pre_end={}".format(
-                    #    self.abs_around_seq_pre_end))
-                    #print("self.abs_pos={}".format(
-                    #    self.abs_pos))
-                    #print("self.abs_around_seq_aft_stt={}".format(
-                    #    self.abs_around_seq_aft_stt))
-                    #print("** self.abs_around_seq_aft_end={}".format(
-                    #    self.abs_around_seq_aft_end))
-                    #print("self.abs_frag_pad_aft_stt={}".format(
-                    #    self.abs_frag_pad_aft_stt))
-                    #print("self.abs_frag_pad_aft_end={}".format(
-                    #    self.abs_frag_pad_aft_end))
-
-                    #sys.exit(1)
-
                     #if stt <= pos <= end:
-                    if 0:
-                        pass
+                    #if self.abs_around_seq_pre_stt <= record.POS and \
+                    #    record.POS <= self.abs_around_seq_aft_end:
+                    #    pass
+                    #    # to notice
 
-                    else:
-                        rel_pos = self.get_relpos(record.POS) #
-                        # variantのref側の長さ この分を避ける
-                        region_len = len(record.REF)
-                        # ただし、このvariantの長さは、
-                        # seq_templateの終点を越えることが
-                        # あるので、指定は終点を越えないようにする。
-                        rel_end_pos = rel_pos + region_len - 1
+                    #else:
 
-                        # 調整
-                        if rel_end_pos > self.seq_template_ref_len:
-                            # 越えている分を引いてseq_templateの終点まで
-                            diff_len = rel_end_pos - self.seq_template_ref_len
-                            region_len = region_len - diff_len
+                    rel_pos = self.get_relpos(record.POS) #
+                    # variantのref側の長さ この分を避ける
+                    region_len = len(record.REF)
+                    # ただし、このvariantの長さは、
+                    # seq_templateの終点を越えることが
+                    # あるので、指定は終点を越えないようにする。
+                    rel_end_pos = rel_pos + region_len - 1
 
-                        list_SEQUENCE_EXCLUDED_REGION += [
-                            "{},{}".format(rel_pos, region_len)]
-                        #breakでいいのか？
-                        #break continue????
-                        continue
-                        #break
+                    # 調整
+                    if rel_end_pos > self.seq_template_ref_len:
+                        # 越えている分を引いてseq_templateの終点まで
+                        diff_len = rel_end_pos - self.seq_template_ref_len
+                        region_len = region_len - diff_len
+
+                    exr = "{},{}".format(rel_pos, region_len)
+
+                    #if self.pos == 463670:
+                    #    print("{}, {}".format(member_name, exr))
+
+                    # add
+                    list_SEQUENCE_EXCLUDED_REGION += [exr]
+
+                    # １つ異なるのがあればそれでいい break
+                    break
 
         self.SEQUENCE_EXCLUDED_REGION = \
             " ".join(list_SEQUENCE_EXCLUDED_REGION)
