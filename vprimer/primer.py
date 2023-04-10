@@ -305,16 +305,30 @@ class Primer(object):
 
         # to primer out file
         l_list += [prinfo.marker_id]
-        # --------------
+
+        #----------------------------------
         l_list += [prinfo.chrom]
         l_list += [prinfo.pos]
         l_list += [prinfo.targ_grp]
         l_list += [prinfo.targ_ano]
         l_list += [prinfo.vseq_gno_str]
-        l_list += [prinfo.gts_segr_lens]
         l_list += [prinfo.var_type]
         # 2022-10-26 add
         l_list += [prinfo.mk_type]
+        # 2023-04-10
+        l_list += [prinfo.in_target]
+        #print(prinfo.in_target)
+        #sys.exit(1)
+
+        l_list += [prinfo.gts_segr_lens]
+
+        #l_list += [prinfo.notice]
+
+        # auto_grp
+        l_list += [prinfo.auto_grp0]
+        l_list += [prinfo.auto_grp1]
+        #----------------------------------
+
         l_list += [prinfo.set_enz_cnt]
         # --------------
         l_list += [prinfo.marker_info]
@@ -363,11 +377,6 @@ class Primer(object):
         l_list += [prinfo.iopr3.get_sequence_excluded_region()]
         l_list += [prinfo.seq_template_ref]
 
-        # auto_grp
-        # formtxt.py format_product
-        #if glv.conf.is_auto_group:
-        l_list += [prinfo.auto_grp0]
-        l_list += [prinfo.auto_grp1]
 
         #print(">{}<".format(','.join(map(str, l_list))))
         #sys.exit(1)
@@ -497,6 +506,10 @@ class PrimerInfo(object):
         self.auto_grp0, \
         self.auto_grp1 = \
             utl.get_basic_primer_info(marker_df_row, hdr_dict)
+
+        # start -
+        self.in_target = "-"
+        #self.notice,
 
         self.g0_seq_target_len = \
             int(marker_df_row[hdr_dict['g0_seq_target_len']])
@@ -641,33 +654,86 @@ class PrimerInfo(object):
                 fullname = utl.get_fullname(member_name)
                 alstr = AlleleSelect.record_call_for_sample(record, fullname)
 
-                if alstr != "00" and self.pos != record.POS:
-                    #if stt <= pos <= end:
-                    #if self.abs_around_seq_pre_stt <= record.POS and \
-                    #    record.POS <= self.abs_around_seq_aft_end:
-                    #    pass
-                    #    # to notice
+                #if alstr == "..":
+                #    print("{} {}".format(alstr, member_name))
 
-                    #else:
+                # 00と違うけれど、./. は評価しないようにしないと
+                # いけないな。マーカー可能かどうか別にして、
+                # 存在するバリアントを見てるから
+                if alstr != "00" and alstr != ".." and \
+                    self.pos != record.POS:
 
-                    rel_pos = self.get_relpos(record.POS) #
+                    #if alstr == "..":
+                    #    print(">> {} {}".format(alstr, member_name))
+
                     # variantのref側の長さ この分を避ける
-                    region_len = len(record.REF)
+                    variant_len = len(record.REF)
+                    rel_pos = self.get_relpos(record.POS)
+
+                    if False:
+                        print()
+                        print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+                        print("member_name  = {}".format(member_name))
+                        print("alstr        = {}".format(alstr))
+                        print("region       = {} {}-{}-{} {}".format(
+                            self.abs_frag_pad_pre_stt,
+                            self.abs_around_seq_pre_stt,
+                            self.pos,
+                            self.abs_around_seq_aft_end,
+                            self.abs_frag_pad_aft_end))
+                        print("record.POS   = {}".format(record.POS))
+                        #print(record)
+
+                        if record.POS < self.abs_frag_pad_pre_stt:
+                            print()
+                            print("\t+++++++++++++++++++++++++++")
+                            print("\trecord.POS < region start")
+                            print()
+
+                        print("variant_le   = {}".format(variant_len))
+                        print("rel_pos      = {}".format(rel_pos))
+                        print()
+
+                        # もし、target_sequence内に、ヴァリアントが
+                        # 見つかったら、noticeにサンプル名を追記する。
+                        if self.abs_around_seq_pre_stt <= record.POS and \
+                            record.POS <= self.abs_around_seq_aft_end:
+
+                            # concat by ','
+                            self.in_target = utl.make_in_target(
+                                self.in_target,
+                                member_name, record.POS, self.pos, 
+                                variant_len)
+                            # add member_name to notice field
+                            #self.notice = utl.make_notice(
+                            #    self.notice, member_name)
+
+                            # chrom_01        166779
+
+                            # to notice
+                            #if self.pos == 463670:
+                            if False:
+                                print("-------------------------")
+                                print("in target_seq")
+                                print()
+                                print(self.in_target)
+                                print()
+                                print("-------------------------")
+                                print()
+
                     # ただし、このvariantの長さは、
                     # seq_templateの終点を越えることが
                     # あるので、指定は終点を越えないようにする。
-                    rel_end_pos = rel_pos + region_len - 1
+                    rel_end_pos = rel_pos + variant_len - 1
 
                     # 調整
                     if rel_end_pos > self.seq_template_ref_len:
                         # 越えている分を引いてseq_templateの終点まで
                         diff_len = rel_end_pos - self.seq_template_ref_len
-                        region_len = region_len - diff_len
+                        variant_len = variant_len - diff_len
 
-                    exr = "{},{}".format(rel_pos, region_len)
-
-                    #if self.pos == 463670:
-                    #    print("{}, {}".format(member_name, exr))
+                    # 登録する領域
+                    exr = "{},{}".format(rel_pos, variant_len)
 
                     # add
                     list_SEQUENCE_EXCLUDED_REGION += [exr]

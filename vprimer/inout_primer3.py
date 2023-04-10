@@ -277,6 +277,7 @@ class InoutPrimer3(object):
         right_primer_ok = True
 
         # 本来は、パラメータで指定すべき
+        # not use
         self.FRtags_Hp_Dm = \
             "ACACTGACGACATGGTTCTACA,TACGGTAGCAGAGACTTGGTCT,45,40"
 

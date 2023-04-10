@@ -142,41 +142,48 @@ class OutList(object):
         i = 1   # 0 is index
 
         if type == 'variant':
-            # Synchronize with allele_select.py _construct_variant_line
+            # ----------------------------------------------------------------
+            # Synchronize with allele_select.py construct_variant_line
             hd_l, hd_d, i = self.mkmap('chrom',                hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('pos',                  hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('targ_grp',             hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('targ_ano',             hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('vseq_gno_str',         hd_l, hd_d, i)
-            hd_l, hd_d, i = self.mkmap('gts_segr_lens',        hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('var_type',             hd_l, hd_d, i)
             # 2022-10-27 add mk_type
             hd_l, hd_d, i = self.mkmap('mk_type',              hd_l, hd_d, i)
-            # ----------------------
+            hd_l, hd_d, i = self.mkmap('gts_segr_lens',        hd_l, hd_d, i)
+            #hd_l, hd_d, i = self.mkmap('notice',               hd_l, hd_d, i)
+            hd_l, hd_d, i = self.mkmap('auto_grp0',            hd_l, hd_d, i)
+            hd_l, hd_d, i = self.mkmap('auto_grp1',            hd_l, hd_d, i)
+            # ----------------------------------------------------------------
+
+            hd_l, hd_d, i = self.mkmap('vseq_ano_str',         hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('set_n',                hd_l, hd_d, i)
             # ----------------------
             hd_l, hd_d, i = self.mkmap('len_g0g1_dif_long',    hd_l, hd_d, i)
-            hd_l, hd_d, i = self.mkmap('vseq_ano_str',         hd_l, hd_d, i)
 
-            # if grouped, these two items are removed
-            hd_l, hd_d, i = self.mkmap('auto_grp0',            hd_l, hd_d, i)
-            hd_l, hd_d, i = self.mkmap('auto_grp1',            hd_l, hd_d, i)
 
         elif type == 'marker':
             # Sync with eval_variant.py
             # copy_line_for_effective_restriction_enzymes
             hd_l, hd_d, i = self.mkmap('marker_id',            hd_l, hd_d, i)
-            # --------------
+
+            # ----------------------------------------------------------------
             hd_l, hd_d, i = self.mkmap('chrom',                hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('pos',                  hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('targ_grp',             hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('targ_ano',             hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('vseq_gno_str',         hd_l, hd_d, i)
-            hd_l, hd_d, i = self.mkmap('gts_segr_lens',        hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('var_type',             hd_l, hd_d, i)
             # 2022-10-26 add mk_type
             hd_l, hd_d, i = self.mkmap('mk_type',              hd_l, hd_d, i)
-            # ----------------------
+            hd_l, hd_d, i = self.mkmap('gts_segr_lens',        hd_l, hd_d, i)
+            #hd_l, hd_d, i = self.mkmap('notice',               hd_l, hd_d, i)
+            hd_l, hd_d, i = self.mkmap('auto_grp0',            hd_l, hd_d, i)
+            hd_l, hd_d, i = self.mkmap('auto_grp1',            hd_l, hd_d, i)
+            # ----------------------------------------------------------------
+
             hd_l, hd_d, i = self.mkmap('set_enz_cnt',          hd_l, hd_d, i)
             # ----------------------
             hd_l, hd_d, i = self.mkmap('marker_info',          hd_l, hd_d, i)
@@ -199,24 +206,29 @@ class OutList(object):
             hd_l, hd_d, i = self.mkmap('SEQUENCE_TARGET',      hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('seq_template_ref',     hd_l, hd_d, i)
 
-            # if grouped, these two items are removed
-            hd_l, hd_d, i = self.mkmap('auto_grp0',            hd_l, hd_d, i)
-            hd_l, hd_d, i = self.mkmap('auto_grp1',            hd_l, hd_d, i)
 
         elif type == 'primer':  # there is no header
 
             # Synchronize with primer.py primer_complete_to_line
             hd_l, hd_d, i = self.mkmap('marker_id',            hd_l, hd_d, i)
-            # --------------
+
+            # ----------------------------------------
             hd_l, hd_d, i = self.mkmap('chrom',                hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('pos',                  hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('targ_grp',             hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('targ_ano',             hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('vseq_gno_str',         hd_l, hd_d, i)
-            hd_l, hd_d, i = self.mkmap('gts_segr_lens',        hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('var_type',             hd_l, hd_d, i)
             # 2022-10-26 add
             hd_l, hd_d, i = self.mkmap('mk_type',              hd_l, hd_d, i)
+            # 2023-04-10
+            hd_l, hd_d, i = self.mkmap('in_target',            hd_l, hd_d, i)
+            hd_l, hd_d, i = self.mkmap('gts_segr_lens',        hd_l, hd_d, i)
+            #hd_l, hd_d, i = self.mkmap('notice',               hd_l, hd_d, i)
+            hd_l, hd_d, i = self.mkmap('auto_grp0',            hd_l, hd_d, i)
+            hd_l, hd_d, i = self.mkmap('auto_grp1',            hd_l, hd_d, i)
+            # ----------------------------------------
+
             hd_l, hd_d, i = self.mkmap('set_enz_cnt',          hd_l, hd_d, i)
             # --------------
             hd_l, hd_d, i = self.mkmap('marker_info',          hd_l, hd_d, i)
@@ -255,9 +267,6 @@ class OutList(object):
                                                                hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('SEQUENCE_TEMPLATE',    hd_l, hd_d, i)
 
-            # if grouped, these two items are removed
-            hd_l, hd_d, i = self.mkmap('auto_grp0',            hd_l, hd_d, i)
-            hd_l, hd_d, i = self.mkmap('auto_grp1',            hd_l, hd_d, i)
 
         elif type == 'formpass':
 
@@ -275,7 +284,12 @@ class OutList(object):
             hd_l, hd_d, i = self.mkmap('var_type',             hd_l, hd_d, i)
             # 2022-10-26 add
             hd_l, hd_d, i = self.mkmap('mk_type',              hd_l, hd_d, i)
-            hd_l, hd_d, i = self.mkmap('comment',              hd_l, hd_d, i)
+            # 2023-04-10
+            hd_l, hd_d, i = self.mkmap('in_target',            hd_l, hd_d, i)
+            hd_l, hd_d, i = self.mkmap('dup_pos',              hd_l, hd_d, i)
+
+            hd_l, hd_d, i = self.mkmap('auto_grp0',            hd_l, hd_d, i)
+            hd_l, hd_d, i = self.mkmap('auto_grp1',            hd_l, hd_d, i)
 
             hd_l, hd_d, i = self.mkmap('enzyme',               hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('g0_name',              hd_l, hd_d, i)
@@ -301,9 +315,7 @@ class OutList(object):
             hd_l, hd_d, i = self.mkmap('right_primer_id',      hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('PRIMER_RIGHT_0_SEQUENCE',
                                                                hd_l, hd_d, i)
-            # if grouped, these two items are removed
-            hd_l, hd_d, i = self.mkmap('auto_grp0',            hd_l, hd_d, i)
-            hd_l, hd_d, i = self.mkmap('auto_grp1',            hd_l, hd_d, i)
+            #hd_l, hd_d, i = self.mkmap('notice',               hd_l, hd_d, i)
 
             #Allele string '00' information for each sample will be added
 

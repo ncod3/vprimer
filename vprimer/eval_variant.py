@@ -96,6 +96,8 @@ class EvalVariant(object):
         self.auto_grp1 = \
             utl.get_basic_primer_info(variant_df_row, hdr_dict)
 
+        #self.notice,
+
         self.gname_gno = [self.g0_name, self.g1_name]
         self.ano_gno = [self.g0_ano, self.g1_ano]
         self.set_my_no, self.set_total_no = map(int, self.set_n.split('/'))
@@ -605,7 +607,7 @@ class EvalVariant(object):
             l_seq_t_ref = [self.seq_template_ref]
             l_seq_target = [self.SEQUENCE_TARGET]
 
-        else:
+        else:   # CAPS
             # duplicate line information by enzyme
             enzyme_cnt_per_variant = len(self.caps_result)
 
@@ -623,9 +625,22 @@ class EvalVariant(object):
 
         for num in range(enzyme_cnt_per_variant):
             enzyme_cnt = "{}/{}".format(num+1, enzyme_cnt_per_variant)
+            # set_enz_cnt とは、1/1-1/2 (self.set_n, enzyme_cnt)
+            # "-" で区切られた最初が、set_n つまり、
+            # バリアントで得られている アリルペアの数
+            # その中での、CAPSの解析数
             set_enz_cnt = "{}-{}".format(self.set_n, enzyme_cnt)
             vseq_lens_ano_str = \
                 "{}".format(','.join(map(str, self.vseq_lens_ano)))
+
+            # enzyme_cnt
+            #if enzyme_cnt_per_variant > 1:
+            #    print()
+            #    print("enzyme_cnt={}".format(enzyme_cnt))
+            #    # set_enz_cnt
+            #    print("set_enz_cnt={}".format(set_enz_cnt))
+            #    # vseq_lens_ano_str
+            #    print("vseq_lens_ano_str={}".format(vseq_lens_ano_str))
 
             l_list = list()
 
@@ -637,15 +652,26 @@ class EvalVariant(object):
             # out to marker out file
             # Synchronize with eval_variant.py outlist.py
             l_list += [l_marker_id[num]]
+
+            # ----------------------------------
             l_list += [self.chrom]
             l_list += [self.pos]
             l_list += [self.targ_grp]
             l_list += [self.targ_ano]
             l_list += [self.vseq_gno_str]
-            l_list += [self.gts_segr_lens]
             l_list += [self.var_type]
             # 2022-10-26 self.mk_type
             l_list += [self.mk_type]
+            l_list += [self.gts_segr_lens]
+
+            #l_list += [self.notice]
+
+            # auto_grp
+            #if glv.conf.is_auto_group:
+            l_list += [self.auto_grp0]
+            l_list += [self.auto_grp1]
+            # ----------------------------------
+
             # ----------------------
             l_list += [set_enz_cnt]
             # ----------------------
@@ -674,11 +700,6 @@ class EvalVariant(object):
             l_list += [l_seq_target[num]]
             # 5) seq_template_ref
             l_list += [l_seq_t_ref[num]]
-
-            # auto_grp
-            #if glv.conf.is_auto_group:
-            l_list += [self.auto_grp0]
-            l_list += [self.auto_grp1]
 
             line_for_each_enzyme.append('\t'.join(map(str, l_list)))
 

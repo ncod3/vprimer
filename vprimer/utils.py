@@ -500,6 +500,18 @@ def pr_dg(proc_name, distin_gdct, reg, proc_cnt, simple=False):
         distin_gdct[0], distin_gdct[1]))
     log.info("region_str    {}".format(reg_dict['reg']))
     log.info("pick_mode     {}".format(distin_gdct['pick_mode']))
+
+    # amplicon snp
+    if distin_gdct['pick_mode'] == glv.MODE_SNP:
+        log.info("p3_mode       {}".format(glv.conf.p3_mode))
+        log.info("forward_tag   {}".format(glv.conf.amplicon_forward_tag))
+        log.info("reverse_tag   {}".format(glv.conf.amplicon_reverse_tag))
+        log.info("hairpin_tm    {}".format(glv.conf.hairpin_tm))
+        log.info("dimer_tm      {}".format(glv.conf.dimer_tm))
+
+    else:
+        log.info("p3_mode       {}".format(glv.conf.p3_mode))
+
     log.info("indel_size    {}".format(distin_gdct['indel_size']))
     log.info("product_size  {}".format(distin_gdct['product_size']))
     log.info("sort_samples  {}".format(distin_gdct['sorted_samples']))
@@ -921,7 +933,7 @@ def get_fullname(sample_name):
 
     return fullname
 
-
+# eval_variant.py primer.py formtxt.py
 # eval_variant.py:      utl.get_basic_primer_info(variant_df_row, hdr_dict)
 # formtxt.py:           utl.get_basic_primer_info(primer_df_row, hdr_dict)
 # primer.py:            utl.get_basic_primer_info(marker_df_row, hdr_dict)
@@ -1011,6 +1023,8 @@ def get_basic_primer_info(df_row, hdr_dict):
     if 'vseq_lens_ano_str' in hdr_dict:
         vseq_lens_ano_str = str(df_row[hdr_dict['vseq_lens_ano_str']])
 
+    #notice = str(df_row[hdr_dict['notice']])
+
     # when glv.conf.is_auto_group, get group string separated by ,.
     #auto_grp0 = "-"
     #auto_grp1 = "-"
@@ -1018,6 +1032,8 @@ def get_basic_primer_info(df_row, hdr_dict):
 
     auto_grp0 = str(df_row[hdr_dict['auto_grp0']])
     auto_grp1 = str(df_row[hdr_dict['auto_grp1']])
+
+    #notice,
 
     return \
         marker_id, \
@@ -1042,6 +1058,7 @@ def get_basic_primer_info(df_row, hdr_dict):
         target_len, \
         auto_grp0, \
         auto_grp1
+
 
 def flip_gno(gno):
 
@@ -1165,6 +1182,29 @@ def is_need_update(src_pathlib, dist_pathlib):
     #    rm_dict = hdr_dict.pop('auto_grp1')
 
 #    return hdr_dict
+
+
+def make_in_target(
+    original_in_target, # original field value
+    member_name,        # member name
+    record_POS,         # now record.POS
+    self_pos,           # center varint pos
+    variant_len):       # variant length on REF
+
+    ret_line = original_in_target
+
+    # MP2_012(2+6) from variant_pos(2 right, and 6 len)
+    in_target_line = "{}({}+{})".format(
+        member_name,
+        record_POS - self_pos,
+        variant_len)
+
+    if original_in_target == "-":
+        ret_line = in_target_line
+    else:
+        ret_line = "{},{}".format(original_in_target, in_target_line)
+
+    return ret_line
 
 
 class UserFormatErrorUtl(Exception):

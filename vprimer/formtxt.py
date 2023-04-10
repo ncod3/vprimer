@@ -108,6 +108,10 @@ class FormTxt(object):
 
                 # ========================================================
                 # keep chrom-pos dupulicate line information
+                # complete であるdfの中に、chrom:posが 重複したものが
+                # どれだけあるのかを、調査する。df.duplicatedは、重複したもの
+                # を抽出する。
+                # ========================================================
                 df_chrom_pos = df_distin_complete.loc[:, ['chrom', 'pos']]
                 df_chrom_pos_duplicated = \
                     df_chrom_pos[df_chrom_pos.duplicated()]
@@ -119,9 +123,12 @@ class FormTxt(object):
                     chrom = c_p_row[1]
                     pos = c_p_row[2]
 
+                    # 辞書オブジェクトに対してinを使うとキーの存在確認になる
+                    # keys()メソッドを使っても同じ。
                     if not chrom in duplicate_pos_dict:
                         duplicate_pos_dict[chrom] = dict();
 
+                    # [chrom][pos] = pos の辞書を作成する。
                     if not pos in duplicate_pos_dict[chrom]:
                         duplicate_pos_dict[chrom][pos] = pos
                 # ========================================================
@@ -434,24 +441,25 @@ class FormTxt(object):
             digest_diff
 
 
-    def add_comment(self, duplicate_pos_dict):
+    def add_dup_info(self, duplicate_pos_dict):
 
-        comment_list = list()
+        dup_notice_str = "-"
 
-        #log.debug("{}".format(duplicate_pos_dict))
+        if self.chrom in duplicate_pos_dict:
+            if self.pos in duplicate_pos_dict[self.chrom]:
+                dup_notice_str = "{},{}".format(
+                    glv.COMMENT_dup, self.set_enz_cnt)
 
-        if len(duplicate_pos_dict) == 0:
-            pass
-        elif self.pos in duplicate_pos_dict[self.chrom]:
-            comment_list = [glv.COMMENT_dup]
+        # dup_notice_str = 'dup,1/1-1/2;
 
-        if len(comment_list) != 0:
-            comment_list += [self.set_enz_cnt]
+        #print()
+        #print("self.pos={}".format(self.pos))
+        #print("duplicate_pos_dict={}".format(duplicate_pos_dict))
+        #print("dup_notice_str={}".format(dup_notice_str))
+        #print()
+        
 
-        if len(comment_list) == 0:
-            comment_list = '-'
-
-        return ','.join(comment_list)
+        return dup_notice_str
 
 
     def prepare_from_primer_file(self, primer_df_row, distin_gdct):
@@ -487,6 +495,10 @@ class FormTxt(object):
         self.auto_grp0, \
         self.auto_grp1 = \
             utl.get_basic_primer_info(primer_df_row, hdr_dict)
+
+        #self.notice, 
+        # in_target
+        self.in_target = primer_df_row[hdr_dict['in_target']]
 
         self.g0_vseq, self.g1_vseq = self.vseq_gno_str.split(",")
         #11/00,hoho_1,1.1/1.1
@@ -559,9 +571,6 @@ class FormTxt(object):
             digest_diff = \
                 self.get_group_product_size()
 
-        # if this pos is duplicated, insert comment to this column 
-        comment = self.add_comment(duplicate_pos_dict)
-
         #--------------------
         line_list = list()
 
@@ -578,7 +587,29 @@ class FormTxt(object):
         line_list += [self.var_type]
         # 2022-10-26 add
         line_list += [self.mk_type]
-        line_list += [comment]
+
+        #line_list += [comment]
+        # if this pos is duplicated, insert comment to this column 
+        # notice_line = 'dup,1/1-1/2;
+
+        # in_target
+        line_list += [self.in_target]
+
+        # dup_pos
+        dup_pos = self.add_dup_info(duplicate_pos_dict)
+        line_list += [dup_pos]
+
+        # add ';'
+        #notice_line = utl.make_notice(self.notice, notice_line)
+
+        # for notice
+        #line_list += [notice_line]
+
+        # auto_grp
+        # primer.py primer_complete_to_line
+        #if glv.conf.is_auto_group:
+        line_list += [self.auto_grp0]
+        line_list += [self.auto_grp1]
 
         line_list += [self.enzyme_name]
         line_list += [self.g0_name]
@@ -624,12 +655,6 @@ class FormTxt(object):
             line_list += [self.right_primer_id]
             line_list += [self.PRIMER_RIGHT_0_SEQUENCE]
  
-        # auto_grp
-        # primer.py primer_complete_to_line
-        #if glv.conf.is_auto_group:
-        line_list += [self.auto_grp0]
-        line_list += [self.auto_grp1]
-
         return '\t'.join(map(str, line_list))
 
 

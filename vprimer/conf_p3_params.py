@@ -59,6 +59,11 @@ class ConfP3Params(object):
 
         # ユーザ指定がある場合 There is a file specification from user.
         # リードファイル変更
+        #print( user_path)
+        #print(user_path.resolve())
+        #print(read_file_path)
+        #sys.exit(1)
+
         if not None == user_path.resolve():
             # symlink name for user_path
             slink_path = self.refs_dir_path / "{}{}".format(
