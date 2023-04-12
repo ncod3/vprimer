@@ -136,6 +136,8 @@ gts_segr_lens|00/01,hohe_s1,1.1/1.1
 
 genotypesは、各グループのgenotype。segregation patternは、異なるアリルの組み合わせのパータンと数、lengthsは、各グループのアリルの長さ。
 
+segregation patternの意味は以下の通り。
+
 |symbol|gts|num|pattern|
 |:---:|:---:|:---:|:---:|
 |hoho_1 | 00/11|   1 |  0:1
