@@ -2,9 +2,17 @@
 
 # 040_FormatF, 050_FormatP
 
+040_FormatF と、050_FormatP は、030_primer に記録された、プライマー作成完了(complete == 1) と、プライマー作成失敗（complete != 1) の情報をもとに、失敗したプライマー情報を 040_FormatFに、成功したプライマー情報を 050_FormatP に振り分けたものです。
+
+成功したプライマー情報を集めた 050_FormatP には、さらにPCR長の情報等を付加して、利用しやすい情報としてまとめています。
+
+
 <dl>
 <dt>
+
 chrom, pos, targ_ano, var_type, mk_type, auto_grp0, auto_grp1, gts_segr_lens
+
+
 </dt>
 <dd>
 <p><p>
@@ -28,7 +36,8 @@ marker_id
 <dl>
 <dt>
 
-in_target, try_cnt, complete, left_primer_id, PRIMER_LEFT_0_SEQUENCE, right_primer_id, PRIMER_RIGHT_0_SEQUENCE
+in_target, product_gc_contents, try_cnt, complete,  left_primer_id, PRIMER_LEFT_0_SEQUENCE, right_primer_id, PRIMER_RIGHT_0_SEQUENCE
+
 
 </dt>
 <dd>
@@ -150,18 +159,6 @@ word
 <dl>
 <dt>
 g1_product_size
-</dt>
-<dd>
-<p><p>
-word
-</p>
-</dd>
-</dl>
-
-
-<dl>
-<dt>
-product_gc_contents
 </dt>
 <dd>
 <p><p>

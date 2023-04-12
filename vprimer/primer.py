@@ -336,6 +336,10 @@ class Primer(object):
         l_list += [prinfo.seq_template_ref_rel_pos]
         # --------------
         # 2023-04-10
+        #print("***** (3)  prinfo.in_target*****")
+        #print(prinfo.in_target)
+        #print("><")
+
         l_list += [prinfo.in_target]
         l_list += [try_cnt]
         l_list += [complete]
@@ -502,7 +506,15 @@ class PrimerInfo(object):
             utl.get_basic_primer_info(marker_df_row, hdr_dict)
 
         # start -
+        #print("***** (0)  to - *******")
         self.in_target = "-"
+        #print("><")
+
+
+        #print("(1) start prepare_from_marker_file")
+        #print(self.in_target)
+        #print("><")
+
         #self.notice,
 
         self.g0_seq_target_len = \
@@ -649,72 +661,43 @@ class PrimerInfo(object):
                 fullname = utl.get_fullname(member_name)
                 alstr = AlleleSelect.record_call_for_sample(record, fullname)
 
-                #if alstr == "..":
-                #    print("{} {}".format(alstr, member_name))
-
-                # 00と違うけれど、./. は評価しないようにしないと
-                # いけないな。マーカー可能かどうか別にして、
-                # 存在するバリアントを見てるから
                 if alstr != "00" and alstr != ".." and \
                     self.pos != record.POS:
-
-                    #if alstr == "..":
-                    #    print(">> {} {}".format(alstr, member_name))
 
                     # variantのref側の長さ この分を避ける
                     variant_len = len(record.REF)
                     rel_pos = self.get_relpos(record.POS)
 
-                    if False:
-                        print()
-                        print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-                        print("member_name  = {}".format(member_name))
-                        print("alstr        = {}".format(alstr))
-                        print("region       = {} {}-{}-{} {}".format(
-                            self.abs_frag_pad_pre_stt,
-                            self.abs_around_seq_pre_stt,
-                            self.pos,
-                            self.abs_around_seq_aft_end,
-                            self.abs_frag_pad_aft_end))
-                        print("record.POS   = {}".format(record.POS))
-                        #print(record)
+                    # vcfのリージョンより前からバリアントが始まっている
+                    # ときは、右に戻す
+                    if rel_pos < 0:
+                        #print()
+                        #print("minus rel_pos={}, variant_len={}".format(
+                        #    rel_pos, variant_len))
+                        #print("record.POS={}, self.pos={}".format(
+                        #    record.POS, self.pos))
 
-                        if record.POS < self.abs_frag_pad_pre_stt:
-                            print()
-                            print("\t+++++++++++++++++++++++++++")
-                            print("\trecord.POS < region start")
-                            print()
+                        variant_len += rel_pos
+                        rel_pos = 1
+                        #print("minus rel_pos={}, variant_len={}".format(
+                        #    rel_pos, variant_len))
 
-                        print("variant_le   = {}".format(variant_len))
-                        print("rel_pos      = {}".format(rel_pos))
-                        print()
+                    # もし、target_sequence内に、ヴァリアントが
+                    # 見つかったら、noticeにサンプル名を追記する。
+                    if self.abs_around_seq_pre_stt <= record.POS and \
+                        record.POS <= self.abs_around_seq_aft_end:
 
-                        # もし、target_sequence内に、ヴァリアントが
-                        # 見つかったら、noticeにサンプル名を追記する。
-                        if self.abs_around_seq_pre_stt <= record.POS and \
-                            record.POS <= self.abs_around_seq_aft_end:
+                        # concat by ','
+                        self.in_target = utl.make_in_target(
+                            self.in_target,
+                            member_name, record.POS, self.pos, 
+                            variant_len)
 
-                            # concat by ','
-                            self.in_target = utl.make_in_target(
-                                self.in_target,
-                                member_name, record.POS, self.pos, 
-                                variant_len)
-                            # add member_name to notice field
-                            #self.notice = utl.make_notice(
-                            #    self.notice, member_name)
-
-                            # chrom_01        166779
-
-                            # to notice
-                            #if self.pos == 463670:
-                            if False:
-                                print("-------------------------")
-                                print("in target_seq")
-                                print()
-                                print(self.in_target)
-                                print()
-                                print("-------------------------")
-                                print()
+                    #if record.POS < self.abs_frag_pad_pre_stt:
+                    #        print()
+                    #        print("\t+++++++++++++++++++++++++++")
+                    #        print("\trecord.POS < region start")
+                    #        print()
 
                     # ただし、このvariantの長さは、
                     # seq_templateの終点を越えることが
@@ -729,6 +712,7 @@ class PrimerInfo(object):
 
                     # 登録する領域
                     exr = "{},{}".format(rel_pos, variant_len)
+                    #print(exr)
 
                     # add
                     list_SEQUENCE_EXCLUDED_REGION += [exr]

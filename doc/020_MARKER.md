@@ -16,7 +16,9 @@ word
 
 <dl>
 <dt>
-chrom, pos, targ_grp, targ_ano, vseq_gno_str, var_type, mk_type, gts_segr_lens, auto_grp0, auto_grp1
+
+chrom, pos, targ_grp, vseq_gno_str, gts_segr_lens, targ_ano, var_type, mk_type, auto_grp0, auto_grp1
+
 </dt>
 <dd>
 <p><p>
@@ -160,7 +162,7 @@ word
 
 <dl>
 <dt>
-seq_template_ref
+SEQUENCE_TEMPLATE
 </dt>
 <dd>
 <p><p>
