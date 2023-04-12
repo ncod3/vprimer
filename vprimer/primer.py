@@ -535,7 +535,8 @@ class PrimerInfo(object):
         self.SEQUENCE_TARGET = \
             str(marker_df_row[hdr_dict['SEQUENCE_TARGET']])
         self.seq_template_ref = \
-            str(marker_df_row[hdr_dict['seq_template_ref']])
+            str(marker_df_row[hdr_dict['SEQUENCE_TEMPLATE']])
+            #str(marker_df_row[hdr_dict['seq_template_ref']])
 
         # abs template info
         self.abs_frag_pad_pre_stt, \

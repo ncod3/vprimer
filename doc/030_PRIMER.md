@@ -2,11 +2,9 @@
 
 # 030_primer
 
-35項目です。
-
 <dl>
 <dt>
-chrom, pos, targ_grp, targ_ano, vseq_gno_str, gts_segr_lens, var_type, mk_type, auto_grp0, auto_grp1
+chrom, pos, targ_grp, targ_ano, vseq_gno_str, var_type, mk_type, gts_segr_lens, auto_grp0, auto_grp1
 </dt>
 <dd>
 <p><p>
@@ -18,11 +16,23 @@ chrom, pos, targ_grp, targ_ano, vseq_gno_str, gts_segr_lens, var_type, mk_type, 
 
 <dl>
 <dt>
-marker_id, set_enz_cnt, marker_info, vseq_lens_ano_str, g0_seq_target_len, g0_seq_target, g1_seq_target_len, g1_seq_target, seq_template_ref_len, seq_template_ref_abs_pos, seq_template_ref_rel_pos
+marker_id, set_enz_cnt, marker_info, vseq_lens_ano_str, g0_seq_target_len, g0_seq_target, g1_seq_target_len, g1_seq_target, seq_template_ref_len, seq_template_ref_abs_pos, seq_template_ref_rel_pos, SEQUENCE_TARGET, SEQUENCE_TEMPLATE
 </dt>
 <dd>
 <p><p>
 (020_markerより引き継ぎ)
+</p>
+</dd>
+</dl>
+
+
+<dl>
+<dt>
+in_target
+</dt>
+<dd>
+<p><p>
+word
 </p>
 </dd>
 </dl>

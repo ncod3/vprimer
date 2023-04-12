@@ -698,7 +698,7 @@ class EvalVariant(object):
             l_list += [l_seq_t_rel_pos[num]]
             # 4) SEQUENCE_TARGET
             l_list += [l_seq_target[num]]
-            # 5) seq_template_ref
+            # 5) seq_template_ref (SEQUENCE_TEMPLATE)
             l_list += [l_seq_t_ref[num]]
 
             line_for_each_enzyme.append('\t'.join(map(str, l_list)))

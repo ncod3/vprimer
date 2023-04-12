@@ -28,13 +28,9 @@ The results will be written to the specified output directory (out_dir). The ana
 
 [Detail output for 030_primer](030_PRIMER.md)
 
-## 040_formatF
+## 040_formatF and 050_formatP
 
-[Detail output for 040_formatF](040_FORMATF.md)
-
-## 050_formatP
-
-[Detail output for 050_formatP](050_FORMATP.md)
+[Detail output for 040_formatF](040_050_FORMATF_P.md)
 
 
 

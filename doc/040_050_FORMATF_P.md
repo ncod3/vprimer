@@ -1,22 +1,10 @@
 [Description](DESCRIPTION.md)
 
-# 020_marker
+# 040_FormatF, 050_FormatP
 
 <dl>
 <dt>
-marker_id
-</dt>
-<dd>
-<p><p>
-word
-</p>
-</dd>
-</dl>
-
-
-<dl>
-<dt>
-chrom, pos, targ_grp, targ_ano, vseq_gno_str, var_type, mk_type, gts_segr_lens, auto_grp0, auto_grp1
+chrom, pos, targ_ano, var_type, mk_type, auto_grp0, auto_grp1, gts_segr_lens
 </dt>
 <dd>
 <p><p>
@@ -28,7 +16,32 @@ chrom, pos, targ_grp, targ_ano, vseq_gno_str, var_type, mk_type, gts_segr_lens, 
 
 <dl>
 <dt>
-set_enz_cnt
+marker_id
+</dt>
+<dd>
+<p><p>
+(020_markerより引き継ぎ)
+</p>
+</dd>
+</dl>
+
+<dl>
+<dt>
+
+in_target, try_cnt, complete, left_primer_id, PRIMER_LEFT_0_SEQUENCE, right_primer_id, PRIMER_RIGHT_0_SEQUENCE
+
+</dt>
+<dd>
+<p><p>
+(030_primerより引き継ぎ)
+</p>
+</dd>
+</dl>
+
+
+<dl>
+<dt>
+g0_vseq
 </dt>
 <dd>
 <p><p>
@@ -40,7 +53,7 @@ word
 
 <dl>
 <dt>
-marker_info
+g1_vseq
 </dt>
 <dd>
 <p><p>
@@ -52,7 +65,7 @@ word
 
 <dl>
 <dt>
-vseq_lens_ano_str
+g0_gt
 </dt>
 <dd>
 <p><p>
@@ -64,7 +77,7 @@ word
 
 <dl>
 <dt>
-g0_seq_target_len
+g1_gt
 </dt>
 <dd>
 <p><p>
@@ -76,7 +89,7 @@ word
 
 <dl>
 <dt>
-g0_seq_target
+dup_pos
 </dt>
 <dd>
 <p><p>
@@ -88,7 +101,7 @@ word
 
 <dl>
 <dt>
-g1_seq_target_len
+enzyme
 </dt>
 <dd>
 <p><p>
@@ -100,7 +113,7 @@ word
 
 <dl>
 <dt>
-g1_seq_target
+g0_name
 </dt>
 <dd>
 <p><p>
@@ -112,7 +125,7 @@ word
 
 <dl>
 <dt>
-seq_template_ref_len
+g1_name
 </dt>
 <dd>
 <p><p>
@@ -124,7 +137,7 @@ word
 
 <dl>
 <dt>
-seq_template_ref_abs_pos
+g0_product_size
 </dt>
 <dd>
 <p><p>
@@ -136,7 +149,7 @@ word
 
 <dl>
 <dt>
-seq_template_ref_rel_pos
+g1_product_size
 </dt>
 <dd>
 <p><p>
@@ -148,7 +161,7 @@ word
 
 <dl>
 <dt>
-SEQUENCE_TARGET
+product_gc_contents
 </dt>
 <dd>
 <p><p>
@@ -160,7 +173,7 @@ word
 
 <dl>
 <dt>
-seq_template_ref
+diff_length
 </dt>
 <dd>
 <p><p>
@@ -169,6 +182,53 @@ word
 </dd>
 </dl>
 
+
+<dl>
+<dt>
+g0_digested_size
+</dt>
+<dd>
+<p><p>
+word
+</p>
+</dd>
+</dl>
+
+
+<dl>
+<dt>
+g1_digested_size
+</dt>
+<dd>
+<p><p>
+word
+</p>
+</dd>
+</dl>
+
+
+<dl>
+<dt>
+digested_gno
+</dt>
+<dd>
+<p><p>
+word
+</p>
+</dd>
+</dl>
+
+
+<dl>
+<dt>
+digested_ano
+</dt>
+<dd>
+<p><p>
+word
+</p>
+</dd>
+</dl>
 
 [Description](DESCRIPTION.md)
 

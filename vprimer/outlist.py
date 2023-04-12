@@ -204,7 +204,8 @@ class OutList(object):
             hd_l, hd_d, i = self.mkmap('seq_template_ref_rel_pos',
                                                                hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('SEQUENCE_TARGET',      hd_l, hd_d, i)
-            hd_l, hd_d, i = self.mkmap('seq_template_ref',     hd_l, hd_d, i)
+            #hd_l, hd_d, i = self.mkmap('seq_template_ref',     hd_l, hd_d, i)
+            hd_l, hd_d, i = self.mkmap('SEQUENCE_TEMPLATE',    hd_l, hd_d, i)
 
 
         elif type == 'primer':  # there is no header
