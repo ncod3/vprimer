@@ -657,15 +657,12 @@ class EvalVariant(object):
             l_list += [self.chrom]
             l_list += [self.pos]
             l_list += [self.targ_grp]
-            l_list += [self.targ_ano]
             l_list += [self.vseq_gno_str]
+            l_list += [self.gts_segr_lens]
+            l_list += [self.targ_ano]
             l_list += [self.var_type]
             # 2022-10-26 self.mk_type
             l_list += [self.mk_type]
-            l_list += [self.gts_segr_lens]
-
-            #l_list += [self.notice]
-
             # auto_grp
             #if glv.conf.is_auto_group:
             l_list += [self.auto_grp0]

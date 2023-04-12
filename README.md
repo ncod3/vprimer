@@ -152,10 +152,12 @@ https://github.com/YukinobuKurata/YouTubeMagicBuyButton/blob/master/MIT-LICENSS
 E.txt
 
 ## Changelog
+- 2023-04-12
+	- 1.0.4 Fixed the order of the columns in the output file.
 - 2023-04-10
 	- 1.0.3 add 'in_target' and 'dup_pos' field in result output.
 - 2023-04-09
-	- 1.0.2 Fixed a bug that stopped at auto_group
+	- 1.0.2 Fixed a bug that stopped at auto_group.
 - 2023-04-03
 	- 1.0.1 Modify parameter settings.
 - 2023-04-02 

@@ -310,25 +310,19 @@ class Primer(object):
         l_list += [prinfo.chrom]
         l_list += [prinfo.pos]
         l_list += [prinfo.targ_grp]
-        l_list += [prinfo.targ_ano]
         l_list += [prinfo.vseq_gno_str]
+        l_list += [prinfo.gts_segr_lens]
+        l_list += [prinfo.targ_ano]
         l_list += [prinfo.var_type]
         # 2022-10-26 add
         l_list += [prinfo.mk_type]
-        # 2023-04-10
-        l_list += [prinfo.in_target]
-        #print(prinfo.in_target)
-        #sys.exit(1)
-
-        l_list += [prinfo.gts_segr_lens]
-
-        #l_list += [prinfo.notice]
-
         # auto_grp
         l_list += [prinfo.auto_grp0]
         l_list += [prinfo.auto_grp1]
         #----------------------------------
-
+        # 2023-04-10
+        l_list += [prinfo.in_target]
+        # --------------
         l_list += [prinfo.set_enz_cnt]
         # --------------
         l_list += [prinfo.marker_info]

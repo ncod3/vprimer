@@ -147,19 +147,17 @@ class OutList(object):
             hd_l, hd_d, i = self.mkmap('chrom',                hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('pos',                  hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('targ_grp',             hd_l, hd_d, i)
-            hd_l, hd_d, i = self.mkmap('targ_ano',             hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('vseq_gno_str',         hd_l, hd_d, i)
+            hd_l, hd_d, i = self.mkmap('gts_segr_lens',        hd_l, hd_d, i)
+            hd_l, hd_d, i = self.mkmap('targ_ano',             hd_l, hd_d, i)
+            hd_l, hd_d, i = self.mkmap('set_n',                hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('var_type',             hd_l, hd_d, i)
             # 2022-10-27 add mk_type
             hd_l, hd_d, i = self.mkmap('mk_type',              hd_l, hd_d, i)
-            hd_l, hd_d, i = self.mkmap('gts_segr_lens',        hd_l, hd_d, i)
-            #hd_l, hd_d, i = self.mkmap('notice',               hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('auto_grp0',            hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('auto_grp1',            hd_l, hd_d, i)
             # ----------------------------------------------------------------
-
             hd_l, hd_d, i = self.mkmap('vseq_ano_str',         hd_l, hd_d, i)
-            hd_l, hd_d, i = self.mkmap('set_n',                hd_l, hd_d, i)
             # ----------------------
             hd_l, hd_d, i = self.mkmap('len_g0g1_dif_long',    hd_l, hd_d, i)
 
@@ -173,13 +171,12 @@ class OutList(object):
             hd_l, hd_d, i = self.mkmap('chrom',                hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('pos',                  hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('targ_grp',             hd_l, hd_d, i)
-            hd_l, hd_d, i = self.mkmap('targ_ano',             hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('vseq_gno_str',         hd_l, hd_d, i)
+            hd_l, hd_d, i = self.mkmap('gts_segr_lens',        hd_l, hd_d, i)
+            hd_l, hd_d, i = self.mkmap('targ_ano',             hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('var_type',             hd_l, hd_d, i)
             # 2022-10-26 add mk_type
             hd_l, hd_d, i = self.mkmap('mk_type',              hd_l, hd_d, i)
-            hd_l, hd_d, i = self.mkmap('gts_segr_lens',        hd_l, hd_d, i)
-            #hd_l, hd_d, i = self.mkmap('notice',               hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('auto_grp0',            hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('auto_grp1',            hd_l, hd_d, i)
             # ----------------------------------------------------------------
@@ -216,18 +213,21 @@ class OutList(object):
             # ----------------------------------------
             hd_l, hd_d, i = self.mkmap('chrom',                hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('pos',                  hd_l, hd_d, i)
+
             hd_l, hd_d, i = self.mkmap('targ_grp',             hd_l, hd_d, i)
-            hd_l, hd_d, i = self.mkmap('targ_ano',             hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('vseq_gno_str',         hd_l, hd_d, i)
+            hd_l, hd_d, i = self.mkmap('gts_segr_lens',        hd_l, hd_d, i)
+            hd_l, hd_d, i = self.mkmap('targ_ano',             hd_l, hd_d, i)
+
             hd_l, hd_d, i = self.mkmap('var_type',             hd_l, hd_d, i)
             # 2022-10-26 add
             hd_l, hd_d, i = self.mkmap('mk_type',              hd_l, hd_d, i)
-            # 2023-04-10
-            hd_l, hd_d, i = self.mkmap('in_target',            hd_l, hd_d, i)
-            hd_l, hd_d, i = self.mkmap('gts_segr_lens',        hd_l, hd_d, i)
-            #hd_l, hd_d, i = self.mkmap('notice',               hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('auto_grp0',            hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('auto_grp1',            hd_l, hd_d, i)
+            # ----------------------------------------
+
+            # 2023-04-10
+            hd_l, hd_d, i = self.mkmap('in_target',            hd_l, hd_d, i)
             # ----------------------------------------
 
             hd_l, hd_d, i = self.mkmap('set_enz_cnt',          hd_l, hd_d, i)
@@ -285,12 +285,11 @@ class OutList(object):
             hd_l, hd_d, i = self.mkmap('var_type',             hd_l, hd_d, i)
             # 2022-10-26 add
             hd_l, hd_d, i = self.mkmap('mk_type',              hd_l, hd_d, i)
+            hd_l, hd_d, i = self.mkmap('auto_grp0',            hd_l, hd_d, i)
+            hd_l, hd_d, i = self.mkmap('auto_grp1',            hd_l, hd_d, i)
             # 2023-04-10
             hd_l, hd_d, i = self.mkmap('in_target',            hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('dup_pos',              hd_l, hd_d, i)
-
-            hd_l, hd_d, i = self.mkmap('auto_grp0',            hd_l, hd_d, i)
-            hd_l, hd_d, i = self.mkmap('auto_grp1',            hd_l, hd_d, i)
 
             hd_l, hd_d, i = self.mkmap('enzyme',               hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('g0_name',              hd_l, hd_d, i)

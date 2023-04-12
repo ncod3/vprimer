@@ -408,22 +408,14 @@ class AlleleSelect(object):
         # Synchronize with outlist.py
         variant_line_list += [self.chrom]
         variant_line_list += [self.pos]
-
         variant_line_list += [targ_grp]
-        variant_line_list += [targ_ano]
-
         variant_line_list += [vseq_gno_str]
-
+        variant_line_list += [gts_segr_lens]
+        variant_line_list += [targ_ano]
+        variant_line_list += [set_n]
         variant_line_list += [var_type]
         # 2022-10-27
         variant_line_list += [mk_type_str]
-
-        variant_line_list += [gts_segr_lens]
-
-        # ---------------------
-        # 20230408
-        #notice = "-"    # init notice
-        #variant_line_list += [notice]
 
         # add members for auto_group
         auto_grp0 = "-"
@@ -442,9 +434,7 @@ class AlleleSelect(object):
 
         # ---------------------
         variant_line_list += [self.vseq_ano_str]
-        variant_line_list += [set_n]
         variant_line_list += [len_g0g1_dif_long]
-
 
         return var_type, '\t'.join(map(str, variant_line_list))
 

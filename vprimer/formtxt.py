@@ -588,6 +588,12 @@ class FormTxt(object):
         # 2022-10-26 add
         line_list += [self.mk_type]
 
+        # auto_grp
+        # primer.py primer_complete_to_line
+        #if glv.conf.is_auto_group:
+        line_list += [self.auto_grp0]
+        line_list += [self.auto_grp1]
+
         #line_list += [comment]
         # if this pos is duplicated, insert comment to this column 
         # notice_line = 'dup,1/1-1/2;
@@ -604,12 +610,6 @@ class FormTxt(object):
 
         # for notice
         #line_list += [notice_line]
-
-        # auto_grp
-        # primer.py primer_complete_to_line
-        #if glv.conf.is_auto_group:
-        line_list += [self.auto_grp0]
-        line_list += [self.auto_grp1]
 
         line_list += [self.enzyme_name]
         line_list += [self.g0_name]
