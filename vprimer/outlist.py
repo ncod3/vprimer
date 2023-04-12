@@ -226,8 +226,6 @@ class OutList(object):
             hd_l, hd_d, i = self.mkmap('auto_grp1',            hd_l, hd_d, i)
             # ----------------------------------------
 
-            # 2023-04-10
-            hd_l, hd_d, i = self.mkmap('in_target',            hd_l, hd_d, i)
             # ----------------------------------------
 
             hd_l, hd_d, i = self.mkmap('set_enz_cnt',          hd_l, hd_d, i)
@@ -246,6 +244,8 @@ class OutList(object):
                                                                hd_l, hd_d, i)
             # --------------
 
+            # 2023-04-10
+            hd_l, hd_d, i = self.mkmap('in_target',            hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('try_cnt',              hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('complete',             hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('blast_check',          hd_l, hd_d, i)

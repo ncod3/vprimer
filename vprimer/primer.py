@@ -320,8 +320,6 @@ class Primer(object):
         l_list += [prinfo.auto_grp0]
         l_list += [prinfo.auto_grp1]
         #----------------------------------
-        # 2023-04-10
-        l_list += [prinfo.in_target]
         # --------------
         l_list += [prinfo.set_enz_cnt]
         # --------------
@@ -337,6 +335,8 @@ class Primer(object):
         l_list += [prinfo.seq_template_ref_abs_pos]
         l_list += [prinfo.seq_template_ref_rel_pos]
         # --------------
+        # 2023-04-10
+        l_list += [prinfo.in_target]
         l_list += [try_cnt]
         l_list += [complete]
         l_list += [blast_check]
