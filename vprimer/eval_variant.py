@@ -357,7 +357,7 @@ class EvalVariant(object):
         m_list = ["gno={}, chrom={}, pos={}".format(gno,
             self.gr_product[gno].chrom, self.gr_product[gno].pos)]
         m_list += ["seq_target={}".format(self.gr_product[gno].seq_target)]
-        m_list += ["seq_target_len={}".format(
+        m_list += ["seq_target_len={}\n".format(
             len(self.gr_product[gno].seq_target))]
 
         return m_list

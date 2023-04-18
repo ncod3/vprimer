@@ -257,6 +257,11 @@ class Param(object):
             type=str, metavar="{}".format(metavar),
             help="{}".format(hlp))
 
+        # --analyse_caps
+        hlp = "print caps info"
+        parser.add_argument('--analyse_caps', action='store_true',
+            help="{}".format(hlp))
+
         return parser
 
         # --use_joblib_threading
@@ -296,11 +301,6 @@ class Param(object):
             type=str, metavar="{}".format(metavar),
             help="{}".format(hlp))
 
-
-        # --analyse_caps
-        hlp = "print caps info"
-        parser.add_argument('--analyse_caps', action='store_true',
-            help="{}".format(hlp))
 
 
         # --ini_version
