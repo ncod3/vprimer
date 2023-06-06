@@ -75,29 +75,10 @@ class Param(object):
             type=str, metavar="{}".format(metavar),
             help="{}".format(hlp))
 
-        # required (3) ------------------------------------
-        # --target
-        '''
-        Format:
-            range_str   ::= stt - end
-            scope       ::= chrom_name | chrom_name:range_str
-            target      ::= scope | target scope
-            region_def  ::= target_name | target_name:scope
-            regions     ::= region_def | regions region_def
-        '''
-
-        hlp = "scope := chrom_name | chrom_name:range_str"
-        metavar = "scope"
-        parser.add_argument('--target', action='store',
-            nargs='*',
-            type=str, metavar="{}".format(metavar),
-            help="{}".format(hlp))
-
-        # --pick_mode
-        hlp = "mode for picking up markers: indel / caps / snp"
-        metavar = "mode"
-        parser.add_argument('--pick_mode', action='store',
-            nargs='*',
+        # --out_dir
+        hlp = "dir name for data output"
+        metavar = "dir_name"
+        parser.add_argument('--out_dir', action='store',
             type=str, metavar="{}".format(metavar),
             help="{}".format(hlp))
 
@@ -111,7 +92,6 @@ class Param(object):
         hlp = "show fasta chromosomal information."
         parser.add_argument('--show_fasta', action='store_true',
             help="{}".format(hlp))
-
 
         # selection required ------------------------------
         # --auto_group 
@@ -140,6 +120,32 @@ class Param(object):
 
         #-------------------------------------------------------------
 
+        # --pick_mode
+        hlp = "mode for picking up markers: indel / caps / snp"
+        metavar = "mode"
+        parser.add_argument('--pick_mode', action='store',
+            nargs='*',
+            type=str, metavar="{}".format(metavar),
+            help="{}".format(hlp))
+
+        # required (3) ------------------------------------
+        # --target
+        '''
+        Format:
+            range_str   ::= stt - end
+            scope       ::= chrom_name | chrom_name:range_str
+            target      ::= scope | target scope
+            region_def  ::= target_name | target_name:scope
+            regions     ::= region_def | regions region_def
+        '''
+
+        hlp = "scope := chrom_name | chrom_name:range_str"
+        metavar = "scope"
+        parser.add_argument('--target', action='store',
+            nargs='*',
+            type=str, metavar="{}".format(metavar),
+            help="{}".format(hlp))
+
         # --indel_size
         hlp = "target indel size, min-max"
         metavar = 'min-max'
@@ -152,6 +158,11 @@ class Param(object):
         metavar = 'min-max'
         parser.add_argument('--product_size', action='store',
             type=str, metavar="{}".format(metavar),
+            help="{}".format(hlp))
+
+        # --homo_only
+        hlp = "pick only homo variant"
+        parser.add_argument('--homo_only', action='store_true',
             help="{}".format(hlp))
 
         #---------------------------------------------------------
@@ -192,6 +203,14 @@ class Param(object):
             type=str, metavar="{}".format(metavar),
             help="{}".format(hlp))
 
+        # --snp_filter
+        hlp = "filter for snp marker"
+        metavar = "str"
+        parser.add_argument('--snp_filter', action='store',
+            nargs='*',
+            type=str, metavar="{}".format(metavar),
+            help="{}".format(hlp))
+
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         # --bed_thal
         #parser.add_argument('--bed_thal', action='store',
@@ -220,31 +239,19 @@ class Param(object):
             type=str, metavar="{}".format(metavar),
             help="{}".format(hlp))
 
-        # --out_dir
-        hlp = "dir name for data output"
-        metavar = "dir_name"
-        parser.add_argument('--out_dir', action='store',
-            type=str, metavar="{}".format(metavar),
-            help="{}".format(hlp))
-
-        # --thread
-        hlp = "thread number: default 2"
-        metavar = "num"
-        parser.add_argument('--thread', action='store',
-            type=int, metavar="{}".format(metavar),
-            help="{}".format(hlp))
-
         # ===================================================================
         # debug, etc.
         # --progress
-        hlp = "progress start point, prepare/variant/marker/primer/formfail"
+        hlp = "progress start point, prepare/variant/marker/primer/"
+        hlp += "formfail/snp_filter/chkhdimer"
+
         metavar = "start_point"
         parser.add_argument('--progress', action='store',
             type=str, metavar="{}".format(metavar),
             help="{}".format(hlp))
 
         # --stop
-        hlp = "progress stop point, prepare/variant/marker/primer"
+        hlp = "progress stop point."
         metavar = "stop_point"
         parser.add_argument('--stop', action='store',
             type=str, metavar="{}".format(metavar),
@@ -257,19 +264,16 @@ class Param(object):
             type=str, metavar="{}".format(metavar),
             help="{}".format(hlp))
 
-        # --homo_snp
-        hlp = "pick only homo snp"
-        parser.add_argument('--homo_snp', action='store_true',
+        # --thread
+        hlp = "thread number: default 2"
+        metavar = "num"
+        parser.add_argument('--thread', action='store',
+            type=int, metavar="{}".format(metavar),
             help="{}".format(hlp))
 
-        # --snp_filter
-        hlp = "filter for snp marker"
-        metavar = "str"
-        parser.add_argument('--snp_filter', action='store',
-            nargs='*',
-            type=str, metavar="{}".format(metavar),
-            help="{}".format(hlp))
+
         return parser
+
 
         # --analyse_caps
         hlp = "print caps info"
@@ -315,8 +319,6 @@ class Param(object):
         parser.add_argument('--snp_marker_diff_len', action='store',
             type=str, metavar="{}".format(metavar),
             help="{}".format(hlp))
-
-
 
         # --ini_version
         hlp = "ini file version"

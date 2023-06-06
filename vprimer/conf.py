@@ -136,7 +136,7 @@ class ConfBase(object):
             'stop':         {'dtype': 'str',    'default': 'no'},
 
             # for all variant
-            'homo_snp':     {'dtype': 'bool',   'default': 'False'},
+            'homo_only':    {'dtype': 'bool',   'default': 'False'},
 
             # debug
             'analyse_caps': {'dtype': 'bool',   'default': 'False'},
@@ -709,8 +709,8 @@ class ConfBase(object):
         self.progress = self.selected_value('progress')
         self.stop = self.selected_value('stop')
 
-        # homo_snp ==============================================
-        self.homo_snp = self.selected_value('homo_snp')
+        # homo_only =============================================
+        self.homo_only = self.selected_value('homo_only')
 
         # for caps debug  =======================================
         self.analyse_caps = self.selected_value('analyse_caps')

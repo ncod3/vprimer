@@ -6,16 +6,15 @@ V-primer is a software written in Python3 for the efficient design of genome-wid
 ```
 vprimer
 	[-h | --help] [--version]
-	[--vcf] [--ref]
-	[--auto_group] [--a_sample] [--b_sample]
-	[--target] [--pick_mode]
-	[--indel_size] [--product_size]
-	[--enzyme] [--enzyme_file]
-	[--p3_normal] [--p3_amplicon] [--amplicon_param]
-	[--bam_table] [--min_max_depth]
+	[--vcf] [--ref] [--out_dir]
 	[--show_samples] [--show_fasta]
-	[--out_dir]
-	[--thread]
+	[--auto_group] [--a_sample] [--b_sample] 
+	[--pick_mode] [--target] [--indel_size] [--product_size]
+	[--homo_only] [--enzyme] [--enzyme_file] 
+	[--p3_normal] [--p3_amplicon]
+	[--amplicon_param] [--snp_filter] 
+	[--bam_table] [--min_max_depth]
+	[--progress] [--stop] [--ini_file] [--thread]
 ```
 
 ## Description

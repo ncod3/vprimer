@@ -214,7 +214,7 @@ class Variant(object):
             return skip, group_tuple_list, alstr_tuple_list, member_dict
 
         # ホモsnp指定の場合、
-        if glv.conf.homo_snp:
+        if glv.conf.homo_only:
             # すべてのアリルストリングがホモならpass
             for alstr in uq_alstr_ndary:
                 # 1つでもheteroだったらskip
