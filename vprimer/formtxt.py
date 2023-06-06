@@ -30,8 +30,9 @@ class FormTxt(object):
     def __init__(self):
 
         # debug
-        #self.alstr_stop = True
-        self.alstr_stop = False
+        self.alstr_stop = True
+        #self.alstr_stop = False
+        pass
 
 
     def format_text(self):
@@ -162,8 +163,8 @@ class FormTxt(object):
                 # ********************************************
 
                 # For formpass, append the allele string to the end
-                #if proc_name == "formpass":
                 if not self.alstr_stop:
+                #if proc_name == "formpass":
 
                     # add member's alstr
                     alstr_list = self.get_members_alstr(
@@ -202,6 +203,7 @@ class FormTxt(object):
             chrom_name, open_stt, close_end):
 
             if record.POS != close_end:
+                print("{} != {}, {}".format(record.POS, close_end, record))
                 continue
 
             for fn in sample_fullname_ordered_list:
