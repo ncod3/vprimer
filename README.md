@@ -14,7 +14,8 @@ vprimer
 	[--p3_normal] [--p3_amplicon]
 	[--amplicon_param] [--snp_filter] 
 	[--bam_table] [--min_max_depth]
-	[--progress] [--stop] [--ini_file] [--thread]
+	[--progress] [--stop] [--ini_file]
+	[--thread]
 ```
 
 ## Description
