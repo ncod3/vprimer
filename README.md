@@ -22,6 +22,11 @@ vprimer
 
 V-primer designs Indel, CAPS and SNP markers that can distinguish between two sample groups using a VCF file created from multiple sample BAM files. There are two ways to specify the sample groups: 1) by user-specified selection of two groups to be compared, and 2) by automatically generating two groups based on the genotype of the VCF file within the entire user-specified set of samples.
 
+The specification of the restriction enzyme used in CAPS marker mode can be done by specifying the enzyme name as an option or by specifying a file containing the enzyme names. The list of available restriction enzyme names can be found on this website under the name 'caps_enzyme_name_list.whole_enzyme.txt.' It includes 745 restriction enzymes derived from the 'REBASE imprint files version 908 (2019),' which is used in the BioPython 1.76 library. If no option is specified, the default set of 72 restriction enzymes, listed on our website as 'caps_enzyme_name_list.txt.original,' will be used.
+
+In SNP marker mode, we conduct checks for homodimer, heterodimer, and hairpin structures on each pair of designed primers, which are sequences with amplicon tags added as specified by the user. Additionally, we also perform heterodimer confirmation on all primers that pass these checks. However, due to the need for confirmation with all possible combinations of primers, the number of confirmations becomes very large. Therefore, by default, we extract primers at a rate of one per 1Mbps, with a GC content range of 50-55%, to reduce the number of primers and perform the confirmation.
+
+
 [Detail description](doc/DESCRIPTION.md)
 
 
@@ -148,8 +153,8 @@ See also the list of contributors who participated in this project.
 
 Copyright (c) 2023 Satoshi Natsume
 Released under the MIT license
-https://github.com/YukinobuKurata/YouTubeMagicBuyButton/blob/master/MIT-LICENSS
-E.txt
+
+https://github.com/YukinobuKurata/YouTubeMagicBuyButton/blob/master/MIT-LICENSSE.txt
 
 ## Changelog
 - 2023-06-06
