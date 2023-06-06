@@ -15,7 +15,7 @@ from vprimer.logging_config import LogConf
 log = LogConf.open_log(__name__)
 
 import pandas as pd
-from joblib import Parallel, delayed
+from concurrent.futures import ThreadPoolExecutor
 
 #from vprimer.enzyme import Enzyme
 from vprimer.eval_variant import EvalVariant
@@ -32,13 +32,27 @@ class Marker(object):
 
         self.enzyme_name_list = glv.conf.enzyme_name_list
 
+        proc_name = "marker"
+
+        # stop or continue ---------------------------------
+        ret_status = utl.decide_action_stop(proc_name)
+
+        if ret_status == glv.progress_stop:
+            log.info(utl.progress_message(ret_status, proc_name))
+            sys.exit(1)
+
+        if ret_status == glv.progress_gothrough:
+            log.info(utl.progress_message(ret_status, proc_name))
+            return
+        # --------------------------------------------------
+
         # start marker
         start = utl.get_start_time()
 
-        proc_name = "marker"
         log.info("-------------------------------")
         log.info("Start processing {}\n".format(proc_name))
 
+        '''
         # stop, action, gothrough
         ret_status = utl.decide_action_stop(proc_name)
 
@@ -59,35 +73,43 @@ class Marker(object):
             msg += "so skip program."
             log.info(msg)
             return
+        '''
 
         # Design a fragment sequence for primer3
         proc_cnt = 0
         for distin_gdct, reg in glv.conf.gdct_reg_list:
+
+            # to self
+            self.distin_gdct = distin_gdct
+
             proc_cnt += 1
 
             # logging current target
-            utl.pr_dg("marker", distin_gdct, reg, proc_cnt)
+            utl.pr_dg("marker", self.distin_gdct, reg, proc_cnt)
 
             # read variant file 
-            variant_file = distin_gdct['variant']['fn'][reg]['out_path']
+            variant_file = self.distin_gdct['variant']['fn'][reg]['out_path']
             log.info("variant_file {}".format(variant_file))
 
             df_distin = pd.read_csv(
                 variant_file, sep='\t', header=0, index_col=None)
 
             # file name to write out result to text
-            out_txt_path = distin_gdct['marker']['fn'][reg]['out_path']
+            out_txt_path = self.distin_gdct['marker']['fn'][reg]['out_path']
             utl.save_to_tmpfile(out_txt_path)
 
             # header
-            header_txt = distin_gdct['marker']['hdr_text']
+            header_txt = self.distin_gdct['marker']['hdr_text']
             # if glv.conf.is_auto_group, remove last 2 columns
             #header_txt = utl.remove_auto_grp_header_txt(header_txt)
 
             with out_txt_path.open('a', encoding='utf-8') as f:
 
-                # write header (no parallel mode)
-                f.write("{}\n".format(header_txt))
+                # to self
+                self.f = f
+
+                # write header (no parallel mode) no \n
+                utl.w_flush(self.f, header_txt)
 
                 ''' eval_variant.py
                 class EvalVariant(object):
@@ -106,24 +128,32 @@ class Marker(object):
                 Therefore, parallel is not used now.
                 '''
 
-                #if glv.conf.parallel == True:
-                # always False
+                #if glv.conf.parallel_ok == True:
                 if False:
-
-                    log.info("do Parallel cpu {} parallel {}".format(
+                    log.info("do Parallel cpu {} parallel {}\n".format(
                         glv.conf.thread,
                         glv.conf.parallel_full_thread))
 
-                    Parallel(
-                        n_jobs=glv.conf.parallel_full_thread,
-                        backend="threading")(
-                        [
-                            delayed(self.loop_evaluate_for_marker)
-                                (distin_file, variant_df_row, f) \
-                                for variant_df_row in \
-                                    df_distin.itertuples()
-                        ]
-                    )
+                    #Parallel(
+                    #    n_jobs=glv.conf.parallel_full_thread,
+                    #    backend="threading")(
+                    #    [
+                    #        delayed(self.loop_evaluate_for_marker)
+                    #            (distin_gdct, variant_df_row, f) \
+                    #            for variant_df_row in \
+                    #                df_distin.itertuples()
+                    #    ]
+                    #)
+
+                    # ジェネレータ内包表記を用いて、df_distinを行ごとに扱う
+                    with ThreadPoolExecutor(
+                        glv.conf.parallel_full_thread) as e:
+                        ret = e.map(
+                            self.loop_evaluate_for_marker,
+                            (variant_df_row for variant_df_row
+                                in df_distin.itertuples()
+                            )
+                        )
 
                 else:
 
@@ -137,29 +167,28 @@ class Marker(object):
                         # information for primer3.
                         #self.loop_evaluate_for_marker(
                         #    distin_file, variant_df_row, f)
-                        self.loop_evaluate_for_marker(
-                            distin_gdct, variant_df_row, f)
+                        self.loop_evaluate_for_marker(variant_df_row)
 
             # don't need in parallel mode
             #utl.sort_file(
-            #    'marker', distin_file, out_txt_path,
+            #    'marker', self.distin_gdct, out_txt_path,
             #    'chrom', 'pos', 'marker_info', 'string')
 
             log.info("marker {} > {}.txt\n".format(
                 utl.elapse_str(start),
-                distin_gdct['marker']['fn'][reg]['base_nam']))
+                self.distin_gdct['marker']['fn'][reg]['base_nam']))
 
 
-    #def loop_evaluate_for_marker(self, distin_file, variant_df_row, f):
-    def loop_evaluate_for_marker(self, distin_gdct, variant_df_row, f):
-        '''
+    #def loop_evaluate_for_marker(self, distin_gdct, variant_df_row, f):
+    def loop_evaluate_for_marker(self, variant_df_row):
+        ''' self.f, self.distin_gdct
         '''
 
         # In order to perform parallel processing safely,
         # an instance is created for each processing unit here.
         evalv = EvalVariant(self.enzyme_name_list)
         #evalv.evaluate_for_marker(variant_df_row, distin_file)
-        evalv.evaluate_for_marker(variant_df_row, distin_gdct)
+        evalv.evaluate_for_marker(variant_df_row, self.distin_gdct)
 
         for mk_type in evalv.mk_type.split(','):
 
@@ -207,7 +236,7 @@ class Marker(object):
                 # restriction enzymes.
                 evalv.copy_line_for_effective_restriction_enzymes()
 
-                # write out to file
-                f.write("{}\n".format(evalv.line))
+                # write out to file ,no \n
+                utl.w_flush(self.f, evalv.line)
 
 

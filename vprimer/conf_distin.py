@@ -572,30 +572,6 @@ class ConfDistinG(object):
                         raise UserFormatErrorDistin(er_m)
 
                 # -----------------------------------
-                # 3. check pick_mode
-                #if pick_mode == "":
-                #    # default setting
-                #    pick_mode = self.pick_mode
-
-                # check if it's in the list
-                # 複数のpick_modeのチェック
-                #print("before, i{}".format(pick_mode))
-                
-                # separator of pick_mode is '+'
-                for pm in pick_mode.split('+'):
-                    #print(pm)
-                    if pm not in glv.pick_mode_list:
-                        er_m = "Pick mode ({}) must be ".format(
-                            pick_mode)
-                        er_m += "one of these {}.".format(
-                            glv.pick_mode_list)
-                        raise UserFormatErrorDistin(er_m)
-
-                if '+' in pick_mode and glv.MODE_SNP in pick_mode:
-                    er_m = "Only pick_mode snp must be used alone, exit."
-                    raise UserFormatErrorDistin(er_m)
-
-                # -----------------------------------
                 # 4. check indel_size
                 if indel_size == "":
                     # default setting
@@ -854,7 +830,9 @@ class ConfDistinG(object):
                 'indel_size'    : indel_size,
                 'product_size'  : product_size,
                 'group01_sn_nds': group01_sn_nds,
-                'distin_str'    : distin_str }
+                'distin_str'    : distin_str,
+                'hdimer_seq'    : list(),
+                'hdimer_ng'     : list()}
 
             # append a dict to list
             distinguish_groups_list.append(distin_grp_dict)

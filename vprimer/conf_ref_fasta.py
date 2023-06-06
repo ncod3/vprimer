@@ -36,6 +36,10 @@ class ConfRefFasta(object):
 
         log.info("prepare_ref start.")
 
+        # src_path      data_vprimer/sample.fasta.gz
+        # bgzip_path    refs/sample.fasta.gz_BGZIP.gz
+
+        # If the user specification is BGZIP under refs, no need to prepare
         if bgzip_path.exists() and src_path == bgzip_path:
 
             mes = "The user-specified ref fasta is already used "
@@ -45,39 +49,37 @@ class ConfRefFasta(object):
             log.info(mes)
             return
 
-        # symlink name for self.user_ref_path
+        # prepairing the three files path
+        # 1.symlink name for self.user_ref_path
         slink_path = self.refs_dir_path / "{}{}".format(
             glv.slink_prefix, src_path.name)
-        # fai
+        # 2.fai_bgzip
         fai_bgzip_path = Path(
             "{}{}".format(bgzip_path, glv.fai_ext))
-        # read fasta to dict vprimer.cnf.refseq
+        # 3.Compress the array into a dict into a pickle
+        #   so that the reference array can be accessed efficiently.
         pickle_bgzip_path = Path(
             "{}{}".format(bgzip_path, glv.pickle_ext))
 
-        # Update the file with the old and new timestamps
-        # between user_ref_path and symlink. backup and copy the files in refs
+        # 1) Create user-specific fasta symlinks under refs/
         utl.refs_file_slink_backup_and_copy(src_path, slink_path)
 
-        # between user_ref_path and bgzip_path
+        # 2) Convert fasta to BGZIP format
         if glv.need_update == utl.is_need_update(src_path, bgzip_path):
 
-            # update bgzip fasta
-            self.update_bgzip_fasta(
-                src_path,
-                bgzip_path,
-                fai_bgzip_path,
-                pickle_bgzip_path)
+            # convert fasta to BGZIP format
+            self.update_bgzip_fasta(src_path, bgzip_path)
 
-        else:
-
-            # 本来、pickleがあるべきだが、なにかエラーで落ちたとき
-            # チェックしつつ作成
+            # fai, pickle, blastdb,
+            # read fasta to refseq & write it to pickle
             self.update_alternate_files(
                 fai_bgzip_path, bgzip_path, pickle_bgzip_path)
 
+        else:
+            # read pickle to refseq
             log.info("Load an existing pickle {} and build a refseq.".format(
                 pickle_bgzip_path))
+
             with pickle_bgzip_path.open('rb') as f:
                 self.refseq = pickle.load(f)
 
@@ -88,11 +90,7 @@ class ConfRefFasta(object):
                 self.get_fai_info(fai_bgzip_path)
 
 
-    def update_bgzip_fasta(self,
-        src_path,
-        bgzip_path,
-        fai_bgzip_path,
-        pickle_bgzip_path):
+    def update_bgzip_fasta(self, src_path, bgzip_path):
 
         # make bgzip fasta
         log.info("ext=[{}], self.user_ref_path={}.".format(
@@ -115,15 +113,14 @@ class ConfRefFasta(object):
 
         # execute
         utl.try_exec(cmd1)
- 
-        # fai, pickle, blastdb
-        self.update_alternate_files(
-            fai_bgzip_path, bgzip_path, pickle_bgzip_path)
 
 
     def update_alternate_files(self,
             fai_bgzip_path, bgzip_path, pickle_bgzip_path):
         # fai, pickle, blastdb
+
+        #print("in update_alternate_files")
+        #print()
 
         # (1) ------------------------------------------
         # backup fai

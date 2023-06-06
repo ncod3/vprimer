@@ -51,9 +51,9 @@ class ConfBedFile(object):
                     glv.bam_bed_tmp_ext, fpath))
                 fpath.unlink()
 
-            if str(fpath).endswith(glv.bed_thal_tmp_ext):
+            if str(fpath).endswith(glv.bed_thal_sort_ext):
                 log.info("delete leftover tmp file ({}), {}.".format(
-                    glv.bed_thal_tmp_ext, fpath))
+                    glv.bed_thal_sort_ext, fpath))
                 fpath.unlink()
 
             if str(fpath).endswith(glv.bed_thal_merge_ext):
@@ -231,4 +231,7 @@ class ConfBedFile(object):
         mes = "finished reading "
         mes += "self.bed_thal_dict[{}], ".format(bed_thal_path)
         mes += "chrom={}".format(chrom_name)
+
+        log.info("{}".format(mes))
+
 

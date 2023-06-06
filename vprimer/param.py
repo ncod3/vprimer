@@ -257,19 +257,34 @@ class Param(object):
             type=str, metavar="{}".format(metavar),
             help="{}".format(hlp))
 
+        # --homo_snp
+        hlp = "pick only homo snp"
+        parser.add_argument('--homo_snp', action='store_true',
+            help="{}".format(hlp))
+
+        # --snp_filter
+        hlp = "filter for snp marker"
+        metavar = "str"
+        parser.add_argument('--snp_filter', action='store',
+            nargs='*',
+            type=str, metavar="{}".format(metavar),
+            help="{}".format(hlp))
+        return parser
+
         # --analyse_caps
         hlp = "print caps info"
         parser.add_argument('--analyse_caps', action='store_true',
             help="{}".format(hlp))
 
-        return parser
 
+        # no longer using 20230524
         # --use_joblib_threading
-        hlp="use or not threading yes/no default yes"
-        metavar = "yes/no"
-        parser.add_argument('--use_joblib_threading', action='store',
-            type=str, metavar="{}".format(metavar),
-            help="{}".format(hlp))
+        #hlp="use or not threading yes/no default yes"
+        #metavar = "yes/no"
+        #parser.add_argument('--use_joblib_threading', action='store',
+        #    type=str, metavar="{}".format(metavar),
+        #    help="{}".format(hlp))
+
 
         # ===================================================================
         # in ini_file

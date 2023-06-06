@@ -22,6 +22,7 @@ from vprimer.conf_curr_setting import ConfCurrSet
 from vprimer.conf_enzyme import ConfEnzyme
 from vprimer.conf_bed_file import ConfBedFile
 from vprimer.conf_p3_params import ConfP3Params
+from vprimer.conf_amplicon import ConfAmplicon
 
 # class Conf(ConfBase, ConfDistinG, ConfBedFile, 
 #     ConfCurrSet, ConfEnzyme):
@@ -75,8 +76,10 @@ class ConfBase(object):
             'thread':       {'dtype': 'int',    'default': '2'},
 
             # 2023.03.31 force no
-            'use_joblib_threading': # param
-                            {'dtype': 'str',    'default': 'no'},
+            # 2023.05.01 returned to yes
+            #'use_joblib_threading': # param
+            #                {'dtype': 'str',    'default': 'yes'},
+            #                {'dtype': 'str',    'default': 'no'},
 
             # list enzyme_file refs/enzyme_names.txt
             'enzyme_file':  {'dtype': 'str',    'default': ''},
@@ -92,6 +95,10 @@ class ConfBase(object):
 
             # for amplicon Ftag,Rtag[,HrTM,DyTM]")
             'amplicon_param':  {'dtype': 'str',    'default': ''},
+
+            # filter for snp marker
+            'snp_filter':   {'dtype': 'str',   'default':
+                                        'gcrange:50-55,interval:1M'},
 
             # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             # bed_thal
@@ -128,6 +135,8 @@ class ConfBase(object):
             'progress':     {'dtype': 'str',    'default': 'all'},
             'stop':         {'dtype': 'str',    'default': 'no'},
 
+            # for all variant
+            'homo_snp':     {'dtype': 'bool',   'default': 'False'},
 
             # debug
             'analyse_caps': {'dtype': 'bool',   'default': 'False'},
@@ -392,23 +401,22 @@ class ConfBase(object):
         ''' called from main: prepare(self), glv.conf.choice_variables()
         '''
 
-        #print("in choice_variables")
-
-        # thread ----------------------------------------------
+        # thread ==============================================
         self.thread = self.selected_value('thread')
         log.info("thread={}".format(self.thread))
-        self.use_joblib_threading = \
-            self.selected_value('use_joblib_threading')
 
-        if not self.use_joblib_threading in ['yes', 'no']:
-            er_m = "use_joblib_threading Choose from Yes or No."
-            log.error("{} exit.".format(er_m))
-            log.error("use_joblib_threading={}".format(
-                self.use_joblib_threading))
-            sys.exit(1)
+        #self.use_joblib_threading = \
+        #    self.selected_value('use_joblib_threading')
+
+        #if not self.use_joblib_threading in ['yes', 'no']:
+        #    er_m = "use_joblib_threading Choose from Yes or No."
+        #    log.error("{} exit.".format(er_m))
+        #    log.error("use_joblib_threading={}".format(
+        #        self.use_joblib_threading))
+        #    sys.exit(1)
 
         # thread adjust
-        self.parallel, \
+        self.parallel_ok, \
         self.parallel_full_thread, \
         self.parallel_blast_cnt, \
         self.blast_num_threads \
@@ -417,15 +425,18 @@ class ConfBase(object):
         # print param and ini variables
         self.print_param_ini()
 
+
         # ref_dir =============================================
         self.refs_dir_path = Path(glv.refs_dir_name).resolve()
         # make ref_dir, self.refs_dir_path is pathlib object
         utl.makedirs(self.refs_dir_path)
 
+
         # bed_dir =============================================
         self.bed_dir_path = self.refs_dir_path / glv.bed_dir_name
         # make into ref_dir
         utl.makedirs(self.bed_dir_path)
+
 
         # out_dir =============================================
         self.user_out_dir = self.selected_value('out_dir')
@@ -434,10 +445,8 @@ class ConfBase(object):
         # timestamp_file
         self.bak_timestamp_path = self.out_bak_dir_path / glv.bak_timestamp
 
-        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        # ref -------------------------------------------------
+        # ref =================================================
         # glv.conf.user_ref_path: user specified fasta path
         self.user_ref_fasta = self.selected_value('ref')
         self.user_ref_path = Path(self.user_ref_fasta).resolve()
@@ -455,7 +464,8 @@ class ConfBase(object):
         self.blastdb_path = self.refs_dir_path / "{}{}".format(
             self.blastdb_title, glv.blastdb_ext)
 
-        # vcf -------------------------------------------------
+
+        # vcf =================================================
         # glv.conf.user_vcf_path: user specified vcf path
         self.user_vcf = self.selected_value('vcf')
         self.user_vcf_path = Path(self.user_vcf).resolve()
@@ -474,52 +484,102 @@ class ConfBase(object):
             self.refs_dir_path / "{}{}".format(
                 self.vcf_gt_path.name, glv.vcf_sample_bam_ext)
 
-        # p3_params -------------------------------------------
-        # 'p3_normal', 'p3_amplicon'
-        self.primer3_header = dict()
-        # set in conjunction with pick_mode
-        # self.p3_mode   : 'p3_normal', 'p3_amplicon'
-        self.p3_mode = glv.p3_normal    # default
+        # self.user_out_dir, self.user_ref_fasta, self.user_vcf
+        #if self.user_out_dir == "" or \
+        #    self.user_ref_fasta == "" or \
+        #    self.user_vcf == "":
+        if self.user_ref_fasta == "" or \
+            self.user_vcf == "":
 
-        # user specified
-        self.user_p3_normal_file = self.selected_value('p3_normal')
-        self.user_p3_normal_path = glv.NonePath
-        if self.user_p3_normal_file != "":
-            self.user_p3_normal_path = \
-                Path(self.user_p3_normal_file).resolve()
+            er_m = "vcf={} and ref={} ".format(
+                self.user_vcf,
+                self.user_ref_fasta)
+            er_m += "are all required. exit."
+            log.error(er_m)
+            sys.exit(1)
 
-        # system unprepared
-        self.p3_normal_path = \
-            self.refs_dir_path / glv.p3_normal_file
 
-        # p3_amplicon ------------------------------------------
-        # user specified
-        self.user_p3_amplicon_file = self.selected_value('p3_amplicon')
-        self.user_p3_amplicon_path = glv.NonePath
-        if self.user_p3_amplicon_file != "":
-            self.user_p3_amplicon_path = \
-                Path(self.user_p3_amplicon_file).resolve()
+        # pick_mode ===========================================
+        self.pick_mode = self.selected_value('pick_mode')
+        # convert , to +: indel,caps => indel+caps
+        self.pick_mode = re.sub(r",", "+", self.pick_mode)
 
-        # system unprepared
-        self.p3_amplicon_path = \
-            self.refs_dir_path / glv.p3_amplicon_file
+        # check pick_mode
+        if '+' in self.pick_mode and glv.MODE_SNP in self.pick_mode:
+            er_m = "Only pick_mode snp must be used alone, exit."
+            log.error(er_m)
+            sys.exit(1)
 
-        # amplicon_param ---------------------------------------
-        self.amplicon_forward_tag = ""
-        self.amplicon_reverse_tag = ""
-        self.hairpin_tm = 0
-        self.dimer_tm = 0
+        # it can use as, self.pick_mode == glv.MODE_SNP
+        for pm in self.pick_mode.split('+'):
+            if pm not in glv.pick_mode_list:
+                er_m = "Pick mode ({}) must be ".format(self.pick_mode)
+                er_m += "one of these {}.".format(glv.pick_mode_list)
+                log.error(er_m)
+                sys.exit(1)
 
-        self.amplicon_param = self.selected_value('amplicon_param')
 
-        # check and separate
-        if self.amplicon_param != "":
-            self.amplicon_forward_tag, self.amplicon_reverse_tag, \
-            self.hairpin_tm, self.dimer_tm = \
-                self.check_amplicon_param(self.amplicon_param)
+        # GROUP MODE == self.is_auto_group ======================
+        self.auto_group = self.selected_value('auto_group')
+        # if auto_group is not specified.
+        if self.auto_group == "":
+            self.is_auto_group = False
+        else:
+            self.is_auto_group = True
 
-        # enzyme, name and files -------------------------------
-        # enzyme, 3 items needed
+        self.a_sample = self.selected_value('a_sample')
+        self.b_sample = self.selected_value('b_sample')
+        self.target = self.selected_value('target')
+
+
+        # indel_size ==========================================
+        self.indel_size = self.selected_value('indel_size')
+        self.min_indel_len, self.max_indel_len = \
+            [int(i) for i in self.indel_size.split('-')]
+
+
+        # product_size ========================================
+        self.product_size = self.selected_value('product_size')
+        self.min_product_size, self.max_product_size = \
+            [int(i) for i in self.product_size.split('-')]
+
+
+        # bed_thal ==============================================
+
+        # user specified bam_table ------------------------------
+        self.user_bam_table = self.selected_value('bam_table')
+        self.user_bam_table_path = Path(self.user_bam_table).resolve()
+
+        # user specified bed_thal -------------------------------
+        self.user_bed_thal = self.selected_value('bed_thal')
+        self.user_bed_thal_path = Path(self.user_bed_thal).resolve()
+
+        # user specified bed_bams -------------------------------
+        self.user_bed_bams_str = self.selected_value('bed_bams')
+
+        # depth_check ----------------------
+        self.depth_mode = glv.depth_no_check   # NoCheck
+
+        # (1) self.user_bam_table
+        if self.user_bam_table != "":
+            self.depth_mode = glv.depth_bam_table
+
+        # (2) self.user_bed_thal
+        elif self.user_bed_thal != "":
+            self.depth_mode = glv.depth_bed_thal
+
+        # (3) self.user_bed_bams_str
+        elif self.user_bed_bams_str != "":
+            self.depth_mode = glv.depth_bed_bams
+
+        # thin_depth --------------------------------------------
+        self.min_max_depth = self.selected_value('min_max_depth')
+        self.min_depth, self.max_depth = \
+            [int(i) for i in self.min_max_depth.split('-')]
+
+
+        # enzyme ================================================
+
         self.user_enzyme_name_list = list()
         self.enzyme_name_list = list()
         #
@@ -537,7 +597,6 @@ class ConfBase(object):
 
         # If an enzyme is specified by the user, add to list
         if self.user_enzyme_str != "":
-
             self.user_enzyme_name_list = self.user_enzyme_str.split(',')
             log.info("user specified enzyme={}".format(
                 ", ".join(self.user_enzyme_name_list)))
@@ -547,91 +606,116 @@ class ConfBase(object):
             for ufile in self.user_enzyme_files_str.split(','):
                 self.user_enzyme_path_list.append(Path(ufile).resolve())
 
-        # bed_thal ==============================================
 
-        # user specified bam_table ------------------------------------
-        self.user_bam_table = self.selected_value('bam_table')
-        self.user_bam_table_path = Path(self.user_bam_table).resolve()
+        # p3_param ============================================
+        self.primer3_header = dict()
 
-        # user specified bed_thal
-        self.user_bed_thal = self.selected_value('bed_thal')
-        self.user_bed_thal_path = Path(self.user_bed_thal).resolve()
+        # self.p3_mode   : 'p3_normal', 'p3_amplicon'
+        if self.pick_mode == glv.MODE_SNP:
+            self.p3_mode = glv.p3_amplicon
+        else:
+            self.p3_mode = glv.p3_normal    # default
 
-        # bed_bams ---------------------------------
-        self.user_bed_bams_str = self.selected_value('bed_bams')
+        # p3_normal --------------------------------------------
+        # user specified file
+        self.user_p3_normal_file = self.selected_value('p3_normal')
+        self.user_p3_normal_path = glv.NonePath
+        if self.user_p3_normal_file != "":
+            self.user_p3_normal_path = \
+                Path(self.user_p3_normal_file).resolve()
 
-        # depth_check =================================================
-        self.depth_mode = glv.depth_no_check   # NoCheck
+        # system unprepared
+        self.p3_normal_path = \
+            self.refs_dir_path / glv.p3_normal_file
 
-        # (1) self.user_bam_table
-        if self.user_bam_table != "":
-            self.depth_mode = glv.depth_bam_table
+        # p3_amplicon ------------------------------------------
+        # user specified file
+        self.user_p3_amplicon_file = self.selected_value('p3_amplicon')
+        self.user_p3_amplicon_path = glv.NonePath
+        if self.user_p3_amplicon_file != "":
+            self.user_p3_amplicon_path = \
+                Path(self.user_p3_amplicon_file).resolve()
 
-        # (2) self.user_bed_thal
-        elif self.user_bed_thal != "":
-            self.depth_mode = glv.depth_bed_thal
+        # system unprepared
+        self.p3_amplicon_path = \
+            self.refs_dir_path / glv.p3_amplicon_file
 
-        # (3) self.user_bed_bams_str
-        elif self.user_bed_bams_str != "":
-            self.depth_mode = glv.depth_bed_bams
 
-        # out_curr_setting ------------------------------------
+        # amplicon_param =======================================
+        self.amplicon_param = self.selected_value('amplicon_param')
+        if self.pick_mode != glv.MODE_SNP and self.amplicon_param != "":
+            er_m = "{} can only be specified when ".format("amplicon_param")
+            er_m += "pick_mode is snp."
+            log.error(er_m)
+            sys.exit(1)
+
+        self.amplicon_forward_tag = ""
+        self.amplicon_reverse_tag = ""
+        self.hairpin_tm = 0.0
+        self.dimer_tm = 0.0
+
+        # check and separate
+        if self.amplicon_param != "":
+            self.amplicon_forward_tag, self.amplicon_reverse_tag, \
+            self.hairpin_tm, self.dimer_tm = \
+                self.check_amplicon_param(self.amplicon_param)
+
+        # snp_filter ===========================================
+        # sub_command default
+        # --snp_filter gcrange:50-55 interval:1M
+        self.snp_filter_gcrange = ""
+        self.snp_filter_gc_min = 0.00
+        self.snp_filter_gc_max = 0.00
+        self.snp_filter_interval = 0
+
+        self.snp_filter = self.selected_value('snp_filter')
+        #print("self.snp_filter={}".format(self.snp_filter))
+
+        if self.pick_mode == glv.MODE_SNP:
+            self.snp_filter_gcrange, \
+            self.snp_filter_gc_min, \
+            self.snp_filter_gc_max, \
+            self.snp_filter_interval = \
+                self.check_snp_filter_sub_command()
+
+        else:
+            self.snp_filter = ""
+
+        #print(self.snp_filter_gcrange)
+        #print(type(self.snp_filter_gcrange))
+
+        #print(self.snp_filter_gc_min)
+        #print(type(self.snp_filter_gc_min))
+        #print(self.snp_filter_gc_max)
+        #print(type(self.snp_filter_gc_max))
+
+        #print(self.snp_filter_interval)
+        #print(type(self.snp_filter_interval))
+
+        #sys.exit(1)
+
+        # out_curr_setting ======================================
         self.curr_setting_file = glv.current_setting_ini
         self.curr_setting_path = \
             self.out_dir_path / self.curr_setting_file
 
-        # bed database
-        #self.bed_dict = dict()
-        #self.sample_bam_dict = dict()
-        #self.user_bed_bams_path_list = list()
+        # show_samples ==========================================
+        self.show_samples = self.selected_value('show_samples')
 
-        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # show_fasta ============================================
+        self.show_fasta = self.selected_value('show_fasta')
 
-        # STOP ================================================
-        # as string
-        if self.user_out_dir == "" or \
-            self.user_ref_fasta == "" or \
-            self.user_vcf == "":
+        # start stop ============================================
+        self.progress = self.selected_value('progress')
+        self.stop = self.selected_value('stop')
 
-            er_m = "out_dir={} and vcf={} and ref={} ".format(
-                self.user_out_dir,
-                self.user_vcf,
-                self.user_ref_fasta)
+        # homo_snp ==============================================
+        self.homo_snp = self.selected_value('homo_snp')
 
-            er_m += "are all required. exit."
-            log.error(er_m)
-            sys.exit(1)
+        # for caps debug  =======================================
+        self.analyse_caps = self.selected_value('analyse_caps')
 
-        # GROUP MODE == self.is_auto_group ======================
-        self.auto_group = self.selected_value('auto_group')
-        # if auto_group is not specified.
-        if self.auto_group == "":
-            self.is_auto_group = False
-        else:
-            self.is_auto_group = True
-
-        self.a_sample = self.selected_value('a_sample')
-        self.b_sample = self.selected_value('b_sample')
-        self.target = self.selected_value('target')
-
-        # indel len -------------------------------------------
-        self.indel_size = self.selected_value('indel_size')
-        self.min_indel_len, self.max_indel_len = \
-            [int(i) for i in self.indel_size.split('-')]
-
-        # product size ----------------------------------------
-        self.product_size = self.selected_value('product_size')
-        self.min_product_size, self.max_product_size = \
-            [int(i) for i in self.product_size.split('-')]
-
-        # pick_mode -------------------------------------------
-        self.pick_mode = self.selected_value('pick_mode')
-        # convert , to +: indel,caps => indel+caps
-        self.pick_mode = re.sub(r",", "+", self.pick_mode)
-        # set in conjunction with pick_mode
-        if glv.MODE_SNP in self.pick_mode:
-            self.p3_mode = glv.p3_amplicon
+        # -----------------------------------------------------
 
         # ini_version -----------------------------------------
         self.ini_version_user = self.selected_value('ini_version')
@@ -642,11 +726,6 @@ class ConfBase(object):
         self.group_members_str = self.init_group_members_str()
         self.distinguish_groups_str = self.init_distinguish_groups_str()
 
-        # thin_depth ------------------------------------------
-        self.min_max_depth = self.selected_value('min_max_depth')
-        self.min_depth, self.max_depth = \
-            [int(i) for i in self.min_max_depth.split('-')]
-        
         # fragment_pad_len ------------------------------------
         self.fragment_pad_len = self.selected_value('fragment_pad_len')
 
@@ -657,101 +736,6 @@ class ConfBase(object):
 
         # for amplicon snp marker -----------------------------
         self.snp_marker_diff_len = self.selected_value('snp_marker_diff_len')
-
-        # show_samples-----------------------------------------
-        self.show_samples = self.selected_value('show_samples')
-
-        # show_fasta-------------------------------------------
-        self.show_fasta = self.selected_value('show_fasta')
-
-        # start stop ------------------------------------------
-        self.progress = self.selected_value('progress')
-        self.stop = self.selected_value('stop')
-
-        # for debug -------------------------------------------
-        self.analyse_caps = self.selected_value('analyse_caps')
-
-
-    def check_amplicon_param(self, amplicon_param):
-        # "ACACTGACGACATGGTTCTACA,TACGGTAGCAGAGACTTGGTCT,45,40"
-
-        ampl_p_list = amplicon_param.split(',')
-        p_cnt = len(ampl_p_list)
-        mes = ""
-
-        try:
-        
-            if p_cnt == 0 or p_cnt == 1:    # only amplicon_forward_tag error
-                mes = "--amplicon_param requires at least "
-                mes += "amplicon_forward_tag and amplicon_reverse_tag. "
-                mes += "exit."
-                raise UserFormatErrorConf(mes)
-
-            elif p_cnt == 2:    # pair, tag: two tm value omitted
-
-                amplicon_forward_tag = ampl_p_list[0]
-                amplicon_reverse_tag = ampl_p_list[1]
-                hairpin_tm = glv.hairpin_tm
-                dimer_tm = glv.dimer_tm
-
-                mes = "Since hairpin_tm and dimer_tm are omitted, "
-                mes += "the system default values "
-                mes += "({},{}) are used for them.".format(
-                    glv.hairpin_tm, glv.dimer_tm)
-
-                log.info(mes)
-
-            elif p_cnt == 3:    # pair, tag, tm1: dimer_tm omitted
-
-                amplicon_forward_tag = ampl_p_list[0]
-                amplicon_reverse_tag = ampl_p_list[1]
-                hairpin_tm = ampl_p_list[2]
-                dimer_tm = glv.dimer_tm
-
-                mes = "Since dimer_tm is omitted, "
-                mes += "the system default values "
-                mes += "({}) are used for them.".format(glv.dimer_tm)
-
-                log.info(mes)
-
-            elif p_cnt == 4:    # complete
-
-                amplicon_forward_tag = ampl_p_list[0]
-                amplicon_reverse_tag = ampl_p_list[1]
-                hairpin_tm = ampl_p_list[2]
-                dimer_tm = ampl_p_list[3]
-
-            else:
-
-                mes = "Too many components of "
-                mes += "amplicon_param {}. exit.".format(p_cnt)
-                raise UserFormatErrorConf(mes)
-
-            p_bps = re.compile('[a-zA-Z]+')
-            p_float = re.compile('[0-9\.]+')
-
-            if not p_bps.fullmatch(amplicon_forward_tag) or \
-                not p_bps.fullmatch(amplicon_reverse_tag):
-                mes = "Both tag must be strings ({},{}).".format(
-                    amplicon_forward_tag, amplicon_reverse_tag)
-                raise UserFormatErrorConf(mes)
-
-            if not p_float.fullmatch(hairpin_tm) or \
-                not p_float.fullmatch(dimer_tm):
-                mes = "Both ({},{})must be integers or floats.".format(
-                    hairpin_tm, dimer_tm)
-                raise UserFormatErrorConf(mes)
-
-
-        except UserFormatErrorConf as ex:
-            log.error("amplicon_param error: {}".format(ex))
-            sys.exit(1)
-
-        else:
-            log.info("ok, amplicon_param is valid format.")
-
-        return amplicon_forward_tag, amplicon_reverse_tag, \
-            hairpin_tm, dimer_tm
 
 
     def prepare_refs_filename(self):
@@ -1009,16 +993,20 @@ class ConfBase(object):
             parallel use 1 thread, blast use 2 threads
         '''
 
-        parallel = True
+        parallel_ok = True
 
         parallel_full_thread = 0
         parallel_blast_cnt = 0
         blast_num_threads = 0
 
-        if self.thread < 6 or self.use_joblib_threading != "yes":
-            parallel = False
+        if self.thread < 6:  # or self.use_joblib_threading != "yes":
+            parallel_ok = False
+            mes = "Parallel execution mode is turned off "
+            mes += "when the number of threads used is "
+            mes += "less than or equal to 5. now={}."
+            log.info(mes.format(self.thread))
 
-        if parallel == True:
+        if parallel_ok == True:
 
             # unit is 4+1=5
             parallel_base = self.thread
@@ -1034,7 +1022,7 @@ class ConfBase(object):
             parallel_full_thread = full_thread
             blast_num_threads = full_thread
 
-        return parallel, \
+        return parallel_ok, \
                 parallel_full_thread, \
                 parallel_blast_cnt, \
                 blast_num_threads
@@ -1265,13 +1253,8 @@ class ConfBase(object):
         self.bak_timestamp_path.touch(exist_ok=True)
 
 
-class UserFormatErrorConf(Exception):
-    """Detect user-defined format errors"""
-    pass
-
-
 class Conf(ConfBase, ConfDistinG, ConfRefFasta, ConfVcfFile,
-    ConfCurrSet, ConfEnzyme, ConfBedFile, ConfP3Params):
+    ConfCurrSet, ConfEnzyme, ConfBedFile, ConfP3Params, ConfAmplicon):
     ''' Split class and join with multiple inheritance
     '''
     pass

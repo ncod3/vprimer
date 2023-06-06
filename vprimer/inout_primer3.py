@@ -54,6 +54,13 @@ class InoutPrimer3(object):
         self.product_seq = ''
         self.product_gc_contents = ''
 
+        # amplicon
+        self.amplicon_forward_tag = glv.conf.amplicon_forward_tag
+        self.amplicon_reverse_tag = glv.conf.amplicon_reverse_tag
+
+        self.hairpin_tm = glv.conf.hairpin_tm
+        self.dimer_tm = glv.conf.dimer_tm
+
     #--------------------------------------------
     # output
     #def get_product_pos(self):
@@ -271,24 +278,15 @@ class InoutPrimer3(object):
 
 
     # 2022-12-28
-    def check_p3_pairpin_dimer(self):
+    def check_p3_hairpin_dimer(self):
 
         left_primer_ok = True
         right_primer_ok = True
 
         # 本来は、パラメータで指定すべき
         # not use
-        self.FRtags_Hp_Dm = \
-            "ACACTGACGACATGGTTCTACA,TACGGTAGCAGAGACTTGGTCT,45,40"
-
-        # from parameter
-        self.amplicon_forward_tag = glv.conf.amplicon_forward_tag
-        self.amplicon_reverse_tag = glv.conf.amplicon_reverse_tag
-        hairpin_tm = glv.conf.hairpin_tm
-        dimer_tm = glv.conf.dimer_tm
-
-        self.hairpin_tm = float(hairpin_tm)
-        self.dimer_tm = float(dimer_tm)
+        #self.FRtags_Hp_Dm = \
+        #    "ACACTGACGACATGGTTCTACA,TACGGTAGCAGAGACTTGGTCT,45,40"
 
         left_primer = self.get_primer_left_seq()
         right_primer = self.get_primer_right_seq()
@@ -328,8 +326,8 @@ class InoutPrimer3(object):
 
         return left_primer_ok, right_primer_ok
 
-    def hairpin_dimer(self, l_seq, r_seq):
 
+    def hairpin_dimer(self, l_seq, r_seq):
 
         #print("in hairpin_dimer")
 
@@ -379,44 +377,31 @@ class InoutPrimer3(object):
 
         return hairpin_dimer_dict
 
+
     def calc_hairpin(self, l_seq, r_seq):
-        #print("in calc_hairpin")
-        #print("l_seq={}".format(l_seq))
-        #print("r_seq={}".format(r_seq))
-
-        l_hairpin = self.calcHairpin(l_seq)
-        r_hairpin = self.calcHairpin(r_seq)
-        return l_hairpin, r_hairpin
-
-    def calc_hetero_dimer(self, l_seq, r_seq):
-        hetd = self.calcHeterodimer(l_seq, r_seq)
-        return hetd
-
-    def calc_homo_dimer(self, l_seq, r_seq):
-        l_homd, r_homd = self.calcHomodimer(l_seq, r_seq)
-        return l_homd, r_homd
-
-    def calcHairpin(self, seq):
         ''' calcHairpin(
                 seq[, mv_conc=50.0, dv_conc=0.0, dntp_conc=0.8,
                 dna_conc=50.0, temmp_c=37, max_loop=30])
         '''
-        p3bc = primer3.bindings.calcHairpin(
-            seq, output_structure=True)
-        #print("in calcHairpin")
-        #print(p3bc)
-        #sys.exit(1)
-        return p3bc
+        l_hairpin = primer3.bindings.calcHairpin(l_seq, output_structure=True)
+        r_hairpin = primer3.bindings.calcHairpin(r_seq, output_structure=True)
 
-    def calcHeterodimer(self, seq1, seq2):
-        ''' calcHeterodimer(seq1, seq2[, mv_conc=50.0, dv_conc=0.0,
+        return l_hairpin, r_hairpin
+
+
+    def calc_hetero_dimer(self, l_seq, r_seq):
+        ''' calc_Hetero_dimer(seq1, seq2[, mv_conc=50.0, dv_conc=0.0,
             dntp_conc=0.8, dna_connc=50.0, temp_c=37, max_loop=30])
         '''
-        p3hd = primer3.bindings.calcHeterodimer(
-            seq1, seq2, output_structure=True)
+        p3hd = primer3.bindings.calcHeterodimer(l_seq, r_seq, output_structure=True)
         return p3hd
 
-    def calcHomodimer(self, l_seq, r_seq):
+    def calc_homo_dimer(self, l_seq, r_seq):
+        l_homd, r_homd = self.calc_Homodimer(l_seq, r_seq)
+        return l_homd, r_homd
+
+
+    def calc_homo_dimer(self, l_seq, r_seq):
         ''' calcHomodimer(seq[, mv_conc=50.0, dv_conc=0.0,
             dntp_conc=0.8, dna_conc=50.0, ttemp_c=37, max_loop=30])
         '''
@@ -427,15 +412,89 @@ class InoutPrimer3(object):
         return l_homd, r_homd
 
 
+    @classmethod
+    def check_all_primer_hetero_dimer(cls,
+        left_primer_w_tag, right_primer_w_tag):
+        '''
+        '''
 
+        is_hetero_dimer_ok = True
+        dimer_tm = glv.conf.dimer_tm
 
+        hetd = primer3.bindings.calcHeterodimer(
+            left_primer_w_tag, right_primer_w_tag, output_structure=True)
 
+        hd_dict = {
+            'hetd': {
+                'stat':     hetd.structure_found,
+                'tm':       hetd.tm,
+                'detail':   hetd.ascii_structure,
+                'ok':       '.',
+                },
+            }
 
+        # hetero dimer
+        if hd_dict['hetd']['stat'] and \
+            hd_dict['hetd']['tm'] >= dimer_tm:
+            is_hetero_dimer_ok = False
 
+        #if not is_hetero_dimer_ok:
+        #    print(hd_dict['hetd']['detail'])
 
+        return is_hetero_dimer_ok
 
-
-
-
-
-
+### 
+###         is_hetero_dimer_ok = True
+### 
+###         dimer_tm = float(glv.conf.dimer_tm)
+### 
+###         # hetero dimer check
+###         hetd = primer3.bindings.calcHeterodimer(
+###             left_primer_w_tag, right_primer_w_tag, output_structure=True)
+### 
+###         dimer_dict = {
+###             'hetd': {
+###                 'stat':     hetd.structure_found,
+###                 'tm':       hetd.tm,
+###                 'detail':   hetd.ascii_structure,
+###                 'ok':       '.',
+###                 },
+###             }
+### 
+###         # hetero dimer
+###         if hd_dict['hetd']['stat'] and \
+###             hd_dict['hetd']['tm'] >= dimer_tm:
+###             is_hetero_dimer_ok = False
+### 
+###         return is_hetero_dimer_ok
+### 
+### 
+###     def check_hetero_dimer(self, left_primer, right_primer):
+###         '''
+###         '''
+### 
+###         is_hetero_dimer_ok = True
+### 
+###         dimer_tm = float(glv.conf.dimer_tm)
+###         l_seq = glv.conf.amplicon_forward_tag + left_primer
+###         r_seq = glv.conf.amplicon_reverse_tag + right_primer
+### 
+###         # hetero dimer check
+###         hetd = self.calc_Hetero_dimer(l_seq, r_seq)
+### 
+###         dimer_dict = {
+###             'hetd': {
+###                 'stat':     hetd.structure_found,
+###                 'tm':       hetd.tm,
+###                 'detail':   hetd.ascii_structure,
+###                 'ok':       '.',
+###                 },
+###             }
+### 
+###         # hetero dimer
+###         if hd_dict['hetd']['stat'] and \
+###             hd_dict['hetd']['tm'] >= dimer_tm:
+###             is_hetero_dimer_ok = False
+### 
+###         return is_hetero_dimer_ok
+### 

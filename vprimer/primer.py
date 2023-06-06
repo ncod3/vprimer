@@ -18,8 +18,9 @@ log = LogConf.open_log(__name__)
 import pandas as pd
 import vcfpy
 import subprocess as sbp
+from concurrent.futures import ThreadPoolExecutor
 
-from joblib import Parallel, delayed
+#from joblib import Parallel, delayed
 #import dill as pickle
 
 from vprimer.product import Product
@@ -38,9 +39,23 @@ class Primer(object):
     def construct_primer(self):
 
         proc_name = "primer"
+
+        # stop or continue ---------------------------------
+        ret_status = utl.decide_action_stop(proc_name)
+
+        if ret_status == glv.progress_stop:
+            log.info(utl.progress_message(ret_status, proc_name))
+            sys.exit(1)
+
+        if ret_status == glv.progress_gothrough:
+            log.info(utl.progress_message(ret_status, proc_name))
+            return
+        # --------------------------------------------------
+
         log.info("-------------------------------")
         log.info("Start processing {}\n".format(proc_name))
 
+        '''
         # stop, action, gothrough
         ret_status = utl.decide_action_stop(proc_name)
 
@@ -61,17 +76,22 @@ class Primer(object):
             msg += "so skip program."
             log.info(msg)
             return
-
+        '''
 
         # for each distinguish_groups
         proc_cnt = 0
+        #for distin_gdct, reg in glv.conf.gdct_reg_list:
         for distin_gdct, reg in glv.conf.gdct_reg_list:
+
+            # set to self
+            self.distin_gdct = distin_gdct
+
             proc_cnt += 1
 
             # logging current target
-            utl.pr_dg("primer", distin_gdct, reg, proc_cnt)
+            utl.pr_dg("primer", self.distin_gdct, reg, proc_cnt)
 
-            marker_file = distin_gdct['marker']['fn'][reg]['out_path']
+            marker_file = self.distin_gdct['marker']['fn'][reg]['out_path']
             log.info("marker_file {}".format(marker_file))
 
             df_distin = pd.read_csv(
@@ -82,32 +102,33 @@ class Primer(object):
             # 空欄を書き入れているのがそもそもの問題
             # ACTAG^I^I$
 
-            out_txt_path = distin_gdct['primer']['fn'][reg]['out_path']
+            out_txt_path = self.distin_gdct['primer']['fn'][reg]['out_path']
             utl.save_to_tmpfile(out_txt_path)
 
+            #with out_txt_path.open('a', encoding='utf-8') as f:
             with out_txt_path.open('a', encoding='utf-8') as f:
-                # write header
-                #f.write("{}\n".format(distin_file['primer']['hdr_text']))
-
+                # set to self
+                self.f = f
+    
+                # don't write header
                 start = utl.get_start_time()
 
-                if glv.conf.parallel == True:
+                # parallel mode
+                if glv.conf.parallel_ok == True:
                     log.info(
-                        "do Parallel cpu {}, parallel {} blast {}".format(
+                        "do Parallel cpu {}, parallel {} blast {}\n".format(
                             glv.conf.thread,
                             glv.conf.parallel_blast_cnt,
                             glv.conf.blast_num_threads))
 
-                    Parallel(
-                        n_jobs=glv.conf.parallel_blast_cnt,
-                        backend="threading")(
-                        [
-                            delayed(self.loop_p3_chk_blst) \
-                                (distin_gdct, marker_df_row, f) \
-                                for marker_df_row in \
-                                    df_distin.itertuples()
-                        ]
-                    )
+                    # ジェネレータ内包表記を用いて、df_distinを行ごとに扱う
+                    with ThreadPoolExecutor(glv.conf.parallel_blast_cnt) as e:
+                        ret = e.map(
+                            self.loop_p3_chk_blst,
+                            (marker_df_row for marker_df_row
+                                in df_distin.itertuples()
+                            )
+                        )
 
                 else:
                     log.info(
@@ -117,27 +138,31 @@ class Primer(object):
                             glv.conf.blast_num_threads))
 
                     for marker_df_row in df_distin.itertuples():
+                        self.loop_p3_chk_blst(marker_df_row)
 
-                        self.loop_p3_chk_blst(
-                            distin_gdct, marker_df_row, f)
 
             utl.sort_file(
-                'primer', distin_gdct, out_txt_path,
+                'primer', self.distin_gdct, out_txt_path,
                 'chrom', 'pos', 'try_cnt', 'number')
 
             log.info("primer {} > {}.txt\n".format(
                 utl.elapse_str(start),
-                distin_gdct['variant']['fn'][reg]['base_nam']))
+                self.distin_gdct['variant']['fn'][reg]['base_nam']))
 
 
-    def loop_p3_chk_blst(self, distin_gdct, marker_df_row, f):
+    #def loop_p3_chk_blst(self, distin_gdct, marker_df_row, f):
+    def loop_p3_chk_blst(self, marker_df_row):
+
+        # self.f, self.distin_gdct
+
+        #print("\nin loop_p3_chk_blst\n")
 
         # プライマー情報クラスのインスタンスを作る
         prinfo = PrimerInfo()
-        prinfo.prepare_from_marker_file(distin_gdct, marker_df_row)
+        prinfo.prepare_from_marker_file(self.distin_gdct, marker_df_row)
 
         # bedファイルのpath
-        bed_thal_path = distin_gdct['bed_thal_path']
+        bed_thal_path = self.distin_gdct['bed_thal_path']
 
         # add exluded region
         prinfo.get_excluded_region(bed_thal_path)
@@ -171,7 +196,8 @@ class Primer(object):
                 complete = -10
                 line, blast_check = self.primer_complete_to_line(
                     complete, blast_check_result_list, prinfo, try_cnt)
-                f.write('{}\n'.format(line))
+                # no \n
+                utl.w_flush(self.f, line)
                 break
 
             elif prinfo.iopr3.PRIMER_PAIR_NUM_RETURNED == 0:
@@ -182,18 +208,19 @@ class Primer(object):
                 complete = -20
                 line, blast_check = self.primer_complete_to_line(
                     complete, blast_check_result_list, prinfo, try_cnt)
-                f.write('{}\n'.format(line))
+                # write and flush, no \n
+                utl.w_flush(self.f, line)
                 break
 
 
             # glv.MODE_SNP in self.pick_mode
             # distin_file に、pick_mode がなければならない。
-            if distin_gdct['pick_mode'] == glv.MODE_SNP:
+            if self.distin_gdct['pick_mode'] == glv.MODE_SNP:
 
                 #print("hairpin_check")
 
                 l_primer_ok, r_primer_ok = \
-                    prinfo.iopr3.check_p3_pairpin_dimer()
+                    prinfo.iopr3.check_p3_hairpin_dimer()
                 #log.info("{} hairpin {},{} try {}".format(
                 #    prinfo.iopr3.get_sequence_id(),
                 #    l_primer_ok, r_primer_ok,
@@ -201,14 +228,19 @@ class Primer(object):
 
                 if l_primer_ok and r_primer_ok:
                     pass
+
                 else:
                     primer_loc = 'both'
+
                     if not l_primer_ok and not r_primer_ok:
                         pass
+
                     elif not l_primer_ok:
                         primer_loc = 'left'
+
                     elif not r_primer_ok:
                         primer_loc = 'right'
+
                     prinfo.iopr3.add_ex_region(
                         prinfo.iopr3.get_primer_region(primer_loc))
                     complete -= 1
@@ -218,7 +250,7 @@ class Primer(object):
                         complete, \
                         blast_check_result_list, \
                         prinfo, try_cnt)
-                    f.write('{}\n'.format(line))
+                    utl.w_flush(self.f, line)
                     '''
                     continue
 
@@ -251,7 +283,8 @@ class Primer(object):
                 complete = 1
                 line, blast_check = self.primer_complete_to_line(
                     complete, blast_check_result_list, prinfo, try_cnt)
-                f.write('{}\n'.format(line))
+                # no \n
+                utl.w_flush(self.f, line)
 
                 #log.info("{} ok_blast try {}".format(
                 #    prinfo.iopr3.get_sequence_id(),
@@ -267,7 +300,8 @@ class Primer(object):
                 complete = 0
                 line, blast_check = self.primer_complete_to_line(
                     complete, blast_check_result_list, prinfo, try_cnt)
-                f.write('{}\n'.format(line))
+                # no \n
+                utl.w_flush(self.f, line)
 
                 #log.info("{} ng_blast {} try {}".format(
                 #    prinfo.iopr3.get_sequence_id(),
@@ -279,11 +313,6 @@ class Primer(object):
                 prinfo.iopr3.get_sequence_id(),
                 blast_check,
                 try_cnt))
-
-#        if line != '':
-#            f.write('{}\n'.format(line))
-#            # if you need
-#            f.flush()
 
 
     def primer_complete_to_line(

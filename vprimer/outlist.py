@@ -25,6 +25,8 @@ class OutList(object):
             'primer'        : {'no': 30,  'fn': '030_primer'},
             'formfail'      : {'no': 40,  'fn': '040_formatF'},
             'formpass'      : {'no': 50,  'fn': '050_formatP'},
+            'snpfilter'     : {'no': 60,  'fn': '060_snpfilter'},
+            'chkhdimer'     : {'no': 70,  'fn': '070_chkhdimer'},
         }
 
         # stopと、progressと。
@@ -71,7 +73,6 @@ class OutList(object):
                 # 個々のリージョンにファイル名登録
                 for reg in distin_grp_dict['regions']:
 
-
                     out_file_path, base_name = self.make_distin_fname(
                         no_fn['fn'],
                         distin_grp_dict[0],             # g0
@@ -99,6 +100,10 @@ class OutList(object):
         log.info("glv.conf.gdct_reg_list complete, size = {}".format(
             glv.conf.all_proc_cnt))
 
+        # 20230602
+        #pprint.pprint(glv.conf.gdct_reg_list)
+        #sys.exit(1)
+
 
     def make_distin_fname(
         self, outf_pref, distin_0, distin_1, rg, pick_mode):
@@ -110,9 +115,22 @@ class OutList(object):
         if group_vs != glv.AUTO_GROUP:
             group_vs = "{}~{}".format(distin_0, distin_1)
 
-        #distin~gHitomebore~gKaluheenati~rg0~all~50-200.txt
-        #basename = "{}~{}~{}~{}~{}~i{}-{}~p{}-{}".format(
-        basename = "{}~{}~{}~{}~i{}-{}~p{}-{}".format(
+        # change out filename
+        if pick_mode == glv.MODE_SNP:
+            # 060_snpfilter~a~b~e_reg_2~snp~gc50-55~iv1000000~p170-180.txt
+            basename = "{}~{}~{}~{}~gc{}~iv{}~p{}-{}".format(
+                outf_pref,
+                group_vs,
+                rg,
+                pick_mode,
+                glv.conf.snp_filter_gcrange,
+                glv.conf.snp_filter_interval,
+                glv.conf.min_product_size,
+                glv.conf.max_product_size)
+
+        else:
+            #distin~gHitomebore~gKaluheenati~rg0~all~50-200.txt
+            basename = "{}~{}~{}~{}~i{}-{}~p{}-{}".format(
                 outf_pref,
                 group_vs,
                 rg,
@@ -121,6 +139,7 @@ class OutList(object):
                 glv.conf.max_indel_len,
                 glv.conf.min_product_size,
                 glv.conf.max_product_size)
+
 
         # pathlib
         out_file_name = "{}/{}.txt".format(glv.conf.out_dir_path, basename)
@@ -291,6 +310,10 @@ class OutList(object):
             hd_l, hd_d, i = self.mkmap('in_target',            hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('dup_pos',              hd_l, hd_d, i)
 
+            # 2023-04-24
+            hd_l, hd_d, i = self.mkmap('same_primer',          hd_l, hd_d, i)
+            hd_l, hd_d, i = self.mkmap('dimer_check',          hd_l, hd_d, i)
+
             hd_l, hd_d, i = self.mkmap('enzyme',               hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('g0_name',              hd_l, hd_d, i)
             hd_l, hd_d, i = self.mkmap('g1_name',              hd_l, hd_d, i)
@@ -318,6 +341,58 @@ class OutList(object):
             #hd_l, hd_d, i = self.mkmap('notice',               hd_l, hd_d, i)
 
             #Allele string '00' information for each sample will be added
+
+#        elif type == 'chkhdimer':
+#
+#            # don't need it
+#            # Synchronize with formtxt.py format_product
+#
+#            hd_l, hd_d, i = self.mkmap('chrom',                hd_l, hd_d, i)
+#            hd_l, hd_d, i = self.mkmap('pos',                  hd_l, hd_d, i)
+#
+#            hd_l, hd_d, i = self.mkmap('g0_vseq',              hd_l, hd_d, i)
+#            hd_l, hd_d, i = self.mkmap('g1_vseq',              hd_l, hd_d, i)
+#            hd_l, hd_d, i = self.mkmap('g0_gt',                hd_l, hd_d, i)
+#            hd_l, hd_d, i = self.mkmap('g1_gt',                hd_l, hd_d, i)
+#            hd_l, hd_d, i = self.mkmap('targ_ano',             hd_l, hd_d, i)
+#
+#            hd_l, hd_d, i = self.mkmap('var_type',             hd_l, hd_d, i)
+#            # 2022-10-26 add
+#            hd_l, hd_d, i = self.mkmap('mk_type',              hd_l, hd_d, i)
+#            hd_l, hd_d, i = self.mkmap('auto_grp0',            hd_l, hd_d, i)
+#            hd_l, hd_d, i = self.mkmap('auto_grp1',            hd_l, hd_d, i)
+#            # 2023-04-10
+#            hd_l, hd_d, i = self.mkmap('in_target',            hd_l, hd_d, i)
+#            hd_l, hd_d, i = self.mkmap('dup_pos',              hd_l, hd_d, i)
+#
+#            # 2023-04-24
+#            hd_l, hd_d, i = self.mkmap('same_primer',          hd_l, hd_d, i)
+#            hd_l, hd_d, i = self.mkmap('dimer_check',          hd_l, hd_d, i)
+#
+#            hd_l, hd_d, i = self.mkmap('enzyme',               hd_l, hd_d, i)
+#            hd_l, hd_d, i = self.mkmap('g0_name',              hd_l, hd_d, i)
+#            hd_l, hd_d, i = self.mkmap('g1_name',              hd_l, hd_d, i)
+#            hd_l, hd_d, i = self.mkmap('g0_product_size',      hd_l, hd_d, i)
+#            hd_l, hd_d, i = self.mkmap('g1_product_size',      hd_l, hd_d, i)
+#            hd_l, hd_d, i = self.mkmap('product_gc_contents',  hd_l, hd_d, i)
+#            hd_l, hd_d, i = self.mkmap('diff_length',          hd_l, hd_d, i)
+#            hd_l, hd_d, i = self.mkmap('g0_digested_size',     hd_l, hd_d, i)
+#            hd_l, hd_d, i = self.mkmap('g1_digested_size',     hd_l, hd_d, i)
+#
+#            hd_l, hd_d, i = self.mkmap('digested_gno',         hd_l, hd_d, i)
+#            hd_l, hd_d, i = self.mkmap('digested_ano',         hd_l, hd_d, i)
+#            hd_l, hd_d, i = self.mkmap('try_cnt',              hd_l, hd_d, i)
+#            hd_l, hd_d, i = self.mkmap('complete',             hd_l, hd_d, i)
+#
+#            hd_l, hd_d, i = self.mkmap('marker_id',            hd_l, hd_d, i)
+#            hd_l, hd_d, i = self.mkmap('gts_segr_lens',        hd_l, hd_d, i)
+#
+#            hd_l, hd_d, i = self.mkmap('left_primer_id',       hd_l, hd_d, i)
+#            hd_l, hd_d, i = self.mkmap('PRIMER_LEFT_0_SEQUENCE',
+#                                                               hd_l, hd_d, i)
+#            hd_l, hd_d, i = self.mkmap('right_primer_id',      hd_l, hd_d, i)
+#            hd_l, hd_d, i = self.mkmap('PRIMER_RIGHT_0_SEQUENCE',
+#                                                               hd_l, hd_d, i)
 
 
         hd_str = '\t'.join(map(str, hd_l))

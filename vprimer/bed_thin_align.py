@@ -34,7 +34,7 @@ class BedThinAlign(object):
 
         ###### self.concurrent_mode = "thread"
         self.concurrent_mode = "process"
-        if glv.conf.parallel == False:
+        if glv.conf.parallel_ok == False:
             self.concurrent_mode = "serial"
 
         self.open_pos = True        # bedのposition法を、open, closeにする
@@ -306,6 +306,7 @@ class BedThinAlign(object):
         if para_cnt > reqcnt:
             para_cnt = reqcnt
 
+        # bed作成は、threadではなく processで
         if self.concurrent_mode == "process":
 
             mes = "Parallelize in process mode. "
@@ -490,12 +491,12 @@ class BedThinAlign(object):
             self.bta_req_dict['bam_bed_path_list']))
 
         # awk, sort処理後の、書き出し用bedファイル
-        # bed_thal_tmp_ext
-        new_bed_thal_tmp_path = \
-            Path(str(new_bed_thal_path) + glv.bed_thal_tmp_ext).resolve()
+        # bed_thal_sort_ext
+        new_bed_thal_sort_path = \
+            Path(str(new_bed_thal_path) + glv.bed_thal_sort_ext).resolve()
 
         # make_header
-        header_bed_thal = self.ident_bed_thal_header()
+        header_bed_thal_r = self.ident_bed_thal_header()
 
         #    groups, sorted_samples, bed_path_list,)
         # (1) awk: remove line that include "(valid)", remain only $1~$3
@@ -522,9 +523,8 @@ class BedThinAlign(object):
         # (3) cmd_awk | cmd_sort > file
         # cmd_redirect = ['>']
         # cmd_redirect += ["{}".format(bed_thal_tmp_path)]
-        with new_bed_thal_tmp_path.open('w', encoding='utf-8') as f:
-            #f.write(header_bed_thal)
-            #f.write("{}".format(header_bed_thal)
+        with new_bed_thal_sort_path.open('w', encoding='utf-8') as f:
+
             # この内部でのエラーをピックアップできるか
             # awk - awka にすると、エラーで止まる。
             #p_awk = sbp.Popen(cmd_awk, stdout=sbp.PIPE, stderr=sbp.PIPE)
@@ -550,7 +550,7 @@ class BedThinAlign(object):
         cmd_bedtools = ['bedtools']
         cmd_bedtools += ['merge']
         cmd_bedtools += ['-nobuf']
-        cmd_bedtools += ['-i', '{}'.format(new_bed_thal_tmp_path)]
+        cmd_bedtools += ['-i', '{}'.format(new_bed_thal_sort_path)]
 
         new_bed_thal_merge_path = \
             Path(str(new_bed_thal_path) + glv.bed_thal_merge_ext).resolve()
@@ -559,7 +559,7 @@ class BedThinAlign(object):
         # エラーをキャプチャして、logに残す
         with new_bed_thal_merge_path.open('w', encoding='utf-8') as f:
             #print("(4) cmd_bedtools")
-            self.print_single(f, header_bed_thal)
+            self.print_single(f, header_bed_thal_r)
 
             p3 = sbp.Popen(cmd_bedtools, stdout=f, stderr=sbp.PIPE, text=True)
             result, err = p3.communicate()
@@ -580,7 +580,7 @@ class BedThinAlign(object):
             f.write(valid_statline)
 
         # 終了したら、tmpを消す
-        new_bed_thal_tmp_path.unlink()
+        new_bed_thal_sort_path.unlink()
         # 終了したら、mvする。
         new_bed_thal_merge_path.rename(new_bed_thal_path)
 
@@ -1133,12 +1133,11 @@ class BedThinAlign(object):
         return now_stat, stat_changed
 
 
-    def print_single(self, f, header):
+    def print_single(self, f, header_r):
         '''
         '''
-        f.write("{}".format(header))
         # ヘッダは確実にflushしておこう 書き出しの順番のために
-        f.flush()
+        utl.w_flush_r(f, header_r)
 
 
     def print_line(self, f, last_stat,
@@ -1190,17 +1189,16 @@ class BedThinAlign(object):
 
         # 直前のもののステータス
         if last_stat != glv.bed_now_valid:
-            f.write("{}\t{}\t{}\t{}_{}\n".format(
+            # no \n
+            utl.w_flush(f, "{}\t{}\t{}\t{}_{}".format(
                 chrom, bed_open_stt,
                 bed_close_end, comment, length))
-            #f.flush()
 
         else:
             if self.valid_print:
-                f.write("{}\t{}\t{}\t({}_{})\n".format(
+                utl.w_flush(f, "{}\t{}\t{}\t({}_{})".format(
                     chrom, bed_open_stt,
                     bed_close_end, comment, length))
-                #f.flush()
 
         # summary: for width coverage
         width_coverage = length

@@ -6,6 +6,7 @@ from pathlib import Path
 import errno
 import time
 import pprint
+import itertools
 
 # global configuration
 import vprimer.glv as glv
@@ -15,19 +16,21 @@ from vprimer.logging_config import LogConf
 log = LogConf.open_log(__name__)
 
 import pandas as pd
-# ok????
+# ok
 import vcfpy
 
 from vprimer.eval_variant import EvalVariant
 from vprimer.product import Product
 from vprimer.primer import PrimerInfo
 from vprimer.allele_select import AlleleSelect
+from vprimer.inout_primer3 import InoutPrimer3
 
 class FormTxt(object):
 
     def __init__(self):
 
-        pass
+        # debug
+        self.alstr_stop = True
 
 
     def format_text(self):
@@ -36,199 +39,532 @@ class FormTxt(object):
             and output.
         '''
 
-        # for each distinguish_groups
-        # proc_cnt is the order of distin_file's starting from 1.
         proc_cnt = 0
         for distin_gdct, reg in glv.conf.gdct_reg_list:
             proc_cnt += 1
 
-            #--------------------------------------------------------
-            # primer_file
-            #
-            # read 030_primer file
+            # init
             primer_file = distin_gdct['primer']['fn'][reg]['out_path']
+            df_distin = pd.DataFrame()
+
+            # out to 040_FormatF
+            proc_name = "formfail"
+            df_distin = self.write_form(primer_file, proc_name, df_distin,
+                proc_cnt, distin_gdct, reg)
+
+            # out to 050_FormatP
+            proc_name = "formpass"
+            df_distin = self.write_form(primer_file, proc_name, df_distin,
+                proc_cnt, distin_gdct, reg)
+
+
+    def write_form(self, primer_file, proc_name, df_distin,
+            proc_cnt, distin_gdct, reg):
+        '''
+        '''
+
+        # stop or continue ---------------------------------
+        ret_status = utl.decide_action_stop(proc_name)
+
+        if ret_status == glv.progress_stop:
+            log.info(utl.progress_message(ret_status, proc_name))
+            sys.exit(1)
+
+        if ret_status == glv.progress_gothrough:
+            log.info(utl.progress_message(ret_status, proc_name))
+            return df_distin
+        # --------------------------------------------------
+
+        
+        if len(df_distin) == 0:
             df_distin = pd.read_csv(
                 primer_file, sep='\t', header=0, index_col=None)
 
-            # complete == 1 or == 0
-            safe = 1    # Lines that successfully generate primers are
-                        # output to 050_formatP
-            fail = 0    # fail that fail, output to 040_formatF
+        if proc_name == "formfail": 
+            df_distin_form = df_distin[df_distin['complete'] <= 0]
+        else:
+            df_distin_form = df_distin[df_distin['complete'] > 0]
 
-            for complete, proc in zip(
-                [fail, safe], ['formfail', 'formpass']):
+        log.info("-------------------------------")
+        log.info("Start processing {}\n".format(proc_name))
 
-                # stop, action, gothrough
-                proc_name = proc
-                ret_status = utl.decide_action_stop(proc_name)
+        # write the formatted result to 040_formfail
+        out_txt_path = distin_gdct[proc_name]['fn'][reg]['out_path']
+        log.info("out_txt_path={}.".format(out_txt_path))
 
-                if ret_status == "stop":
-                    msg = "STOP. "
-                    msg += "Current process \'{}\' ".format(proc_name)
-                    msg += "has exceeded the User-specified stop point "
-                    msg += "\'{}', ".format(glv.conf.stop)
-                    msg += "so stop program. exit."
-                    log.info(msg)
-                    #sys.exit(1)
-                    continue
+        # If the specified file already exists, move that file
+        # to the bak directory.
+        utl.save_to_tmpfile(out_txt_path)
+
+        #====================================================
+        # header
+        header_txt = distin_gdct['formpass']['hdr_text']
+
+        #====================================================
+        # final check dict for 050_FormatP
+        duplicate_pos_dict = dict()
+        same_primer_dict = dict()
+
+        if proc_name == "formpass":
+            # 1) duplicate position, make duplicate_pos_dict
+            duplicate_pos_dict = self.make_duplicate_pos_dict(df_distin_form)
+            # 2) same primer sequence make same_primer_dict
+            same_primer_dict = self.make_same_primer_dict(df_distin_form)
+
+            # 3) add header -------------------------------------------------
+            if glv.conf.is_auto_group:
+                gr_list = [distin_gdct[0]]
+            else:
+                gr_list = [distin_gdct[0], distin_gdct[1]]
+
+            sample_nickname_ordered_list, \
+            sample_basename_ordered_list, \
+            sample_fullname_ordered_list = \
+                utl.get_specified_sample_list(gr_list)
+
+            
+            # add sample header to original formpass header
+            if not self.alstr_stop:
+                header_txt = "{}\t{}".format(header_txt, "\t".join(
+                sample_nickname_ordered_list))
+
+            # open vcf for alstr in formpass
+            vcf_reader_formpass = vcfpy.Reader.from_path(
+                glv.conf.vcf_gt_path)
+
+        #====================================================
+
+        # file open with append mode
+        with out_txt_path.open('a', encoding='utf-8') as f:
+        #with open(out_txt_path, mode='a') as f:
+
+            start = utl.get_start_time()
+
+            # write header no \n
+            utl.w_flush(f, header_txt)
+
+            # each of fail or safe line from primer file
+            for primer_df_row in df_distin_form.itertuples():
+
+                # index_no = primer_df_row[0]
+                # marker_id = primer_df_row[1]
+                chrom_name = primer_df_row[2]
+                pos = primer_df_row[3]
+
+                self.prepare_from_primer_file(
+                    primer_df_row, distin_gdct)
+
+                # ********************************************
+                # duplicate_pos_dict: format duplicate line
+                line = self.format_product(distin_gdct,
+                    duplicate_pos_dict, same_primer_dict)
+                # ********************************************
+
+                # For formpass, append the allele string to the end
+                #if proc_name == "formpass":
+                if not self.alstr_stop:
+
+                    # add member's alstr
+                    alstr_list = self.get_members_alstr(
+                        chrom_name, pos,
+                        vcf_reader_formpass,
+                        sample_fullname_ordered_list)
+
+                    if len(alstr_list) != 2:
+                        print(len(alstr_list))
+                        print(type(alstr_list))
+                        print(">{}<".format(alstr_list))
+                        print(line)
+                        sys.exit(1)
 
 
-                elif ret_status == "gothrough":
-                    msg = "SKIP \'{}\' proc, ".format(proc_name)
-                    msg += "glv.conf.progress = {}, ".format(
-                        glv.conf.progress)
-                    msg += "glv.conf.stop = {}, ".format(glv.conf.stop)
-                    msg += "so skip program."
-                    log.info(msg)
-                    continue
+                    line = "{}\t{}".format(line, "\t".join(alstr_list))
+
+                # no \n
+                utl.w_flush(f, line)
+
+        log.info("{} {} > {}.txt\n".format(
+            proc_name, utl.elapse_str(start),
+            distin_gdct[proc_name]['fn'][reg]['base_nam']))
+
+        return df_distin
 
 
-                log.info("-------------------------------")
-                log.info("Start processing {} complete={}\n".format(
-                    proc_name, complete))
+    def get_members_alstr(self, chrom_name, pos,
+            vcf_reader_formpass, sample_fullname_ordered_list):
+        '''
+        '''
 
-                # logging current target
-                sub_proc = "{}_{}".format(proc, complete)
-                # simple logging (last True)
-                utl.pr_dg(
-                    sub_proc, distin_gdct, reg, proc_cnt, True)
+        alstr_list = list()
 
-                # complete >= 1
-                if complete > 0:
-                    df_distin_complete = \
-                        df_distin[df_distin['complete'] > 0]
-                else:
-                    df_distin_complete = \
-                        df_distin[df_distin['complete'] <= 0]
+        # zero based: open start
+        open_stt = pos - 1
+        # close end
+        close_end = open_stt + 1
 
-                # open vcf for alstr in formpass
-                if proc == 'formpass':
-                    vcf_reader_formpass = vcfpy.Reader.from_path(
-                        glv.conf.vcf_gt_path)
+        alstr_list = list()
+        # Since fetch may bring multiple records, only those whose
+        # pos is close_end are targeted.
+        for record in vcf_reader_formpass.fetch(
+            chrom_name, open_stt, close_end):
 
-                # ========================================================
-                # keep chrom-pos dupulicate line information
-                # complete であるdfの中に、chrom:posが 重複したものが
-                # どれだけあるのかを、調査する。df.duplicatedは、重複したもの
-                # を抽出する。
-                # ========================================================
-                df_chrom_pos = df_distin_complete.loc[:, ['chrom', 'pos']]
-                df_chrom_pos_duplicated = \
-                    df_chrom_pos[df_chrom_pos.duplicated()]
+            if record.POS != close_end:
+                continue
 
-                duplicate_pos_dict = dict()
-                for c_p_row in df_chrom_pos_duplicated.itertuples():
+            for fn in sample_fullname_ordered_list:
+                alstr = \
+                    AlleleSelect.record_call_for_sample(
+                        record, fn)
+                #gt = AlleleSelect.sepal(alstr, 'gt')
+                # directly 00, 01, 11
+                alstr_list += [alstr]
 
-                    # index_no = c_p_row[0]
-                    chrom = c_p_row[1]
-                    pos = c_p_row[2]
+        #alstr_line = '\t'.join(alstr_list)
 
-                    # 辞書オブジェクトに対してinを使うとキーの存在確認になる
-                    # keys()メソッドを使っても同じ。
-                    if not chrom in duplicate_pos_dict:
-                        duplicate_pos_dict[chrom] = dict();
+        if len(alstr_list) != 2:
+            print(alstr_list)
+            sys.exit(1)
 
-                    # [chrom][pos] = pos の辞書を作成する。
-                    if not pos in duplicate_pos_dict[chrom]:
-                        duplicate_pos_dict[chrom][pos] = pos
-                # ========================================================
+        return alstr_list
 
-                # write the formatted result to 040_formfail
-                # and 050_formatP
-                out_txt_path = distin_gdct[proc]['fn'][reg]['out_path']
-                log.info("out_txt_path={}.".format(out_txt_path))
 
-                # If the specified file already exists, move that file
-                # to the bak directory.
-                utl.save_to_tmpfile(out_txt_path)
+    def make_duplicate_pos_dict(self, df_distin_form):
+        # notice when position duplicated(diferent enzyme
+        # for caps in same pos)
+        duplicate_pos_dict = dict()
 
-                # file open with append mode
-                with out_txt_path.open('a', encoding='utf-8') as f:
-                #with open(out_txt_path, mode='a') as f:
+        # ========================================================
+        # keep chrom-pos dupulicate line information
+        # complete であるdfの中に、chrom:posが 重複したものが
+        # どれだけあるのかを、調査する。df.duplicatedは、重複したもの
+        # を抽出する。
+        # ========================================================
+        df_chrom_pos = df_distin_form.loc[:, ['chrom', 'pos']]
+        df_chrom_pos_duplicated = df_chrom_pos[df_chrom_pos.duplicated()]
 
-                    start = utl.get_start_time()
+        for c_p_row in df_chrom_pos_duplicated.itertuples():
 
-                    header_txt = distin_gdct['formpass']['hdr_text']
-                    # if glv.conf.is_auto_group, remove last 2 columns
-                    #header_txt = utl.remove_auto_grp_header_txt(header_txt)
+            # index_no = c_p_row[0]
+            chrom = c_p_row[1]
+            pos = c_p_row[2]
 
-                    if (proc == "formpass"):
+            # 辞書オブジェクトに対してinを使うとキーの存在確認になる
+            # keys()メソッドを使っても同じ。
+            if not chrom in duplicate_pos_dict:
+                duplicate_pos_dict[chrom] = dict();
 
-                        # For form-safe, append the allele string to the end
+            # [chrom][pos] = pos の辞書を作成する。
+            if not pos in duplicate_pos_dict[chrom]:
+                duplicate_pos_dict[chrom][pos] = pos
 
-                        #---------------------------------------------------
-                        # To add an alstr column for all sample
-                        # Members of the specified group come first
-                        # (same as variant.py:_iterate_vcf)
-                        # 20221122
-                        if glv.conf.is_auto_group:
-                            gr_list = [distin_gdct[0]]
-                        else:
-                            gr_list = [distin_gdct[0], distin_gdct[1]]
+        return duplicate_pos_dict
 
-                        sample_nickname_ordered_list, \
-                        sample_basename_ordered_list, \
-                        sample_fullname_ordered_list = \
-                            utl.get_specified_sample_list(gr_list)
 
-                        # add sample header to original formpass header
-                        header_txt = "{}\t{}".format(header_txt, "\t".join(
-                            sample_nickname_ordered_list))
+    def make_same_primer_dict(self, df_distin_form):
+        # notice for same primer sequence pair
+        same_primer_dict = dict()
 
-                    # write header
-                    f.write("{}\n".format(header_txt))
+        #df_primers = df_distin_form.loc[:,
+        df_primers = df_distin_form.loc[:,
+            ['chrom',
+             'pos',
+             'PRIMER_LEFT_0_SEQUENCE',
+             'PRIMER_RIGHT_0_SEQUENCE']]
 
-                    # each of fail or safe line from primer file
-                    for primer_df_row in df_distin_complete.itertuples():
+        df_primers['PRIMERs'] = \
+            df_primers['PRIMER_LEFT_0_SEQUENCE'] + \
+            df_primers['PRIMER_RIGHT_0_SEQUENCE']
 
-                        # index_no = primer_df_row[0]
-                        # marker_id = primer_df_row[1]
-                        chrom_name = primer_df_row[2]
-                        pos = primer_df_row[3]
+        # all duplicated records
+        df_primers_duplicated = df_primers[
+            df_primers.duplicated(subset='PRIMERs', keep=False)]
+        
+        # for each duplicated record
+        for pr_row in df_primers_duplicated.itertuples():
 
-                        self.prepare_from_primer_file(
-                            primer_df_row, distin_gdct)
+            # index_no = pr_row[0]
+            chrom = pr_row[1]
+            pos = pr_row[2]
+            l_seq = pr_row[3]
+            r_seq = pr_row[4]
+            lr_seq = "{},{}".format(l_seq, r_seq)
 
-                        # ********************************************
-                        # duplicate_pos_dict: format duplicate line
-                        #
-                        line = self.format_product(
-                            distin_gdct, duplicate_pos_dict)
-                        # ********************************************
+            # 辞書オブジェクトに対してinを使うとキーの存在確認になる
+            # keys()メソッドを使っても同じ。
+            if not lr_seq in same_primer_dict:
+                same_primer_dict[lr_seq] = list();
 
-                        # For formpass, append the allele string to the end
-                        if (proc == "formpass"):
+            chrom_pos = "{}:{}".format(chrom, pos)
+            # append chrom:pos as list
+            if not chrom_pos in same_primer_dict[lr_seq]:
+                same_primer_dict[lr_seq].append(chrom_pos)
 
-                            # zero based: open start
-                            open_stt = pos - 1
-                            # close end
-                            close_end = open_stt + 1
+        return same_primer_dict
 
-                            alstr_list = list()
-                            alstr_line = ''
 
-                            # fetch only one record
-                            for record in vcf_reader_formpass.fetch(
-                                chrom_name, open_stt, close_end):
 
-                                for fn in sample_fullname_ordered_list:
-                                    alstr = \
-                                        AlleleSelect.record_call_for_sample(
-                                            record, fn)
-                                    #gt = AlleleSelect.sepal(alstr, 'gt')
-                                    # directly 00, 01, 11
-                                    alstr_list += [alstr]
+    def prepare_from_primer_file(self, primer_df_row, distin_gdct):
+        ''' from primer raw, pick up each value and information
+        '''
 
-                            alstr_line = '\t'.join(alstr_list)
-                            f.write("{}\t{}\n".format(line, alstr_line))
+        # hdr_dict is a dictionary for translaing the header names
+        # to row column_no
+        hdr_dict = distin_gdct['primer']['hdr_dict']
 
-                        else:   # formfail
-                            # 書き出す
-                            f.write("{}\n".format(line))
+        # Read the data from the 010_variant file, save it locally,
+        #   and split the variables as needed
+        self.marker_id, \
+        self.chrom, \
+        self.pos, \
+        self.targ_grp, \
+        self.g0_name, \
+        self.g1_name, \
+        self.targ_ano, \
+        self.g0_ano, \
+        self.g1_ano, \
+        self.vseq_gno_str, \
+        self.gts_segr_lens, \
+        self.var_type, \
+        self.mk_type, \
+        self.set_enz_cnt, \
+        self.marker_info, \
+        self.vseq_lens_ano_str, \
+        self.enzyme_name, \
+        self.digest_pattern, \
+        self.target_gno, \
+        self.target_len, \
+        self.auto_grp0, \
+        self.auto_grp1 = \
+            utl.get_basic_primer_info(primer_df_row, hdr_dict)
 
-                    log.info("{} {} > {}.txt\n".format(
-                        proc, utl.elapse_str(start),
-                        distin_gdct[proc]['fn'][reg]['base_nam']))
+        #self.notice,
+        # in_target
+        self.in_target = primer_df_row[hdr_dict['in_target']]
+
+        self.g0_vseq, self.g1_vseq = self.vseq_gno_str.split(",")
+        #11/00,hoho_1,1.1/1.1
+        self.g0_gt, self.g1_gt = self.get_genotype()
+
+        #log.debug("self.chrom={} pos={}".format(self.chrom, self.pos))
+
+        self.try_cnt = str(primer_df_row[hdr_dict['try_cnt']])
+        self.complete = str(primer_df_row[hdr_dict['complete']])
+        self.blast_check = str(primer_df_row[hdr_dict['blast_check']])
+
+        self.g0_seq_target_len = \
+            int(primer_df_row[hdr_dict['g0_seq_target_len']])
+        self.g0_seq_target = \
+            str(primer_df_row[hdr_dict['g0_seq_target']])
+        self.g1_seq_target_len = \
+            int(primer_df_row[hdr_dict['g1_seq_target_len']])
+        self.g1_seq_target = \
+            str(primer_df_row[hdr_dict['g1_seq_target']])
+
+        self.seq_template_ref_len = \
+            int(primer_df_row[hdr_dict['seq_template_ref_len']])
+        self.seq_template_ref_abs_pos = \
+            str(primer_df_row[hdr_dict['seq_template_ref_abs_pos']])
+        self.seq_template_ref_rel_pos = \
+            str(primer_df_row[hdr_dict['seq_template_ref_rel_pos']])
+
+        self.PRIMER_PAIR_0_PRODUCT_SIZE = \
+            int(primer_df_row[hdr_dict['PRIMER_PAIR_0_PRODUCT_SIZE']])
+        self.PRIMER_LEFT_0 = \
+            str(primer_df_row[hdr_dict['PRIMER_LEFT_0']])
+        self.left_primer_id = \
+            str(primer_df_row[hdr_dict['left_primer_id']])
+        self.PRIMER_LEFT_0_SEQUENCE = \
+            str(primer_df_row[hdr_dict['PRIMER_LEFT_0_SEQUENCE']])
+        self.PRIMER_RIGHT_0 = \
+            str(primer_df_row[hdr_dict['PRIMER_RIGHT_0']])
+        self.right_primer_id = \
+            str(primer_df_row[hdr_dict['right_primer_id']])
+        self.PRIMER_RIGHT_0_SEQUENCE = \
+            str(primer_df_row[hdr_dict['PRIMER_RIGHT_0_SEQUENCE']])
+        self.SEQUENCE_TEMPLATE = \
+            str(primer_df_row[hdr_dict['SEQUENCE_TEMPLATE']])
+
+        # summer 20210910 add
+        self.product_gc_contents = \
+            str(primer_df_row[hdr_dict['product_gc_contents']])
+
+
+    def get_genotype(self):
+        '''
+        '''
+
+        # 11/00,hoho_1,1.1/1.1
+        # self.gts_segr_lens
+        #print("self.gts_segr_lens={}".format(self.gts_segr_lens))
+        gts = self.gts_segr_lens.split(",")[0]
+        #print("gts={}".format(gts))
+        g0_gt, g1_gt = gts.split("/")
+        #print("g0_gt={}, g1_gt={}".format(g0_gt, g1_gt))
+        g0_gtl = list(g0_gt)
+        #print("g0_gtl={}".format(g0_gtl))
+        g1_gtl = list(g1_gt)
+
+        g0_genotype = "{}/{}".format(g0_gtl[0], g0_gtl[1])
+        g1_genotype = "{}/{}".format(g1_gtl[0], g1_gtl[1])
+
+        #print("{}, {}".format(g0_genotype, g1_genotype))
+
+        return g0_genotype, g1_genotype
+
+
+    def format_product(self, distin_gdct,
+        duplicate_pos_dict, same_primer_dict):
+
+        if self.PRIMER_PAIR_0_PRODUCT_SIZE == 0:
+            product_size_0 = -1
+            product_size_1 = -1
+            digested_gno = -1
+            digested_ano = -1
+            digested_size_0 = -1
+            digested_size_1 = -1
+            diff_product_size = -1
+            digest_diff = -1
+
+        else:
+            product_size_0, \
+            product_size_1, \
+            digested_gno, \
+            digested_ano, \
+            digested_size_0, \
+            digested_size_1, \
+            diff_product_size, \
+            digest_diff = \
+                self.get_group_product_size()
+
+        #--------------------
+        line_list = list()
+
+
+        line_list += [self.chrom]
+        line_list += [self.pos]
+
+        line_list += [self.g0_vseq]
+        line_list += [self.g1_vseq]
+        line_list += [self.g0_gt]
+        line_list += [self.g1_gt]
+        line_list += [self.targ_ano]
+
+        line_list += [self.var_type]
+        # 2022-10-26 add
+        line_list += [self.mk_type]
+
+        # auto_grp
+        # primer.py primer_complete_to_line
+        #if glv.conf.is_auto_group:
+        line_list += [self.auto_grp0]
+        line_list += [self.auto_grp1]
+
+        #line_list += [comment]
+        # if this pos is duplicated, insert comment to this column
+        # notice_line = 'dup,1/1-1/2;
+
+        # in_target
+        line_list += [self.in_target]
+
+        # dup_pos
+        dup_pos = self.add_dup_info(duplicate_pos_dict)
+        line_list += [dup_pos]
+
+        # same primer sequence
+
+        same_primer = self.add_same_primer(
+            same_primer_dict,
+            self.PRIMER_LEFT_0_SEQUENCE,
+            self.PRIMER_RIGHT_0_SEQUENCE)
+        line_list += [same_primer]
+
+        # dimer check
+        dimer_check = "-"
+        line_list += [dimer_check]
+
+        # add ';'
+        #notice_line = utl.make_notice(self.notice, notice_line)
+
+        # for notice
+        #line_list += [notice_line]
+
+        line_list += [self.enzyme_name]
+        line_list += [self.g0_name]
+        line_list += [self.g1_name]
+        line_list += [product_size_0]
+        line_list += [product_size_1]
+        # summer 20210910
+        line_list += [self.product_gc_contents]
+
+        # **
+        #line_list += [digest_diff]
+        line_list += [diff_product_size]
+        line_list += [digested_size_0]
+        line_list += [digested_size_1]
+
+        line_list += [digested_gno]
+        line_list += [digested_ano]
+        line_list += [self.try_cnt]
+        line_list += [self.complete]
+
+        line_list += [self.marker_id]
+        line_list += [self.gts_segr_lens]
+
+        # for amplicon
+        if distin_gdct['pick_mode'] == glv.MODE_SNP and \
+            self.PRIMER_LEFT_0_SEQUENCE != "-" and \
+            self.PRIMER_RIGHT_0_SEQUENCE != "-":
+
+            line_list += [self.left_primer_id]
+            line_list += ["{}{}".format(
+                glv.conf.amplicon_forward_tag,
+                self.PRIMER_LEFT_0_SEQUENCE)]
+
+            line_list += [self.right_primer_id]
+            line_list += ["{}{}".format(
+                glv.conf.amplicon_reverse_tag,
+                self.PRIMER_RIGHT_0_SEQUENCE)]
+
+        else:
+            line_list += [self.left_primer_id]
+            line_list += [self.PRIMER_LEFT_0_SEQUENCE]
+            line_list += [self.right_primer_id]
+            line_list += [self.PRIMER_RIGHT_0_SEQUENCE]
+
+        return '\t'.join(map(str, line_list))
+
+
+    def add_dup_info(self, duplicate_pos_dict):
+
+        dup_notice_str = "-"
+
+        if self.chrom in duplicate_pos_dict:
+            if self.pos in duplicate_pos_dict[self.chrom]:
+                dup_notice_str = "{},{}".format(
+                    glv.COMMENT_dup, self.set_enz_cnt)
+
+        # dup_notice_str = 'dup,1/1-1/2;
+
+        #print()
+        #print("self.pos={}".format(self.pos))
+        #print("duplicate_pos_dict={}".format(duplicate_pos_dict))
+        #print("dup_notice_str={}".format(dup_notice_str))
+        #print()
+
+
+        return dup_notice_str
+
+
+    def add_same_primer(self, same_primer_dict,
+        LEFT_SEQUENCE, RIGHT_SEQUENCE):
+
+        same_primer = "-"
+
+        lr_seq = "{},{}".format(LEFT_SEQUENCE, RIGHT_SEQUENCE)
+        if lr_seq in same_primer_dict:
+            same_primer = ",".join(same_primer_dict[lr_seq])
+
+        return same_primer
 
 
     def get_group_product_size(self):
@@ -439,248 +775,4 @@ class FormTxt(object):
             digested_size_str_g1, \
             diff_product_size, \
             digest_diff
-
-
-    def add_dup_info(self, duplicate_pos_dict):
-
-        dup_notice_str = "-"
-
-        if self.chrom in duplicate_pos_dict:
-            if self.pos in duplicate_pos_dict[self.chrom]:
-                dup_notice_str = "{},{}".format(
-                    glv.COMMENT_dup, self.set_enz_cnt)
-
-        # dup_notice_str = 'dup,1/1-1/2;
-
-        #print()
-        #print("self.pos={}".format(self.pos))
-        #print("duplicate_pos_dict={}".format(duplicate_pos_dict))
-        #print("dup_notice_str={}".format(dup_notice_str))
-        #print()
-        
-
-        return dup_notice_str
-
-
-    def prepare_from_primer_file(self, primer_df_row, distin_gdct):
-        ''' from primer raw, pick up each value and information
-        '''
-
-        # hdr_dict is a dictionary for translaing the header names
-        # to row column_no
-        hdr_dict = distin_gdct['primer']['hdr_dict']
-
-        # Read the data from the 010_variant file, save it locally,
-        #   and split the variables as needed
-        self.marker_id, \
-        self.chrom, \
-        self.pos, \
-        self.targ_grp, \
-        self.g0_name, \
-        self.g1_name, \
-        self.targ_ano, \
-        self.g0_ano, \
-        self.g1_ano, \
-        self.vseq_gno_str, \
-        self.gts_segr_lens, \
-        self.var_type, \
-        self.mk_type, \
-        self.set_enz_cnt, \
-        self.marker_info, \
-        self.vseq_lens_ano_str, \
-        self.enzyme_name, \
-        self.digest_pattern, \
-        self.target_gno, \
-        self.target_len, \
-        self.auto_grp0, \
-        self.auto_grp1 = \
-            utl.get_basic_primer_info(primer_df_row, hdr_dict)
-
-        #self.notice, 
-        # in_target
-        self.in_target = primer_df_row[hdr_dict['in_target']]
-
-        self.g0_vseq, self.g1_vseq = self.vseq_gno_str.split(",")
-        #11/00,hoho_1,1.1/1.1
-        self.g0_gt, self.g1_gt = self.get_genotype()
-
-        #log.debug("self.chrom={} pos={}".format(self.chrom, self.pos))
-
-        self.try_cnt = str(primer_df_row[hdr_dict['try_cnt']])
-        self.complete = str(primer_df_row[hdr_dict['complete']])
-        self.blast_check = str(primer_df_row[hdr_dict['blast_check']])
-
-        self.g0_seq_target_len = \
-            int(primer_df_row[hdr_dict['g0_seq_target_len']])
-        self.g0_seq_target = \
-            str(primer_df_row[hdr_dict['g0_seq_target']])
-        self.g1_seq_target_len = \
-            int(primer_df_row[hdr_dict['g1_seq_target_len']])
-        self.g1_seq_target = \
-            str(primer_df_row[hdr_dict['g1_seq_target']])
-
-        self.seq_template_ref_len = \
-            int(primer_df_row[hdr_dict['seq_template_ref_len']])
-        self.seq_template_ref_abs_pos = \
-            str(primer_df_row[hdr_dict['seq_template_ref_abs_pos']])
-        self.seq_template_ref_rel_pos = \
-            str(primer_df_row[hdr_dict['seq_template_ref_rel_pos']])
-
-        self.PRIMER_PAIR_0_PRODUCT_SIZE = \
-            int(primer_df_row[hdr_dict['PRIMER_PAIR_0_PRODUCT_SIZE']])
-        self.PRIMER_LEFT_0 = \
-            str(primer_df_row[hdr_dict['PRIMER_LEFT_0']])
-        self.left_primer_id = \
-            str(primer_df_row[hdr_dict['left_primer_id']])
-        self.PRIMER_LEFT_0_SEQUENCE = \
-            str(primer_df_row[hdr_dict['PRIMER_LEFT_0_SEQUENCE']])
-        self.PRIMER_RIGHT_0 = \
-            str(primer_df_row[hdr_dict['PRIMER_RIGHT_0']])
-        self.right_primer_id = \
-            str(primer_df_row[hdr_dict['right_primer_id']])
-        self.PRIMER_RIGHT_0_SEQUENCE = \
-            str(primer_df_row[hdr_dict['PRIMER_RIGHT_0_SEQUENCE']])
-        self.SEQUENCE_TEMPLATE = \
-            str(primer_df_row[hdr_dict['SEQUENCE_TEMPLATE']])
-
-        # summer 20210910 add
-        self.product_gc_contents = \
-            str(primer_df_row[hdr_dict['product_gc_contents']])
-
-
-    def format_product(self, distin_gdct, duplicate_pos_dict):
-
-        if self.PRIMER_PAIR_0_PRODUCT_SIZE == 0:
-            product_size_0 = -1
-            product_size_1 = -1
-            digested_gno = -1
-            digested_ano = -1
-            digested_size_0 = -1
-            digested_size_1 = -1
-            diff_product_size = -1
-            digest_diff = -1
-
-        else:
-            product_size_0, \
-            product_size_1, \
-            digested_gno, \
-            digested_ano, \
-            digested_size_0, \
-            digested_size_1, \
-            diff_product_size, \
-            digest_diff = \
-                self.get_group_product_size()
-
-        #--------------------
-        line_list = list()
-
-
-        line_list += [self.chrom]
-        line_list += [self.pos]
-
-        line_list += [self.g0_vseq]
-        line_list += [self.g1_vseq]
-        line_list += [self.g0_gt]
-        line_list += [self.g1_gt]
-        line_list += [self.targ_ano]
-
-        line_list += [self.var_type]
-        # 2022-10-26 add
-        line_list += [self.mk_type]
-
-        # auto_grp
-        # primer.py primer_complete_to_line
-        #if glv.conf.is_auto_group:
-        line_list += [self.auto_grp0]
-        line_list += [self.auto_grp1]
-
-        #line_list += [comment]
-        # if this pos is duplicated, insert comment to this column 
-        # notice_line = 'dup,1/1-1/2;
-
-        # in_target
-        line_list += [self.in_target]
-
-        # dup_pos
-        dup_pos = self.add_dup_info(duplicate_pos_dict)
-        line_list += [dup_pos]
-
-        # add ';'
-        #notice_line = utl.make_notice(self.notice, notice_line)
-
-        # for notice
-        #line_list += [notice_line]
-
-        line_list += [self.enzyme_name]
-        line_list += [self.g0_name]
-        line_list += [self.g1_name]
-        line_list += [product_size_0]
-        line_list += [product_size_1]
-        # summer 20210910
-        line_list += [self.product_gc_contents]
-
-        # **
-        #line_list += [digest_diff]
-        line_list += [diff_product_size]
-        line_list += [digested_size_0]
-        line_list += [digested_size_1]
-
-        line_list += [digested_gno]
-        line_list += [digested_ano]
-        line_list += [self.try_cnt]
-        line_list += [self.complete]
-
-        line_list += [self.marker_id]
-        line_list += [self.gts_segr_lens]
-
-
-        # for amplicon
-        if distin_gdct['pick_mode'] == glv.MODE_SNP and \
-            self.PRIMER_LEFT_0_SEQUENCE != "-" and \
-            self.PRIMER_RIGHT_0_SEQUENCE != "-":
-
-            line_list += [self.left_primer_id]
-            line_list += ["{}{}".format(
-                glv.conf.amplicon_forward_tag,
-                self.PRIMER_LEFT_0_SEQUENCE)]
-
-            line_list += [self.right_primer_id]
-            line_list += ["{}{}".format(
-                glv.conf.amplicon_reverse_tag,
-                self.PRIMER_RIGHT_0_SEQUENCE)]
-
-        else:
-            line_list += [self.left_primer_id]
-            line_list += [self.PRIMER_LEFT_0_SEQUENCE]
-            line_list += [self.right_primer_id]
-            line_list += [self.PRIMER_RIGHT_0_SEQUENCE]
- 
-        return '\t'.join(map(str, line_list))
-
-
-    def get_genotype(self):
-        '''
-        '''
-
-        # 11/00,hoho_1,1.1/1.1
-        # self.gts_segr_lens
-        #print("self.gts_segr_lens={}".format(self.gts_segr_lens))
-        gts = self.gts_segr_lens.split(",")[0] 
-        #print("gts={}".format(gts))
-        g0_gt, g1_gt = gts.split("/")
-        #print("g0_gt={}, g1_gt={}".format(g0_gt, g1_gt))
-        g0_gtl = list(g0_gt)
-        #print("g0_gtl={}".format(g0_gtl))
-        g1_gtl = list(g1_gt)
-
-        g0_genotype = "{}/{}".format(g0_gtl[0], g0_gtl[1])
-        g1_genotype = "{}/{}".format(g1_gtl[0], g1_gtl[1])
-
-        #print("{}, {}".format(g0_genotype, g1_genotype))
-
-        return g0_genotype, g1_genotype
-
-
-
-
 

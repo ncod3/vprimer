@@ -21,6 +21,7 @@ from vprimer.variant import Variant
 from vprimer.marker import Marker
 from vprimer.primer import Primer
 from vprimer.formtxt import FormTxt
+from vprimer.chkhdimer import ChkHDimer
 
 def main():
 
@@ -42,6 +43,7 @@ class VPrimer(object):
         self.marker = Marker()
         self.primer = Primer()
         self.formtxt = FormTxt()
+        self.chkhdimer = ChkHDimer()
 
 
     def prepare(self):
@@ -79,6 +81,8 @@ class VPrimer(object):
         self.primer.construct_primer()
         # format
         self.formtxt.format_text()
+        # snp_filter: if pick_mode is SNP
+        self.chkhdimer.filter_and_check_hetero_dimer()
 
 
 if __name__ == '__main__':

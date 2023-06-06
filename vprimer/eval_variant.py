@@ -434,18 +434,33 @@ class EvalVariant(object):
         #self.seq_template_ref = ''
         #self.seq_template_ref_len = 0
 
+        # get chrom_len
+        chrom_info_list = glv.conf.get_chrom_info(self.chrom)
+        chrom_len = chrom_info_list[2]
+
         # frag_padを切り出す
         self.fragment_pad_len = glv.conf.fragment_pad_len
 
         # abs_posを決める
         self.abs_frag_pad_pre_end = self.abs_around_seq_pre_stt - 1
 
+        #=========================================================
         self.abs_frag_pad_pre_stt = \
             self.abs_frag_pad_pre_end - self.fragment_pad_len + 1
+        # 2023.04.28
+        if self.abs_frag_pad_pre_stt < 0:
+            self.abs_frag_pad_pre_stt = 1
+        #=========================================================
 
         self.abs_frag_pad_aft_stt = self.abs_around_seq_aft_end + 1
+
+        #=========================================================
         self.abs_frag_pad_aft_end = \
             self.abs_frag_pad_aft_stt + self.fragment_pad_len - 1
+        # 2023.04.28
+        if self.abs_frag_pad_aft_end > chrom_len:
+            self.abs_frag_pad_aft_end = chrom_len
+        #=========================================================
 
         # templateの絶対pos stringを最初に作る。
         # 最初はposはすべて完成しているが、今後端を切るために。

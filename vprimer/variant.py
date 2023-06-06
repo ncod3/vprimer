@@ -32,9 +32,23 @@ class Variant(object):
         """
 
         proc_name = "variant"
+
+        # stop or continue ---------------------------------
+        ret_status = utl.decide_action_stop(proc_name)
+
+        if ret_status == glv.progress_stop:
+            log.info(utl.progress_message(ret_status, proc_name))
+            sys.exit(1)
+
+        if ret_status == glv.progress_gothrough:
+            log.info(utl.progress_message(ret_status, proc_name))
+            return
+        # --------------------------------------------------
+
         log.info("-------------------------------")
         log.info("Start processing {}\n".format(proc_name))
 
+        '''
         # stop, action, gothrough
         ret_status = utl.decide_action_stop(proc_name)
 
@@ -55,7 +69,7 @@ class Variant(object):
             msg += "so skip program."
             log.info(msg)
             return
-
+        '''
 
         # open vcf through vcfpy
         reader = vcfpy.Reader.from_path(glv.conf.vcf_gt_path)
@@ -96,9 +110,28 @@ class Variant(object):
 
         with out_txt_path.open('a', encoding='utf-8') as f:
             # write header
-            f.write("{}\n".format(header_txt))
+            utl.w_flush(f, header_txt)
+
             # access to vcf using iterater
             for record in vcf_ittr:
+
+                # 20230428
+                # chrom len
+                chrom_info_list = glv.conf.get_chrom_info(record.CHROM)
+                chrom_len = chrom_info_list[2]
+
+                # 端の２つは、skipする。
+                # posが、端と21違い以内はskip
+                #               o  22=<|
+                # *12345678901234567890#12345678901234567890*(300)
+                #                      |279x
+                # ok: 1+20 + 1 >= pos      #  22 <= pos
+                # ok: max- 1 - 20 - 1 <= pos # 300-1-20-1 = 278
+
+                if record.POS < 1 + glv.AROUND_SEQ_LEN + 1: # 22
+                    continue
+                if record.POS > chrom_len - 1 - glv.AROUND_SEQ_LEN - 1: # 278
+                    continue
 
                 # ここでするのは、genotype_pairを作ること
                 skip, \
@@ -143,8 +176,8 @@ class Variant(object):
 
                         # If the pick_mode and the current var_type match
                         if asel.is_var_type_in_pick_mode(var_type):
-                            # out to file
-                            f.write("{}\n".format(var_line))
+                            # out to file, no \n
+                            utl.w_flush(f, var_line)
 
 
         ### print("STOP")
@@ -179,6 +212,17 @@ class Variant(object):
             skip = True
             #print("SKIP {}".format(uq_alstr_ndary))
             return skip, group_tuple_list, alstr_tuple_list, member_dict
+
+        # ホモsnp指定の場合、
+        if glv.conf.homo_snp:
+            # すべてのアリルストリングがホモならpass
+            for alstr in uq_alstr_ndary:
+                # 1つでもheteroだったらskip
+                if not utl.is_homo(alstr):
+                    skip = True
+                    #print("SKIP {}".format(uq_alstr_ndary))
+                    return skip, group_tuple_list, \
+                        alstr_tuple_list, member_dict
 
         ### print("in make_genotype_pair PASS {}".format(uq_alstr_ndary))
         # alstrの全組み合わせのタプルを作り、仮のグループ名でメンバ構成を作る

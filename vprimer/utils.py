@@ -392,14 +392,17 @@ def tabix(vcf_gt_pathlib):
 
 
 def refs_file_slink_backup_and_copy(src_pathlib, slink_pathlib, cp_mode=True):
+    '''
+    '''
+    #print("in refs_file_slink_backup_and_copy")
 
     if glv.noneed_update == is_need_update(src_pathlib, slink_pathlib):
 
-        log.info("do not need update between {} and {}.".format(
+        log.info("no need to update between {} and {}.".format(
             src_pathlib, slink_pathlib))
         return
 
-    log.info("need update between {} and {}.".format(
+    log.info("need to update between {} and {}.".format(
         src_pathlib, slink_pathlib))
 
     # もし渡されたファイルが、refs 以下ならば、シンボリックリンクを張らない
@@ -538,6 +541,7 @@ def decide_action_stop(now_progress):
     '''
 
     # Current location number
+    #print(now_progress)
     now_progress_no = glv.outlist.outf_prefix[now_progress]['no']
 
 #    print("now_progress={}, now_progress_no={}".format(
@@ -552,14 +556,14 @@ def decide_action_stop(now_progress):
     stop_no = 100
 
     # If progress_name is "all", progress_no is 0
-    if progress_name != "all":
+    if progress_name != glv.progress_all:
         progress_no = glv.outlist.outf_prefix[progress_name]['no']
 
     # If stop_name is "no", stop_no is 100
     if stop_name != "no":
         stop_no = glv.outlist.outf_prefix[stop_name]['no']
 
-    ret_status = "stop"
+    ret_status = glv.progress_stop
 
 #    print("progress_name={}, progress_no={}".format(
 #        progress_name, progress_no))
@@ -568,14 +572,14 @@ def decide_action_stop(now_progress):
 
     # decide
     if progress_no == 100:
-        ret_status = "action"
+        ret_status = glv.progress_action
     elif now_progress_no < progress_no:
-        ret_status = "gothrough"
+        ret_status = glv.progress_gothrough
     else:
-        ret_status = "action"
+        ret_status = glv.progress_action
 
     if stop_no < now_progress_no:
-        ret_status = "stop"
+        ret_status = glv.progress_stop
 
 #    print("ret_status={}".format(ret_status))
 
@@ -611,6 +615,16 @@ def check_for_files(filepath):
     return sorted(fobj_list)
     '''
 
+
+def is_homo(alstr):
+
+    homo = False
+
+    alstr_lst = list(alstr)
+    if alstr_lst[0] == alstr_lst[1]:
+        homo = True
+
+    return homo
 
 def is_same_gt(s0_a0, s0_a1, s1_a0, s1_a1):
     ''' not use
@@ -761,6 +775,7 @@ def sort_file(
     try_exec(cmd_cat)
 
     # rm header sorted
+
     rm_f(out_txt_header)
     rm_f(sorted_file)
 
@@ -1118,6 +1133,8 @@ def is_need_update(src_pathlib, dist_pathlib):
 
     try:
 
+        #print("in is_need_update")
+
         # 1) if src(file) not exist, it's error, stop.
         if not src_pathlib.exists() or not src_pathlib.is_file():
             er_m = "not found {}.".format(src_pathlib)
@@ -1144,14 +1161,20 @@ def is_need_update(src_pathlib, dist_pathlib):
 
             if st_mtime_src_pathlib > st_mtime_dist_pathlib:
                 do_update = glv.need_update
+            else:
+                log.info("src {} and dist {} timestamp is valid. {} <= {}".\
+                    format(src_pathlib, dist_pathlib,
+                    st_mtime_src_pathlib, st_mtime_dist_pathlib))
 
     except UserFormatErrorUtl as ex:
         log.error("Error: {}".format(ex))
         sys.exit(1)
 
     else:
-        log.info("{} update {}, {}.".format(
-            do_update, src_pathlib, dist_pathlib))
+        log.info("{} to update.".format(do_update))
+
+        #log.info("{} update {}, {}.".format(
+        #    do_update, src_pathlib, dist_pathlib))
         return do_update
 
 
@@ -1205,6 +1228,82 @@ def make_in_target(
         ret_line = "{},{}".format(original_in_target, in_target_line)
 
     return ret_line
+
+
+def progress_message(ret_status, proc_name):
+
+#proc, complete):
+
+    # stop, action, gothrough -----------------------
+    #ret_status = decide_action_stop(proc)
+
+    if ret_status == glv.progress_stop:
+
+        msg = "STOP. "
+        msg += "Current process \'{}\' ".format(proc_name)
+        msg += "has exceeded the User-specified stop point "
+        msg += "\'{}', ".format(glv.conf.stop)
+        msg += "so stop program. exit."
+        #log.info(msg)
+
+    else:
+    #elif ret_status == glv.progress_gothrough:
+
+        msg = "SKIP \'{}\'.".format(proc_name)
+
+        #msg = "SKIP \'{}\' proc, ".format(proc_name)
+        #msg += "glv.conf.progress = {}, ".format(
+        #    glv.conf.progress)
+        #msg += "glv.conf.stop = {}, ".format(glv.conf.stop)
+        #msg += "so skip program."
+        #log.info(msg)
+
+    '''
+    else:
+
+        log.info("-------------------------------")
+        log.info("Start processing {} complete={}\n".format(
+            proc, complete))
+    '''
+    return msg
+
+
+
+
+def is_integer(num):
+
+    try:
+        float(num)
+    except ValueError:
+        return False
+    else:
+        return float(num).is_integer()
+
+
+def is_float(num):
+
+    try:
+        float(num)
+    except ValueError:
+        return False
+    else:
+        return True
+
+
+def w_flush(f, line):
+    '''
+    '''
+
+    f.write('{}\n'.format(line))
+    f.flush()
+
+
+def w_flush_r(f, line):
+    ''' no lf
+    '''
+
+    f.write('{}'.format(line))
+    f.flush()
 
 
 class UserFormatErrorUtl(Exception):

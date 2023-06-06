@@ -32,6 +32,7 @@ ini_vprimer_file =      'ini_vprimer.txt'
 p3_normal_file =        'p3_normal.txt'
 p3_amplicon_file =      'p3_amplicon.txt'
 caps_enzyme_name_file = 'caps_enzyme_name_list.txt'
+whole_enzyme_file_ext = '.whole_enzyme.txt'
 current_setting_ini =   'current_setting_ini.txt'
 
 slink_prefix =          'slink_'
@@ -56,12 +57,10 @@ bam_slink_ext =         '_slink.bam'
 bed_mid_txt =           '_depth_'
 
 #####
-
-#bed_thal_prefix =       'bed_thal_'
-#bed_tmp_ext =           '.bed_tmp'
-
-#bed_thal_tmp_ext =      '.bed_thal_sort'
-#bed_thal_merge_ext =    '.bed_thal_merge'
+progress_all            = 'all'
+progress_stop           = 'stop'
+progress_action         = 'action'
+progress_gothrough      = 'gothrough'
 
 #-----------------------------------------
 # glv.conf.p3_mode
@@ -118,7 +117,7 @@ bam_bed_tmp_ext    = ".bed_tmp"
 # bed_thal
 bed_thal_prefix    = "bed_thal_"
 bed_thal_ext       = ".bta.bed"
-bed_thal_tmp_ext   = ".bed_thal_sort"
+bed_thal_sort_ext  = ".bed_thal_sort"
 bed_thal_merge_ext = ".bed_thal_merge"
 
 na_group_names     = "GRP_NA"
@@ -146,6 +145,12 @@ pick_mode_list = [
     MODE_CAPS,
     MODE_SNP,
     MODE_OOR
+]
+
+# check snp_filter_sub_command
+snp_filter_sub_command_list = [
+    'gcrange',
+    'interval',
 ]
 
 ##########################################
@@ -275,6 +280,7 @@ def init(prog_name):
     conf.open_log_enzyme()
     conf.open_log_bedfile()
     conf.open_log_currset()
+    conf.open_log_confampl()
 
     outlist.open_log()
 

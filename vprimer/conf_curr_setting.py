@@ -64,8 +64,9 @@ class ConfCurrSet(object):
                     vname == "enzyme" or \
                     vname == "group_members" or \
                     vname == "blast_distance" or \
-                    vname == "use_joblib_threading" or \
                     vname == "amplicon_param":
+
+                    # vname == "use_joblib_threading" or
 
                     current_setting_ini.append("\n#")
 
@@ -80,10 +81,6 @@ class ConfCurrSet(object):
         # write to sample_name_file
         with self.curr_setting_path.open('w', encoding='utf-8') as f:
             # Export while adjusting
-            #line = self.convert_setting_ini(current_setting_ini)
-            #f.write("{}\n".format("\n".join(current_setting_ini)))
-
-            #pprint.pprint(current_setting_ini)
             line = self.convert_setting_ini(current_setting_ini)
             f.write("{}\n".format(line))
 

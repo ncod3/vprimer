@@ -152,8 +152,8 @@ https://github.com/YukinobuKurata/YouTubeMagicBuyButton/blob/master/MIT-LICENSS
 E.txt
 
 ## Changelog
-- 2023-04-12
-	- 1.0.4 Fixed the order of the columns in the output file.
+- 2023-06-06
+	- 1.0.5 Includes Hetero Dimer check in SNP mode.
 - 2023-04-10
 	- 1.0.3 add 'in_target' and 'dup_pos' field in result output.
 - 2023-04-09
