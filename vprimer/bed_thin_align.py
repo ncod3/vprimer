@@ -166,26 +166,41 @@ class BedThinAlign(object):
                 bam_bed_path = "-"          # 変換後のbam_bedのPath
                 bta_min_max_depth = "-"
 
+                # extension_without_dot = file_path.suffix.lstrip('.')
+
                 if associated_bam != "-":
+                    # bedでも可
                     # user_bam_path
                     user_bam_path = Path(associated_bam).resolve()
                     bta_min_max_depth = self.bta_min_max_depth
-
-                    # user_bam_file_path existance check
-                    if not user_bam_path.exists():
-                        er = "bam_file not found "
-                        er += "{}.".format(associated_bam)
-                        log.error(er)
-                        sys.exit(1)
 
                     # make bed file name and get pathlib
                     bam_bed_path = self.make_name_bam_bed_path(
                         user_bam_path, self.min_depth, self.max_depth)
 
+                    # user_bam_file_path existance check
+                    if not user_bam_path.exists():
+
+                        if bam_bed_path.exists():
+                            er = "The Bam file {} was ".format(associated_bam)
+                            er += "not found, but a corresponding bed file "
+                            er += "{} for this Bam file ".format(bam_bed_path)
+                            er += "was found. This bed file will be used."
+                            log.info(er)
+                            # change status to "-"
+                            user_bam_path = "-"
+
+                        else:
+                            # If there is a bed file corresponding to bam, use it.
+                            er = "The Bam file {} ".format(associated_bam)
+                            er += "not found."
+                            log.error(er)
+                            sys.exit(1)
+
                 # dictionary
                 self.bam_table_dict[vcf_sample] = {
                     'vcf_sample': vcf_sample,
-                    'associated_bam': associated_bam,
+                    'associated_bam': associated_bam,   # bedかもしれない
                     'user_bam_path': user_bam_path,
                     #'slink_bam_path': bam_path,
                     'min_max_depth': bta_min_max_depth,
