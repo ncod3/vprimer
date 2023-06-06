@@ -80,7 +80,7 @@ depth_no_check =        'depth_no_check'
 
 depth_bam_table =       'depth_bam_table'
 depth_bed_thal =        'depth_bed_thal'
-depth_bed_bams =        'depth_bed_bams'
+#depth_bed_bams =        'depth_bed_bams'
 
 ##########################################
 # NonePath for pathlib resolve()

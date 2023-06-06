@@ -213,9 +213,9 @@ class Param(object):
 
         # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         # --bed_thal
-        #parser.add_argument('--bed_thal', action='store',
-        #    type=str, metavar='file',
-        #    help="bed_thal file")
+        parser.add_argument('--bed_thal', action='store',
+            type=str, metavar='file',
+            help="bed_thal file")
 
         # --bam_table
         hlp = "Correspondence table between sample names and bam files"
@@ -224,7 +224,10 @@ class Param(object):
             type=str, metavar="{}".format(metavar),
             help="{}".format(hlp))
 
-        # --bed_bams
+        # --bed_bams これは、bam_tableで代用できる。
+        # つまり、bamに対応するbedがあるならば、
+        # bam_tableに、bamファイル名を書いておくだけで、
+        # bedファイルを参照してくれるから。
         #parser.add_argument('--bed_bams', action='store',
         #    type=str, metavar='bam',
         #    nargs='*',

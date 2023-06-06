@@ -151,19 +151,28 @@ class ConfBedFile(object):
 
             log.info("finished, {}".format(utl.elapse_epoch()))
 
-        elif self.depth_mode == glv.depth_bed_bams:
+        #elif self.depth_mode == glv.depth_bed_bams:
             # 共通bamを指定
             # glv.conf.user_bed_bams_str
             # bamを指定した、bed_thal を作成
-            pass
+        #    pass
 
 
         elif self.depth_mode == glv.depth_bed_thal:
             # 共通bed_thalを指定
-            # glv.conf.user_bed_thal_path
-            distin_grp_dict['bed_thal_path'] = glv.conf.user_bed_thal_path
-            # 存在の確認
+            bed_thal_path = glv.conf.user_bed_thal_path
 
+            # 存在の確認
+            if not bed_thal_path.exists():
+                er_m = "not found bed_thal {}".format(bed_thal_path)
+                log.error(er_m)
+                sys.exit(1)
+
+            # glv.conf.user_bed_thal_path
+            distin_grp_dict['bed_thal_path'] = bed_thal_path
+            mes = "All analyzes are set to use "
+            mes += "the bed_thal {}".format(bed_thal_path)
+            log.info(mes)
 
         else:
             # glv.depth_no_check:

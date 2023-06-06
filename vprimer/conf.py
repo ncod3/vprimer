@@ -106,8 +106,9 @@ class ConfBase(object):
                             {'dtype': 'str',    'default': ''},
             'bed_thal':
                             {'dtype': 'str',    'default': ''},
-            'bed_bams':
-                            {'dtype': 'str',    'default': ''},
+            # 不要
+            #'bed_bams':
+            #                {'dtype': 'str',    'default': ''},
             # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
             # min_max_depth
@@ -546,6 +547,8 @@ class ConfBase(object):
 
         # bed_thal ==============================================
 
+        # bam_tabelと、bed_tha
+
         # user specified bam_table ------------------------------
         self.user_bam_table = self.selected_value('bam_table')
         self.user_bam_table_path = Path(self.user_bam_table).resolve()
@@ -555,7 +558,11 @@ class ConfBase(object):
         self.user_bed_thal_path = Path(self.user_bed_thal).resolve()
 
         # user specified bed_bams -------------------------------
-        self.user_bed_bams_str = self.selected_value('bed_bams')
+        #self.user_bed_bams_str = self.selected_value('bed_bams')
+        if self.user_bam_table != "" and self.user_bed_thal != "":
+            er_m = "bam_table and bed_thal cannot be specified together."
+            log.error(er_m)
+            sys.exit(1)
 
         # depth_check ----------------------
         self.depth_mode = glv.depth_no_check   # NoCheck
@@ -569,8 +576,8 @@ class ConfBase(object):
             self.depth_mode = glv.depth_bed_thal
 
         # (3) self.user_bed_bams_str
-        elif self.user_bed_bams_str != "":
-            self.depth_mode = glv.depth_bed_bams
+        #elif self.user_bed_bams_str != "":
+        #    self.depth_mode = glv.depth_bed_bams
 
         # thin_depth --------------------------------------------
         self.min_max_depth = self.selected_value('min_max_depth')

@@ -30,7 +30,8 @@ class FormTxt(object):
     def __init__(self):
 
         # debug
-        self.alstr_stop = True
+        #self.alstr_stop = True
+        self.alstr_stop = False
 
 
     def format_text(self):
@@ -170,14 +171,6 @@ class FormTxt(object):
                         vcf_reader_formpass,
                         sample_fullname_ordered_list)
 
-                    if len(alstr_list) != 2:
-                        print(len(alstr_list))
-                        print(type(alstr_list))
-                        print(">{}<".format(alstr_list))
-                        print(line)
-                        sys.exit(1)
-
-
                     line = "{}\t{}".format(line, "\t".join(alstr_list))
 
                 # no \n
@@ -220,11 +213,6 @@ class FormTxt(object):
                 alstr_list += [alstr]
 
         #alstr_line = '\t'.join(alstr_list)
-
-        if len(alstr_list) != 2:
-            print(alstr_list)
-            sys.exit(1)
-
         return alstr_list
 
 
