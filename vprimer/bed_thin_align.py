@@ -390,6 +390,10 @@ class BedThinAlign(object):
             }
 
             # read bam_hed_header
+            #print(">{}<".format(bam_bed_path))
+            if bam_bed_path == "-":
+                continue
+
             with bam_bed_path.open('r', encoding='utf-8') as f:
                 for r_liner in f:
                     r_line = r_liner.strip()    # ct, ws
