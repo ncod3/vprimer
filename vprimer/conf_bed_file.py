@@ -168,6 +168,17 @@ class ConfBedFile(object):
                 log.error(er_m)
                 sys.exit(1)
 
+            else:
+                # bedとしての動作チェック
+                err_str = utl.bed_validation(bed_thal_path)
+                if err_str != "":
+                    er_m = "For the following bed_thal "
+                    er_m += "file that already exists, "
+                    er_m += "bedtools says that:\n\n{}".format(err_str)
+                    log.error(er_m)
+                    sys.exit(1)
+
+
             # glv.conf.user_bed_thal_path
             distin_grp_dict['bed_thal_path'] = bed_thal_path
             mes = "All analyzes are set to use "

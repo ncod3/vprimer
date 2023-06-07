@@ -263,7 +263,7 @@ def try_exec(cmd, can_log=True):
         sys.exit(1)
 
 
-def try_exec_error(cmd):
+def try_exec_error(cmd, print_info=True):
     '''
     '''
     # https://qiita.com/HidKamiya/items/e192a55371a2961ca8a4
@@ -271,7 +271,8 @@ def try_exec_error(cmd):
     err_str = ''
 
     try:
-        log.info("do {}".format(cmd))
+        if print_info:
+            log.info("do {}".format(cmd))
 
         sbp.run(cmd,
             stdout=PIPE,
@@ -282,6 +283,15 @@ def try_exec_error(cmd):
 
     except sbp.CalledProcessError as e:
         err_str = e.stderr
+
+    return err_str
+
+
+def bed_validation(bam_bed_path):
+    '''
+    '''
+    cmd1 = "{} merge -i {} > /dev/null".format('bedtools', bam_bed_path)
+    err_str = try_exec_error(cmd1, False)
 
     return err_str
 

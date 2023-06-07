@@ -157,6 +157,8 @@ Released under the MIT license
 https://github.com/YukinobuKurata/YouTubeMagicBuyButton/blob/master/MIT-LICENSSE.txt
 
 ## Changelog
+- 2023-06-07
+	- 1.0.6 Fixed a bug related to incorporating the allele string information(00 01).
 - 2023-06-06
 	- 1.0.5 Includes Hetero Dimer check in SNP mode.
 - 2023-04-10

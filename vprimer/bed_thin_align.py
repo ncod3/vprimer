@@ -261,7 +261,15 @@ class BedThinAlign(object):
 
             # すでに、指定のファイル名のbedがあれば、何もしない
             if bam_bed_path.exists():
-                log.info("bam_bed {} already exist.".format(bam_bed_path))
+                # bedとしての動作チェック
+                err_str = utl.bed_validation(bam_bed_path)
+                if err_str != "":
+                    er_m = "For the following bed file that already exists, "
+                    er_m += "bedtools says that:\n\n{}".format(err_str)
+                    log.error(er_m)
+                    sys.exit(1)
+
+                #log.info("bam_bed {} already exist.".format(bam_bed_path))
                 continue
 
             #----------------------------------------------

@@ -30,8 +30,8 @@ class FormTxt(object):
     def __init__(self):
 
         # debug
-        self.alstr_stop = True
-        #self.alstr_stop = False
+        #self.alstr_stop = True
+        self.alstr_stop = False
         pass
 
 
@@ -150,11 +150,28 @@ class FormTxt(object):
 
                 # index_no = primer_df_row[0]
                 # marker_id = primer_df_row[1]
-                chrom_name = primer_df_row[2]
-                pos = primer_df_row[3]
+                #chrom_name = primer_df_row[2]
+                #pos = primer_df_row[3]
 
                 self.prepare_from_primer_file(
                     primer_df_row, distin_gdct)
+
+                #print("self.marker_id={}".format(self.marker_id))
+                #print("self.chrom={}".format(self.chrom))
+                #print("self.pos={}".format(self.pos))
+                #print("self.targ_grp={}".format(self.targ_grp))
+                #print("self.g0_name={}".format(self.g0_name))
+                #print("self.g1_name={}".format(self.g1_name))
+                #print("self.targ_ano={}".format(self.targ_ano))
+                #print("self.g0_ano={}".format(self.g0_ano))
+                #print("self.g1_ano={}".format(self.g1_ano))
+                #print("self.vseq_gno_str={}".format(self.vseq_gno_str))
+                #print()
+
+                # REF=
+                #ano_gno = self.targ_ano.split(',')
+
+                #if split(self.targ_ano).split(',')[1] ==
 
                 # ********************************************
                 # duplicate_pos_dict: format duplicate line
@@ -163,12 +180,12 @@ class FormTxt(object):
                 # ********************************************
 
                 # For formpass, append the allele string to the end
-                if not self.alstr_stop:
+                if not self.alstr_stop and proc_name == "formpass":
                 #if proc_name == "formpass":
 
                     # add member's alstr
                     alstr_list = self.get_members_alstr(
-                        chrom_name, pos,
+                        self.chrom, self.pos,
                         vcf_reader_formpass,
                         sample_fullname_ordered_list)
 
@@ -197,15 +214,26 @@ class FormTxt(object):
         close_end = open_stt + 1
 
         alstr_list = list()
+
         # Since fetch may bring multiple records, only those whose
         # pos is close_end are targeted.
         for record in vcf_reader_formpass.fetch(
             chrom_name, open_stt, close_end):
 
-            if record.POS != close_end:
-                print("{} != {}, {}".format(record.POS, close_end, record))
+            # here
+            #print("{}, {}\t{}\t{}\t{}".format(
+            #    close_end,
+            #    record.CHROM, record.POS, record.REF, record.ALT))
+
+            # (1) vcf_readerによって集められたrecordのPOSが、formpassのposと
+            # 異なる場合には、variantの関連領域はかぶるが、
+            # 解析に用いられたバリアントではないことがわかるので、扱わない
+            mes = self.confirm_selected_variant(record, close_end)
+            if mes != "":
+                #log.info(mes)
                 continue
 
+            # サンプルを検索し、alstrを作る
             for fn in sample_fullname_ordered_list:
                 alstr = \
                     AlleleSelect.record_call_for_sample(
@@ -216,6 +244,79 @@ class FormTxt(object):
 
         #alstr_line = '\t'.join(alstr_list)
         return alstr_list
+
+
+    def confirm_selected_variant(self, record, close_end):
+        '''
+        '''
+        mes = ""
+
+        # positionが異なる場合、使わない
+        if record.POS != close_end:
+            mes = "{} != {}, {}".format(record.POS, close_end, record)
+            return mes
+
+        # formpassの、グループの２つのseqが、recordのseqと等しい場合に
+        # このレコードが解析に用いたバリアントであるとする。
+
+        # レコードの vseq_by_ano のリスト
+        rec_vseq_ano = [record.REF]
+        [rec_vseq_ano.append(alt.value) for alt in record.ALT]
+        #print("{}\trec_vseq_ano".format(rec_vseq_ano))
+
+        # レコードの ano のリスト
+        rec_ano = list(range(len(rec_vseq_ano)))
+        #print("{}\trec_ano".format(rec_ano))
+
+        # formpassの vseq_by_gno のリスト
+        form_2vseq_gno = self.vseq_gno_str.split(',')
+        #print("{}\tform_2vseq_gno".format(form_2vseq_gno))
+
+        # formpassの ano_by_gno のリスト
+        form_ano_gno = list(map(int, self.targ_ano.split(',')))
+        #print("{}\tform_ano_gno".format(form_ano_gno))
+
+        # 情報を集約したdict
+        form_2vseq_list = [
+            {'ano': form_ano_gno[0], 'seq': form_2vseq_gno[0]},
+            {'ano': form_ano_gno[1], 'seq': form_2vseq_gno[1]},
+        ]
+
+        #print("{}\tform_2vseq_list".format(form_2vseq_list))
+
+        form_ano0 = form_2vseq_list[0]['ano']
+        #print("{}\tform_ano0".format(form_ano0))
+        form_ano1 = form_2vseq_list[1]['ano']
+        #print("{}\tform_ano1".format(form_ano1))
+
+        form_seq0 = form_2vseq_list[0]['seq']
+        #print("{}\tform_seq0".format(form_seq0))
+        form_seq1 = form_2vseq_list[1]['seq']
+        #print("{}\tform_seq1".format(form_seq1))
+
+        # formのanoが、recordのanoにない場合、探索終わり
+        for f_ano in form_ano_gno:
+            if not f_ano in rec_ano:
+                # over
+                mes = "{} not in {}".format(f_ano, rec_ano)
+                return mes
+
+        # formのseq1が、recと違うなら、探索終わり
+        if rec_vseq_ano[form_ano0] != form_seq0:
+            mes = "\nover form_ano0 {} ".format(form_ano0)
+            mes += "form_seq0 {} ".format(form_seq0)
+            mes += "!= {}\n\n".format(rec_vseq_ano[form_ano0])
+            #print(mes)
+            return mes
+
+        if rec_vseq_ano[form_ano1] != form_seq1:
+            mes = "\nover form_ano1 {} ".format(form_ano1)
+            mes += "form_seq1 {} ".format(form_seq1)
+            mes += "!= {}\n\n".format(rec_vseq_ano[form_ano1])
+            #print(mes)
+            return mes 
+
+        return mes
 
 
     def make_duplicate_pos_dict(self, df_distin_form):
