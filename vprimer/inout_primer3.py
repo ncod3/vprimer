@@ -94,7 +94,6 @@ class InoutPrimer3(object):
         left_info = self.left_fasta_id.split(':')
         right_info = self.right_fasta_id.split(':')
 
-
         self.product_chrom = str(left_info[0])
         self.product_sttpos = int((left_info[1].split('-'))[0])
         self.product_endpos = int((right_info[1].split('-'))[1])
@@ -393,7 +392,8 @@ class InoutPrimer3(object):
         ''' calc_Hetero_dimer(seq1, seq2[, mv_conc=50.0, dv_conc=0.0,
             dntp_conc=0.8, dna_connc=50.0, temp_c=37, max_loop=30])
         '''
-        p3hd = primer3.bindings.calcHeterodimer(l_seq, r_seq, output_structure=True)
+        p3hd = primer3.bindings.calcHeterodimer(
+            l_seq, r_seq, output_structure=True)
         return p3hd
 
     def calc_homo_dimer(self, l_seq, r_seq):
@@ -429,7 +429,7 @@ class InoutPrimer3(object):
                 'stat':     hetd.structure_found,
                 'tm':       hetd.tm,
                 'detail':   hetd.ascii_structure,
-                'ok':       '.',
+                'ok':       True,
                 },
             }
 
@@ -441,7 +441,10 @@ class InoutPrimer3(object):
         #if not is_hetero_dimer_ok:
         #    print(hd_dict['hetd']['detail'])
 
-        return is_hetero_dimer_ok
+        hd_dict['hetd']['ok'] = is_hetero_dimer_ok
+
+        #return is_hetero_dimer_ok
+        return hd_dict
 
 ### 
 ###         is_hetero_dimer_ok = True

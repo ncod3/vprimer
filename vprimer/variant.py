@@ -96,7 +96,7 @@ class Variant(object):
         # File name to export variant data
         out_txt_path = distin_gdct['variant']['fn'][reg]['out_path']
         # If there is old data with the same name, back it up
-        utl.save_to_tmpfile(out_txt_path)
+        utl.save_to_tmpfile(out_txt_path, pre_log=True)
 
         # header: if glv.conf.is_auto_group, remove last 2 columns
         header_txt = distin_gdct['variant']['hdr_text']

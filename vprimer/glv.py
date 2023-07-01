@@ -43,9 +43,6 @@ chrom_txt_ext =         '.chrom.txt'
 blastdb_ext =           '.blastdb'
 pickle_ext =            '.pickle'
 
-need_update =           'need'
-noneed_update =         'no_need'
-
 vcf_sample_name_ext =   '_sample_name.txt'
 vcf_sample_bam_ext =    '_sample_bam_table.txt'
 

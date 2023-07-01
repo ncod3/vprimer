@@ -96,7 +96,7 @@ class FormTxt(object):
 
         # If the specified file already exists, move that file
         # to the bak directory.
-        utl.save_to_tmpfile(out_txt_path)
+        utl.save_to_tmpfile(out_txt_path, pre_log=True)
 
         #====================================================
         # header

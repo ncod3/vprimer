@@ -86,6 +86,10 @@ class OutList(object):
                     distin_grp_dict[key]['fn'][reg]['base_nam'] = \
                         base_name
 
+                    # ampliconにおける当初のインターバルポイント
+                    if key == 'chkhdimer':
+                        distin_grp_dict[key]['fn'][reg]['intv_stt'] = 0
+
         # make argment list
         glv.conf.gdct_reg_list = list()
         glv.conf.all_proc_cnt = 0

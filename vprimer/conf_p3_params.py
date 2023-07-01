@@ -48,11 +48,10 @@ class ConfP3Params(object):
                 header_txt, line_list, sys_path, sys_path_org)
 
         else:
-            # sys_path backup
-            if glv.need_update == utl.is_need_update(
-                sys_path, self.bak_timestamp_path):
-                    # copy if updated
-                    utl.save_to_tmpfile(sys_path, True, True)
+            # compare timestamp for backup copy
+            if utl.is_need_update(sys_path, "timestamp"):
+                # copy if updated
+                utl.save_to_tmpfile(sys_path, copy_mod=True)
 
         # 読み込むファイルは、システムファイルかユーザファイル
         read_file_path = sys_path

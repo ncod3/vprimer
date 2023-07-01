@@ -68,7 +68,7 @@ $ conda activate vprimer
 Prepare the remaining required environments using the conda install command.
 
 ```
-(vprimer) $ conda install pandas vcfpy pysam joblib samtools bcftools bedtools tabix primer3 primer3-py blast
+(vprimer) $ conda install pandas vcfpy pysam samtools bcftools bedtools tabix primer3 primer3-py blast
 ```
 
 Install vprimer. First, try uninstalling.
@@ -157,6 +157,8 @@ Released under the MIT license
 https://github.com/YukinobuKurata/YouTubeMagicBuyButton/blob/master/MIT-LICENSSE.txt
 
 ## Changelog
+- 2023-07-01
+	- 1.0.7 Improved the behavior of heterodimer checks in SNP mode.
 - 2023-06-07
 	- 1.0.6 Fixed a bug related to incorporating the allele string information(00 01).
 - 2023-06-06

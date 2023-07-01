@@ -831,8 +831,13 @@ class ConfDistinG(object):
                 'product_size'  : product_size,
                 'group01_sn_nds': group01_sn_nds,
                 'distin_str'    : distin_str,
-                'hdimer_seq'    : list(),
-                'hdimer_ng'     : list()}
+                # これは初期化が必要
+                # amplicon での ヘテロダイマーチェック用
+                'hdimer_seq'    : list(),   # SNPモードで、プライマを集める
+                'hdimer_ng'     : list(),   # NGとなったプライマを集める
+                'hdimer_ngc'    : 0,        # NGのペア数
+                'hdimer_dict'   : dict(),   # プライマの位置を示す辞書
+            }
 
             # append a dict to list
             distinguish_groups_list.append(distin_grp_dict)

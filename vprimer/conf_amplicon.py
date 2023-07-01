@@ -114,7 +114,7 @@ class ConfAmplicon(object):
 
         # default value
 
-        print("self.snp_filter={}".format(self.snp_filter))
+        #print("self.snp_filter={}".format(self.snp_filter))
 
         snp_filter_gcrange = "" # "50-55"
         snp_filter_gc_min = 0.00
@@ -215,7 +215,7 @@ class ConfAmplicon(object):
         er_m = "{} was set to snp_filter_gcrange.".format(
             snp_filter_gcrange)
         log.info(er_m)
-        er_m = "{} was set to snp_filter_interval.".format(
+        er_m = "{:,} was set to snp_filter_interval.".format(
             snp_filter_interval)
         log.info(er_m)
 

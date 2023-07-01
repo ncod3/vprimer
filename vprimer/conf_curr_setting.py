@@ -74,7 +74,7 @@ class ConfCurrSet(object):
         if self.curr_setting_path.exists():
             # If the file exists, move it to bak
             log.info("found {}".format(self.curr_setting_path))
-            utl.save_to_tmpfile(self.curr_setting_path)
+            utl.save_to_tmpfile(self.curr_setting_path, pre_log=True)
         else:
             log.info("not found {}".format(self.curr_setting_path))
 

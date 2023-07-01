@@ -60,7 +60,7 @@ class LogConf(object):
         self.config['handlers']['fileHandler']['filename'] = \
             str(log_file_path)
         # before logging
-        utl.save_to_tmpfile(log_file_path, False)
+        utl.save_to_tmpfile(log_file_path, pre_log=True)
 
         log = LogConf.open_log(mod_name)
 

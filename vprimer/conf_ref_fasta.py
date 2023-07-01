@@ -65,7 +65,7 @@ class ConfRefFasta(object):
         utl.refs_file_slink_backup_and_copy(src_path, slink_path)
 
         # 2) Convert fasta to BGZIP format
-        if glv.need_update == utl.is_need_update(src_path, bgzip_path):
+        if utl.is_need_update(src_path, bgzip_path):
 
             # convert fasta to BGZIP format
             self.update_bgzip_fasta(src_path, bgzip_path)
@@ -124,7 +124,7 @@ class ConfRefFasta(object):
 
         # (1) ------------------------------------------
         # backup fai
-        utl.save_to_tmpfile(fai_bgzip_path, can_log=True)
+        utl.save_to_tmpfile(fai_bgzip_path)
 
         # make fai file
         if not fai_bgzip_path.exists():
@@ -323,7 +323,7 @@ class ConfRefFasta(object):
 
         # pathlib read_txt, print
         s = self.ref_bgzip_chrom_txt_path.read_text()
-        mes = "fasta's chromosome information is here."
+        mes = "fasta's chromosome information is below."
         log.info("{}\n{}\n\n{}".format(mes, self.ref_bgzip_chrom_txt_path, s))
 
         return ref_fasta_chrom_dict_list, \

@@ -237,15 +237,15 @@ def prelog(line, name):
     print("prelog: {} {}".format(name, line), file=sys.stderr)
 
 
-def try_exec(cmd, can_log=True):
+def try_exec(cmd, pre_log=False, print_log=False):
     '''
     '''
     try:
-        if can_log == True:
-            log.info("do {}".format(cmd))
-        else:
-            #print("do {}".format(cmd), file=sys.stderr)
-            prelog("do {}".format(cmd), __name__)
+        if print_log:
+            if pre_log:
+                prelog("do {}".format(cmd), __name__)
+            else:
+                log.info("do {}".format(cmd))
 
         sbp.run(cmd,
             stdout=PIPE,
@@ -255,7 +255,7 @@ def try_exec(cmd, can_log=True):
             check=True)
 
     except sbp.CalledProcessError as e:
-        if can_log == True:
+        if _log == True:
             log.error("{}.".format(e.stderr))
         else:
             prelog("{}.".format(e.stderr), cmd)
@@ -263,7 +263,7 @@ def try_exec(cmd, can_log=True):
         sys.exit(1)
 
 
-def try_exec_error(cmd, print_info=True):
+def try_exec_error(cmd, pre_log=False, print_log=False):
     '''
     '''
     # https://qiita.com/HidKamiya/items/e192a55371a2961ca8a4
@@ -271,8 +271,11 @@ def try_exec_error(cmd, print_info=True):
     err_str = ''
 
     try:
-        if print_info:
-            log.info("do {}".format(cmd))
+        if print_log:
+            if pre_log:
+                prelog("do {}".format(cmd), __name__)
+            else:
+                log.info("do {}".format(cmd))
 
         sbp.run(cmd,
             stdout=PIPE,
@@ -291,14 +294,18 @@ def bed_validation(bam_bed_path):
     '''
     '''
     cmd1 = "{} merge -i {} > /dev/null".format('bedtools', bam_bed_path)
-    err_str = try_exec_error(cmd1, False)
+    err_str = try_exec_error(cmd1)
 
     return err_str
 
 
-def save_to_tmpfile(file_path_pathlib, can_log=True, copy_mod=False):
+def save_to_tmpfile(file_path_pathlib,
+        pre_log=False, print_log=False, copy_mod=False):
     '''
     '''
+
+    #print("save_to_tmpfile: {} {} {}".format(
+    #    file_path_pathlib, can_log, copy_mod))
 
     ret = False
 
@@ -321,11 +328,11 @@ def save_to_tmpfile(file_path_pathlib, can_log=True, copy_mod=False):
 
         file_bak_path = glv.conf.out_bak_dir_path / basename_file
 
-
         ret = True
 
         new_file_path = glv.conf.out_bak_dir_path / "{}.{}".format(
-            glv.now_datetime_str, basename_file)
+            basename_file, glv.now_datetime_str)
+            #glv.now_datetime_str, basename_file)
 
         #print(file_path_pathlib)
         #print(file_bak_path)
@@ -335,25 +342,29 @@ def save_to_tmpfile(file_path_pathlib, can_log=True, copy_mod=False):
         mode = "mv"
         if copy_mod == True:
             mode = "cp"
-            cp_f(file_path_pathlib, new_file_path, can_log)
 
+            cp_f(file_path_pathlib, new_file_path,
+                print_log=print_log, pre_log=pre_log)
         else:
-            mv_f(file_path_pathlib, new_file_path, can_log)
+
+            mv_f(file_path_pathlib, new_file_path,
+                print_log=print_log, pre_log=pre_log)
         
-        if can_log:
+        if print_log:
             log.info("done {}. {} to {}".format(
                 file_path_pathlib, mode, new_file_path))
 
     return ret
 
 
-def ln_s(source_file_pathlib, symbolic_link_file_pathlib, can_log=True):
+def ln_s(source_file_pathlib, symbolic_link_file_pathlib):
     ''' source_file_pathlib.symlink_to(symbolic_link_file_pathlib)
+        log, True
     '''
 
     cmd1 = "{} {} {}".format(
         'ln -s', source_file_pathlib, symbolic_link_file_pathlib)
-    try_exec(cmd1, can_log)
+    try_exec(cmd1, print_log=True)
 
 
 def rm_f(remove_file_pathlib):
@@ -370,23 +381,25 @@ def makedirs(dir_name_pathlib):
 
     cmd1 = "{} {}".format(
         'mkdir -p', dir_name_pathlib)
-    try_exec(cmd1, False)
+    try_exec(cmd1)
 
 
-def mv_f(source_file_pathlib, renamed_file_pathlib, can_log=False):
+def mv_f(source_file_pathlib, renamed_file_pathlib,
+        pre_log=False, print_log=False):
     '''
     '''
     cmd1 = "{} {} {}".format(
         'mv', source_file_pathlib, renamed_file_pathlib)
-    try_exec(cmd1, can_log)
+    try_exec(cmd1, pre_log=pre_log, print_log=print_log)
 
 
-def cp_f(source_file_pathlib, copyed_file_pathlib, can_log=False):
+def cp_f(source_file_pathlib, copyed_file_pathlib,
+        pre_log=False, print_log=False):
     '''
     '''
     cmd1 = "{} {} {}".format(
         'cp', source_file_pathlib, copyed_file_pathlib)
-    try_exec(cmd1, can_log)
+    try_exec(cmd1, pre_log=pre_log, print_log=print_log)
 
 
 def tabix(vcf_gt_pathlib):
@@ -406,23 +419,29 @@ def refs_file_slink_backup_and_copy(src_pathlib, slink_pathlib, cp_mode=True):
     '''
     #print("in refs_file_slink_backup_and_copy")
 
-    if glv.noneed_update == is_need_update(src_pathlib, slink_pathlib):
+    #print("src_pathlib={}".format(src_pathlib))
+    #print("slink_pathlib={}".format(slink_pathlib))
+    #print("cp_mode={}".format(cp_mode))
 
-        log.info("no need to update between {} and {}.".format(
+    if is_need_update(src_pathlib, slink_pathlib):
+
+        log.info("NEED to update between {} and {}.".format(
             src_pathlib, slink_pathlib))
-        return
 
-    log.info("need to update between {} and {}.".format(
-        src_pathlib, slink_pathlib))
+        # もし渡されたファイルが、refs 以下ならば、
+        # シンボリックリンクを張らない
+        # のがいいんじゃないか
 
-    # もし渡されたファイルが、refs 以下ならば、シンボリックリンクを張らない
-    # のがいいんじゃないか
+        # 1) backup slink file
+        save_to_tmpfile(slink_pathlib)
 
-    # 1) backup slink file
-    save_to_tmpfile(slink_pathlib, can_log=True)
+        # 2) slink src to slink
+        ln_s(src_pathlib, slink_pathlib)
 
-    # 2) slink src to slink
-    ln_s(src_pathlib, slink_pathlib)
+    else:
+
+        log.info("no_need to update between {} and {}.".format(
+            src_pathlib, slink_pathlib))
 
     # don't copy to refdir
     #if cp_mode:
@@ -448,22 +467,9 @@ def refs_make_original_file_and_copy(
 
     log.info("cp {} to {}.".format(sys_pathlib_org, sys_pathlib))
     # 1) システムをバックアップして、
-    save_to_tmpfile(sys_pathlib, can_log=True)
+    save_to_tmpfile(sys_pathlib)
     # 2) オリジナルをコピーする
-    cp_f(sys_pathlib_org, sys_pathlib, True)
-
-
-
-#=========================================================
-def write_df_to_csv(dataframe, out_file, index=True, force=True):
-    '''
-    '''
-    file_name = out_file
-    moved = False
-    if force == True:
-        moved = save_to_tmpfile(out_file)
-
-    dataframe.to_csv(out_file, sep='\t', index=index)
+    cp_f(sys_pathlib_org, sys_pathlib)
 
 
 #def progress_check(now_progress):
@@ -1111,81 +1117,128 @@ def gc(seq):
     #print(GC)
     return GC_f
 
-def exec_thin_to_bed(bam, depth_txt, thin_depth, thick_depth):
-
-    print("in utl.exec_thin_to_bed")
-    print("bam={}".format(bam))
-    print("depth_txt={}".format(depth_txt))
-    print("thin_depth={}".format(thin_depth))
-    print("thick_depth={}".format(thick_depth))
-    print("thread={}".format(glv.conf.thread))
-
-    # https://dev.classmethod.jp/articles/python-subprocess-shell-command/
-    # samtools depth -@ cpu bam > depth_txt
-    cpu = glv.conf.thread - 1
-    cmd1 = "{} {} {} {} {} {} {}".format(
-        'samtools',
-        'depth',
-        '-@',
-        cpu,
-        bam,
-        '>', 
-        depth_txt)
-
-    try_exec(cmd1, True)
-    sys.exit(1)
+#def exec_thin_to_bed(bam, depth_txt, thin_depth, thick_depth):
+#
+#    print("in utl.exec_thin_to_bed")
+#    print("bam={}".format(bam))
+#    print("depth_txt={}".format(depth_txt))
+#    print("thin_depth={}".format(thin_depth))
+#    print("thick_depth={}".format(thick_depth))
+#    print("thread={}".format(glv.conf.thread))
+#
+#    # https://dev.classmethod.jp/articles/python-subprocess-shell-command/
+#    # samtools depth -@ cpu bam > depth_txt
+#    cpu = glv.conf.thread - 1
+#    cmd1 = "{} {} {} {} {} {} {}".format(
+#        'samtools',
+#        'depth',
+#        '-@',
+#        cpu,
+#        bam,
+#        '>', 
+#        depth_txt)
+#
+#    try_exec(cmd1, True)
+#    sys.exit(1)
 
 
 def is_need_update(src_pathlib, dist_pathlib):
+    ''' if dist_pathlib == glv.conf.bak_timestamp_path:
+            check timestamp
+    '''
 
-    er_m = ""
-    do_update = glv.noneed_update
+    # for return value
+    need_update = False
 
-    try:
+    # 1) if src(file) not exist, it's error, stop.
+    if not src_pathlib.exists() or not src_pathlib.is_file():
+        er_m = "not found {}.".format(src_pathlib)
+        log.error("Error: {}".format(er_m))
+        sys.exit(1)
 
-        #print("in is_need_update")
+    # timestamp check or not
+    if dist_pathlib == "timestamp":
+        # timestamp check mode
+        need_update = time_stamp_check(src_pathlib, dist_pathlib)
 
-        # 1) if src(file) not exist, it's error, stop.
-        if not src_pathlib.exists() or not src_pathlib.is_file():
-            er_m = "not found {}.".format(src_pathlib)
-            raise UserFormatErrorUtl(er_m)
+    else:
 
+        # normal mode
         # 2) if dist(ex. symlink) not exist, need_update
         if not dist_pathlib.exists():
-            do_update = glv.need_update
+            log.info("not exist dist_pathlib {}".format(dist_pathlib))
+            need_update = True
 
         else:
+
+            #print("normal mode")
 
             # if dist(ex. symlink) exist,
             # 3) if dist is symlink,
             if dist_pathlib.is_symlink():
+
+                #print("symlink")
+                #print("dist_pathlib={}".format(dist_pathlib))
+                #print("src_pathlib={}".format(src_pathlib))
+
                 # It's error if the src and dist are not identical.
                 if not dist_pathlib.samefile(src_pathlib):
                     er_m = "{} and {} are different files.".format(
                         src_pathlib, dist_pathlib)
-                    raise UserFormatErrorUtl(er_m)
+                    log.error("Error: {}".format(er_m))
+                    sys.exit(1)
 
-            # confirm src time is old than dist time
-            st_mtime_src_pathlib = src_pathlib.stat().st_mtime
-            st_mtime_dist_pathlib = dist_pathlib.stat().st_mtime
+            # normal file
+            # 4) confirm src time is old than dist time
+            need_update = time_stamp_check(src_pathlib, dist_pathlib)
 
-            if st_mtime_src_pathlib > st_mtime_dist_pathlib:
-                do_update = glv.need_update
-            else:
-                log.info("src {} and dist {} timestamp is valid. {} <= {}".\
-                    format(src_pathlib, dist_pathlib,
-                    st_mtime_src_pathlib, st_mtime_dist_pathlib))
+    log.info("need_update {}.".format(need_update))
 
-    except UserFormatErrorUtl as ex:
-        log.error("Error: {}".format(ex))
-        sys.exit(1)
+    return need_update
 
+
+def time_stamp_check(src_pathlib, dist_pathlib):
+    '''
+    dist_pathlib は、"timestamp" として渡されていることがある
+    その際は、glv.conf.bak_timestamp_path と日時を比較する
+    '''
+
+    need_update = False
+
+    # timestamp として渡されてきた場合は、
+    if dist_pathlib == "timestamp":
+        # タイムスタンプファイルが対象
+        dist_pathlib = glv.conf.bak_timestamp_path
+
+    # ファイルがない場合
+    # これはタイムスタンプの場合以外はチェック済みのため
+    # タイムスタンプファイルのこと。初期の状態
+    if not dist_pathlib.exists():
+        # 要更新
+        need_update = True
+        mes = "timestamp file is not found. "
+        mes += "src file will copy to bak dir."
+        log.info(mes)
+        return need_update
+
+    # src と dist の更新日時を見て、
+    st_mtime_src_pathlib = src_pathlib.stat().st_mtime
+    st_mtime_dist_pathlib = dist_pathlib.stat().st_mtime
+
+    # srcが新しいときは、更新されていることを示す
+    if st_mtime_src_pathlib > st_mtime_dist_pathlib:
+        need_update = True
+
+    if need_update:
+        log.info("src {} and dist {} timestamp is reversed. {} > {}".\
+            format(src_pathlib, dist_pathlib,
+                st_mtime_src_pathlib, st_mtime_dist_pathlib))
     else:
-        log.info("{} to update.".format(do_update))
+        log.info("src {} and dist {} timestamp is valid. {} <= {}".\
+            format(src_pathlib, dist_pathlib,
+                st_mtime_src_pathlib, st_mtime_dist_pathlib))
 
-        #log.info("{} update {}, {}.".format(
-        #    do_update, src_pathlib, dist_pathlib))
-        return do_update
+    return need_update
 
 
 #def remove_auto_grp_header_txt(header_txt):

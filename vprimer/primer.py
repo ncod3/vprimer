@@ -103,7 +103,7 @@ class Primer(object):
             # ACTAG^I^I$
 
             out_txt_path = self.distin_gdct['primer']['fn'][reg]['out_path']
-            utl.save_to_tmpfile(out_txt_path)
+            utl.save_to_tmpfile(out_txt_path, pre_log=True)
 
             #with out_txt_path.open('a', encoding='utf-8') as f:
             with out_txt_path.open('a', encoding='utf-8') as f:

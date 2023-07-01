@@ -96,7 +96,7 @@ class Marker(object):
 
             # file name to write out result to text
             out_txt_path = self.distin_gdct['marker']['fn'][reg]['out_path']
-            utl.save_to_tmpfile(out_txt_path)
+            utl.save_to_tmpfile(out_txt_path, pre_log=True)
 
             # header
             header_txt = self.distin_gdct['marker']['hdr_text']

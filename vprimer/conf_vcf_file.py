@@ -53,7 +53,7 @@ class ConfVcfFile(object):
         utl.refs_file_slink_backup_and_copy(src_path, slink_path)
 
         # between user_vcf_path and gtonly_path
-        if glv.need_update == utl.is_need_update(src_path, gtonly_path):
+        if utl.is_need_update(src_path, gtonly_path):
 
             # update gtonly vcf
             self.update_gtonly_vcf(src_path, gtonly_path)
@@ -152,10 +152,18 @@ class ConfVcfFile(object):
                 # copy existed file as backup.
                 # args are (fname, can_log, copy_mode)
 
-                if glv.need_update == utl.is_need_update(
-                    sample_path, self.bak_timestamp_path):
+                #print("sample_path={}".format(sample_path))
+                #print("self.bak_timestamp_path={}".format(
+                #    self.bak_timestamp_path))
+
+                #r = utl.is_need_update(
+                #    sample_path, self.bak_timestamp_path)
+                #print("r={}".format(r))
+
+                # compare timestamp for backup copy
+                if utl.is_need_update(sample_path, self.bak_timestamp_path):
                     # backup if updated
-                    utl.save_to_tmpfile(sample_path, True, True)
+                    utl.save_to_tmpfile(sample_path, copy_mod=True)
 
             else:
 
@@ -173,7 +181,7 @@ class ConfVcfFile(object):
                 log.info("not found {}.".format(sample_path))
 
                 # backup
-                utl.save_to_tmpfile(sample_path)
+                utl.save_to_tmpfile(sample_path, pre_log=True)
 
                 # write to vcf_sample_name_file
                 with sample_path.open('w', encoding='utf-8') as f:
@@ -183,11 +191,11 @@ class ConfVcfFile(object):
 
             if sample_path == sample_name_path:
                 # sample_name_path
-                mes = "vcf samples are here."
+                mes = "vcf samples are below."
             else:
                 # sample_bam_path
                 mes = "the correspondence between vcf sample and "
-                mes += "bam/bed file is here."
+                mes += "bam/bed file is below."
 
             # pathlib read_txt, print
             s = sample_path.read_text()
