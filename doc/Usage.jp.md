@@ -1,12 +1,10 @@
-[../README.md](../README.md)
+[../README.md] | [Tutorial.jp.md]
 
-# V-primer コマンド詳細 (日本語)
-
-## 利用方法
+# V-primer 利用方法 (日本語)
 
 vprimer [options]
 
-### 必須項目（２つ）
+## 必須項目（２つ）
 
 <dl>
 <dt>
@@ -33,7 +31,7 @@ VCFファイル作成に用いたbamファイルが参照しているリファ�
 </dl>
 
 
-### 選択項目
+## 選択項目
 
 <dl>
 <dt>
@@ -320,35 +318,4 @@ vprimerの実行フェイズは以下の８つに分かれている。prepare, v
 </dd>
 </dl>
 
-
-# V-primer チュートリアル (日本語)
-
-このチュートリアルでは、デモデータに基づき動作の解説を行う。
-
-デモデータをダウンロードし、test_script の下の７つのスクリプトを順次実行していく。７つのスクリプトは３つのグループに分かれている。スクリプト名からは → で結果出力ディレクトリが示されている。
-
-### グループ１：初期設定
-
-必須項目であるリファレンスFastaとVCFファイルのみを指定し、解析の事前処理を行う。
-
-- 010.show_samples.sh → out_vprimer
-
-結果出力ディレクトリを明示的に指定していないことから、結果の出力はデフォルト「out_vprimer」に書き出される。結果出力ディレクトリには、logsと、bak というディレクトリが作成され、logsの下には最新の稼動ログ「vprimer_log.txt」が１つだけ保存される。bakには、何度か解析を実施したとしても、決して既存の情報を上書きしてしまわぬよう、同名のファイルがあったなら必ずbakにコピーを残してある。また、使用する各種データの準備を行うrefsディレクトリが作成される。refsディレクトリの詳細については後述する。
-
-### グループ２：ユーザ指定のグルーピング
-サンプルをユーザが指定してグルーピングし、解析モードはそれぞれindel、 caps、snpを指定する。
-
-- 020.6samples_indel.sh → out_vprimer_020_indel
-- 021.6samples_caps.sh → out_vprimer_021_caps
-- 022.6samples_snp.sh → out_vprimer_022_snp
-
-### グループ３：genotypeによる自動グルーピング
-サンプルをgenotypeにより自動でグルーピングし、解析モードはそれぞれindel、 caps、snpを指定する。
-
-- 030.auto_group_indel.sh → out_vprimer_030_indel
-- 031.auto_group_caps.sh → out_vprimer_031_caps
-- 032.auto_group_snp.sh → out_vprimer_032_snp
-
-それぞれのスクリプトにしたがって、動作の内容を説明する。
-
-
+[../README.md] | [Tutorial.jp.md]
