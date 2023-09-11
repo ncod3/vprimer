@@ -1,4 +1,4 @@
-[../README.md] | [Tutorial.jp.md]
+[../README.md](../README.md) | [Tutorial.jp.md](Tutorial.jp.md)
 
 # V-primer 利用方法 (日本語)
 
@@ -318,4 +318,4 @@ vprimerの実行フェイズは以下の８つに分かれている。prepare, v
 </dd>
 </dl>
 
-[../README.md] | [Tutorial.jp.md]
+[../README.md](../README.md) | [Tutorial.jp.md](Tutorial.jp.md)
