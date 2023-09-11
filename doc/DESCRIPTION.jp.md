@@ -1,35 +1,73 @@
 [../README.md](../README.md)
 
+# コマンド詳細 (日本語)
 
-# Detail description (japanese)
+## 利用方法
 
+vprimer [options]
 
-この文書では、vprimerを使用して指定されたVCFファイルとFastaファイルからマーカーを設計する方法について説明します。
+### 必須項目（２つ）
+<dl>
+<dt>
+--ref リファレンスFasta
+</dt>
+<dd>
+<p><p>
+VCFファイル作成時に用いたbamファイルのリファレンスFastaを指定する。プレーンテキストでもgzip圧縮形式でも可。
+</p></p>
 
-最初に、VCFファイルとFastaファイルを指定し、Fastaの解析範囲と設計するマーカーのタイプをvprimerに指示します。vprimerが起動すると、現在のディレクトリの下にrefsディレクトリが作成され、解析に必要なファイルが準備されます。
-
-refsディレクトリの構造は以下のようになっています。
-（refsディレクトリ構造の説明）
-
-結果は指定された出力ディレクトリ（out_dir）に書き出されます。解析は以下の5つのステップで進みます。各ステップの項目名は、そのステップで書き出されるファイル名のprefixを示しています。
-
-## 010_variant
-
-
-
-## 020_marker
-
-## 030_primer
+</dd>
+</dl>
 
 
-## 040_formatF
+<dl>
+<dt>
+--vcf VCFファイル
+</dt>
+<dd>
+<p><p>
+各サンプルのバリアントが収納されたVCFファイルを指定する。
+</p></p>
+
+</dd>
+</dl>
+
+### 選択項目
+
+<dl>
+<dt>
+--out_dir 結果出力ディレクトリ名
+</dt>
+<dd>
+<p><p>
+結果を出力するディレクトリ名を指定する。デフォルトは「out_vprimer」。
+</p></p>
+
+</dd>
+</dl>
 
 
-## 050_formatP
+<dl>
+<dt>
+--show_samples
+</dt>
+<dd>
+<p><p>
+解析の事前処理として、VCF内に収められたサンプル名を表示して終了する。システム内ではサンプル名を３種類で指定可能である。VCFファイルに書かれたサンプル名そのもの(fullname)、'/' で区切られたPATHを取り除いた名前(basename)、basenameから拡張子.bamを取り除いた名前(nickname)である。この情報は、refsの中の _sample_name.txt という拡張子の付いたファイルに保存されており、このファイルの nickname をユーザが編集することで、システム内で利用可能となる。
+</p>
 
-[Detail output format](OUTPUT.md)
+</dd>
+</dl>
 
-## Usage
+<dl>
+<dt>
+--show_fasta
+</dt>
+<dd>
+<p><p>
+解析の事前処理として、fasta内に収められたcontig名とそのサイズを表示して終了する。
+</p>
 
-[Usage](USAGE.md)
+</dd>
+</dl>
 
