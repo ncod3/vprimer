@@ -9,7 +9,7 @@ vprimer [options]
 ### 必須項目（２つ）
 
 <dl>
-<dt>
+<dt style="font-style:normal;">
 --ref リファレンスFasta
 </dt>
 <dd>
@@ -22,7 +22,7 @@ VCFファイル作成時に用いたbamファイルのリファレンスFastaを
 
 
 <dl>
-<dt>
+<dt style="font-style:normal;">
 --vcf VCFファイル
 </dt>
 <dd>
@@ -36,7 +36,7 @@ VCFファイル作成時に用いたbamファイルのリファレンスFastaを
 ### 選択項目
 
 <dl>
-<dt>
+<dt style="font-style:normal;">
 --out_dir 結果出力ディレクトリ名
 </dt>
 <dd>
@@ -49,7 +49,7 @@ VCFファイル作成時に用いたbamファイルのリファレンスFastaを
 
 
 <dl>
-<dt>
+<dt style="font-style:normal;">
 --show_samples
 </dt>
 <dd>
@@ -62,7 +62,7 @@ VCFファイル作成時に用いたbamファイルのリファレンスFastaを
 
 
 <dl>
-<dt>
+<dt style="font-style:normal;">
 --show_fasta
 </dt>
 <dd>
@@ -75,7 +75,7 @@ VCFファイル作成時に用いたbamファイルのリファレンスFastaを
 
 
 <dl>
-<dt>
+<dt style="font-style:normal;">
 --a_sample [サンプル名 [サンプル名 ...]]<br>
 --b_sample [サンプル名 [サンプル名 ...]]
 </dt>
@@ -89,7 +89,7 @@ VCFファイル作成時に用いたbamファイルのリファレンスFastaを
 
 
 <dl>
-<dt>
+<dt style="font-style:normal;">
 --auto_group [サンプル名 [サンプル名 ...]]
 </dt>
 <dd>
@@ -103,7 +103,7 @@ VCFファイル作成時に用いたbamファイルのリファレンスFastaを
 <!-- ここからしたがまだ -->
 
 <dl>
-<dt>
+<dt style="font-style:normal;">
 --pick_mode
 </dt>
 <dd>
@@ -116,7 +116,7 @@ VCFファイル作成時に用いたbamファイルのリファレンスFastaを
 
 
 <dl>
-<dt>
+<dt style="font-style:normal;">
 --target
 </dt>
 <dd>
@@ -129,7 +129,7 @@ VCFファイル作成時に用いたbamファイルのリファレンスFastaを
 
 
 <dl>
-<dt>
+<dt style="font-style:normal;">
 --indel_size
 </dt>
 <dd>
@@ -142,7 +142,7 @@ VCFファイル作成時に用いたbamファイルのリファレンスFastaを
 
 
 <dl>
-<dt>
+<dt style="font-style:normal;">
 --product_size 最小サイズ-最大サイズ
 </dt>
 <dd>
@@ -155,7 +155,7 @@ VCFファイル作成時に用いたbamファイルのリファレンスFastaを
 
 
 <dl>
-<dt>
+<dt style="font-style:normal;">
 --homo_only
 </dt>
 <dd>
@@ -168,7 +168,7 @@ VCFファイル作成時に用いたbamファイルのリファレンスFastaを
 
 
 <dl>
-<dt>
+<dt style="font-style:normal;">
 --enzyme
 </dt>
 <dd>
@@ -181,7 +181,7 @@ VCFファイル作成時に用いたbamファイルのリファレンスFastaを
 
 
 <dl>
-<dt>
+<dt style="font-style:normal;">
 --enzyme_file
 </dt>
 <dd>
@@ -194,7 +194,7 @@ VCFファイル作成時に用いたbamファイルのリファレンスFastaを
 
 
 <dl>
-<dt>
+<dt style="font-style:normal;">
 --p3_normal
 </dt>
 <dd>
@@ -207,7 +207,7 @@ VCFファイル作成時に用いたbamファイルのリファレンスFastaを
 
 
 <dl>
-<dt>
+<dt style="font-style:normal;">
 --p3_amplicon
 </dt>
 <dd>
@@ -220,7 +220,7 @@ VCFファイル作成時に用いたbamファイルのリファレンスFastaを
 
 
 <dl>
-<dt>
+<dt style="font-style:normal;">
 --amplicon_param
 </dt>
 <dd>
@@ -233,7 +233,7 @@ VCFファイル作成時に用いたbamファイルのリファレンスFastaを
 
 
 <dl>
-<dt>
+<dt style="font-style:normal;">
 --snp_filter
 </dt>
 <dd>
@@ -246,7 +246,7 @@ VCFファイル作成時に用いたbamファイルのリファレンスFastaを
 
 
 <dl>
-<dt>
+<dt style="font-style:normal;">
 --bam_table
 </dt>
 <dd>
@@ -259,7 +259,7 @@ VCFファイル作成時に用いたbamファイルのリファレンスFastaを
 
 
 <dl>
-<dt>
+<dt style="font-style:normal;">
 --min_max_depth
 </dt>
 <dd>
@@ -273,7 +273,7 @@ VCFファイル作成時に用いたbamファイルのリファレンスFastaを
 
 
 <dl>
-<dt>
+<dt style="font-style:normal;">
 --progress
 </dt>
 <dd>
@@ -286,7 +286,7 @@ VCFファイル作成時に用いたbamファイルのリファレンスFastaを
 
 
 <dl>
-<dt>
+<dt style="font-style:normal;">
 --stop
 </dt>
 <dd>
@@ -299,7 +299,7 @@ VCFファイル作成時に用いたbamファイルのリファレンスFastaを
 
 
 <dl>
-<dt>
+<dt style="font-style:normal;">
 --ini_file
 </dt>
 <dd>
@@ -312,7 +312,7 @@ VCFファイル作成時に用いたbamファイルのリファレンスFastaを
 
 
 <dl>
-<dt>
+<dt style="font-style:normal;">
 --thread
 </dt>
 <dd>
