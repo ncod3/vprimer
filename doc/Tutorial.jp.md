@@ -1,4 +1,4 @@
-[../README.md](../README.md)
+[../README.md](../README.md) | [Usage.jp.md](Usage.jp.md)
 
 # V-primer チュートリアル (日本語)
 
@@ -30,4 +30,9 @@
 
 それぞれのスクリプトにしたがって、動作の内容を説明する。
 
+
+
+
+
+[../README.md](../README.md) | [Usage.jp.md](Usage.jp.md)
 
