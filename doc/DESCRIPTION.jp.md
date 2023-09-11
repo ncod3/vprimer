@@ -9,8 +9,8 @@ vprimer [options]
 ### 必須項目（２つ）
 
 <dl>
-<dt style="font-style:normal;">
---ref リファレンスFasta
+<dt>
+`--ref リファレンスFasta`
 </dt>
 <dd>
 <p><p>
