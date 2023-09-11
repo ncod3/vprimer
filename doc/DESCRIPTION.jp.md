@@ -10,7 +10,9 @@ vprimer [options]
 
 <dl>
 <dt>
-<em style="font-style:normal;">--ref リファレンスFasta</em>
+<span style="font-style:normal;">
+--ref リファレンスFasta
+</span>
 </dt>
 <dd>
 <p><p>
