@@ -27,7 +27,7 @@ The specification of the restriction enzyme used in CAPS marker mode can be done
 In SNP marker mode, we conduct checks for homodimer, heterodimer, and hairpin structures on each pair of designed primers, which are sequences with amplicon tags added as specified by the user. Additionally, we also perform heterodimer confirmation on all primers that pass these checks. However, due to the need for confirmation with all possible combinations of primers, the number of confirmations becomes very large. Therefore, by default, we extract primers at a rate of one per 1Mbps, with a GC content range of 50-55%, to reduce the number of primers and perform the confirmation.
 
 
-[Detail description(japanese doc)](doc/DESCRIPTION.jp.md)
+[Detail description (Japanese doc)](doc/DESCRIPTION.jp.md)
 
 
 ## Installation
