@@ -91,9 +91,9 @@ bamファイルを用いて、プライマー生成の際に有効depthの判断
 
 __BB.BEDファイル__
 
-サンプル名に対応するbamファイルが {vcfファイル名}_sample_bam_table.txt の中で指定されており、そのサンプルが解析で用いられたならば、bamファイルのデプス評価が実施される。--min_max_depth 最低デプス-最高デプス で指定されたデプス範囲を用いて、bamファイルごとに .m{最低デプス}_x{最高デプス}.bb.bed の拡張子が付いた bed ファイルが作成される。
+サンプル名に対応するbamファイルが {vcfファイル名}_sample_bam_table.txt の中で指定されており、そのサンプルが解析で用いられたならば、bamファイルのデプス評価が実施される。--min_max_depth 最低デプス-最高デプス で指定されたデプス範囲により、bamファイルごとに拡張子、.m{最低デプス}_x{最高デプス}.bb.bed のbedファイルが作成される。
 
-ファイルの先頭には、# で始まるいくつかのコメントが書かれている。ここには bedファイルが作成された時の情報が残されている。特に bamファイルのmd5値が計算されており(bam_md5)、指し示すbamが変更されたことが判明した時点で、bedファイルを作成しなおす。
+bedファイルの先頭には、# で始まるいくつかのコメントが書かれている。ここには bedファイルが作成された時の情報が残されている。特に bamファイルのmd5値が計算されており(bam_md5)、指し示すbamが変更されたことが判明した時点で、bedファイルを作成し直す。
 
 最初の # 行の固まりが終わると、bed行となる。
 
@@ -122,7 +122,27 @@ bed行がすべて終わると、# で始まる以下の統計情報が付加さ
 
 __BTA.BEDファイル__
 
-bed_thal_2023_0904_1019_19.m8_x300.bta.bed
+指定されたサンプル群ごとに、bb.bedファイルの正常範囲外の領域をまとめたbedファイル(bed_thin_alignファイル)が作成される。ファイル名は、bed_thal_{年_月日_時分_秒}.m{最小デプス}_x{最大デプス}.bta.bed である。bedファイルの先頭には、# で始まる、集められた bb.bed ファイルの情報が書かれている。最初の # 行の固まりが終わると、bed行となる。この領域はデプスが正常範囲外であることを示す。ファイルの最後には、次のような統計情報が書かれている。
+
+>\#  
+>\# genome_total_len      373,245,519  
+>\# bed_thal_valid_length 326,230,263  
+>\# bed_thal_valid_rate   87.40%  
+>\#
+
+#### 5) caps用 enzyme name list
+caps_enzyme_name_list.txt
+caps_enzyme_name_list.txt.original
+caps_enzyme_name_list.whole_enzyme.txt
+slink_caps_enzyme_name_list.txt
+
+#### 6) primer3用パラメータ指定ファイル (normal / amplicon)
+
+p3_amplicon.txt
+p3_amplicon.txt.original
+p3_normal.txt
+p3_normal.txt.original
+
 
 
 
