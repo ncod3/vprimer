@@ -17,14 +17,22 @@
 結果出力ディレクトリ (--out_dir) を明示的に指定していないことから、結果の出力はデフォルト「out_vprimer」に書き出される。結果出力ディレクトリには、logsと、bakというディレクトリが作成され、logsの下には最新の稼動ログ「vprimer_log.txt」が１つだけ保存される。bakには、何度か解析を実施したとしても、決して既存の情報を上書きしてしまわぬよう、同名のファイルがあったなら必ずbakにコピーを残してある。また、使用する各種データの準備を行うrefsディレクトリが作成される。refsディレクトリの詳細については後述する。
 
 ### 種類２：ユーザ指定のグルーピング
-サンプルのグルーピングをユーザが指定する。解析モードはそれぞれindel、 caps、snpを指定する。
+サンプルのグルーピングをユーザが指定する。スクリプトでは、a、b、２つのグループにそれぞれ３サンプルが指定されている。
+>--a_sample MP2_012,MP2_013,MP2_014  
+--b_sample MP2_015,MP2_018,MP2_020
+
+解析モードはそれぞれindel、 caps、snpを指定する。
 
 - 020.6samples_indel.sh → out_vprimer_020_indel
 - 021.6samples_caps.sh → out_vprimer_021_caps
 - 022.6samples_snp.sh → out_vprimer_022_snp
 
 ### 種類３：genotypeによる自動グルーピング
-サンプルのグルーピングをgenotypeにより自動で行う。解析モードはそれぞれindel、 caps、snpを指定する。
+サンプルのグルーピングをgenotypeにより自動で行う。スクリプトでは、使用するサンプル群が６サンプルで指定されている。
+
+>--auto_group MP2_012,MP2_013,MP2_014,MP2_015,MP2_018,MP2_020
+
+解析モードはそれぞれindel、 caps、snpを指定する。
 
 - 030.auto_group_indel.sh → out_vprimer_030_indel
 - 031.auto_group_caps.sh → out_vprimer_031_caps
