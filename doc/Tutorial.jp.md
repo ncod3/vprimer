@@ -2,6 +2,10 @@
 
 # V-primer チュートリアル (日本語)
 
+>１．デモデータ概説  
+>２．refs ディレクトリ詳細  
+>３．テストスクリプト詳細
+
 ## １．デモデータ概説
 
 このチュートリアルでは、デモデータに基づき動作の解説を行う。
@@ -40,18 +44,11 @@
 
 それぞれのスクリプトにしたがって、動作の内容を説明する。
 
-## ２．デモスクリプト毎の説明
+## ２．refs ディレクトリ詳細
 
-### 010.show_samples.sh
+V-primer は、最初に実行された場所の直下に refs というディレクトリを作成し、そこに、解析に必要な情報をまとめて作成する。--show_samples オプションを指定した場合には最小限の 1) 〜 3) が準備され、実際の解析においては、1) 〜 6) が準備される。順に説明する。
 
-必須項目であるリファレンスFastaとVCFファイルのみを指定し、解析の事前処理として refs ディレクトリを作成する。
-
-### refs ディレクトリ
-vprimerを実行したディレクトリの直下に、refs ディレクトリが作成され、解析に必要な環境がこの中に整えられる。
-
---show_samples オプションを指定した場合には最小限の設定が行われ、以下の 1) 〜 3) のファイル、ディレクトリが準備される。
-
-#### 1) リファレンスfasta
+### 1) リファレンスfasta
 - slink_{fasta名}:
   - ユーザが指定したfastaへのシンボリックリンク。
 - {fasta名}_BGZIP.gz:
@@ -65,7 +62,7 @@ vprimerを実行したディレクトリの直下に、refs ディレクトリ�
 - {fasta名}_BGZIP.gz.pickle:
   - プログラム内部で用いるfastaの辞書形式をpickleで保存したもの。次回以降早い立ち上げを行う。
 
-#### 2) vcfファイル
+### 2) vcfファイル
 - slink_{vcfファイル名}:
   - ユーザが指定したvcfへのシンボリックリンク
 - {vcfファイル名}_GTonly.vcf.gz.tbi:
@@ -80,14 +77,10 @@ vprimerを実行したディレクトリの直下に、refs ディレクトリ�
     - basename: パス表記がされている場合、もっとも下流に書かれた名前。
     - fullname: vcfに書かれた名前そのもの。
 
-#### 3) bedディレクトリ
+### 3) bedディレクトリ
 bamファイルを用いて、プライマー生成の際に有効depthの判断を行う場合に作成される各種ファイルが置かれる。この時点ではディレクトリが作成されるのみ。
 
-### 後続の 020. ~ 032. のスクリプトによる refs ディレクトリの更新
-
-実際の解析において、上記 refs ディレクトリの内容が随時更新されていくことから、 1) 〜 3) に引き続き 4) 〜 6) 内容を説明する。
-
-#### 4) bed ディレクトリ
+### 4) bed ディレクトリ
 
 __BB.BEDファイル__
 
@@ -130,18 +123,35 @@ __BTA.BEDファイル__
 >\# bed_thal_valid_rate   87.40%  
 >\#
 
-#### 5) caps用 enzyme name list
-caps_enzyme_name_list.txt
-caps_enzyme_name_list.txt.original
-caps_enzyme_name_list.whole_enzyme.txt
-slink_caps_enzyme_name_list.txt
+### 5) caps用 enzyme name list
 
-#### 6) primer3用パラメータ指定ファイル (normal / amplicon)
+解析が始まると、解析モードに関わらず、caps用制限酵素名一覧表が作成される。
 
-p3_amplicon.txt
-p3_amplicon.txt.original
-p3_normal.txt
-p3_normal.txt.original
+- caps_enzyme_name_list.whole_enzyme.txt
+  - V-primerのシステムで利用可能な制限酵素名の一覧(965)である。
+- caps_enzyme_name_list.txt.original
+  - よく使いそうな制限酵素を選択した(71)一覧である。
+- caps_enzyme_name_list.txt
+  - システムのデフォルトファイル。当初は上記の71が記述されている。
+- slink_caps_enzyme_name_list.txt
+  - ユーザが指定したファイルへのシンボリックリンク
+
+### 6) Primer3用パラメータ指定ファイル (normal / amplicon)
+
+解析が始まると、解析モードに関わらず、Primer3用パラメータ指定ファイルが作成される。
+
+- p3_normal.txt.original
+  - 解析モードが indel、caps の時のパラメータ指定ファイルのオリジナル。
+- p3_normal.txt
+  - 解析モードが indel、caps の時のデフォルトファイル。
+- p3_amplicon.txt.original
+  - 解析モードが snp の時のパラメータ指定ファイルのオリジナル。
+- p3_amplicon.txt
+  - 解析モードが snp の時のデフォルトファイル。
+
+## ３．各テストスクリプト詳細
+
+
 
 
 

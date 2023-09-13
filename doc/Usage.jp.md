@@ -184,7 +184,7 @@ caps解析モードで使用する制限酵素名を羅列する。使用可能�
 </dt>
 <dd>
 <p><p>
-caps解析モードで使用する制限酵素名を羅列したファイルを指定する。複数のファイルを指定可。使用可能な制限酵素名は、refs/caps_enzyme_name_list.whole_enzyme.txt に記述されているものを指定でき、１行に１つ制限酵素名を記述する。２カラム目以降に、制限酵素名の情報が書かれていても無視される。
+caps解析モードで使用する制限酵素名を羅列したファイルを指定する。デフォルトは、refs/caps_enzyme_name_list.txt。複数のファイルを指定可。使用可能な制限酵素名は、refs/caps_enzyme_name_list.whole_enzyme.txt に記述されているものを指定でき、１行に１つ制限酵素名を記述する。２カラム目以降に、制限酵素名の情報が書かれていても無視される。
 </p></p>
 </dd>
 </dl>
@@ -197,7 +197,7 @@ caps解析モードで使用する制限酵素名を羅列したファイルを�
 </dt>
 <dd>
 <p><p>
-indelおよびcaps解析モードにおいて、Primer3 に与えるパラメータが書かれたファイルを指定する。デフォルトは refs/p3_normal.txt で、このファイルを直接編集しても良い。当初の内容は refs/p3_normal.txt.original として保存されている。
+indelおよびcaps解析モードにおいて、Primer3 に与えるパラメータが書かれたファイルを指定する。デフォルトは refs/p3_normal.txt で、このファイルを直接編集しても良い。当初の内容は refs/p3_normal.txt.original として保存されている。設定できる内容は refs/p3_normal.txt.original の項目のみである。
 </p></p>
 </dd>
 </dl>
@@ -210,7 +210,7 @@ indelおよびcaps解析モードにおいて、Primer3 に与えるパラメー
 </dt>
 <dd>
 <p><p>
-snp解析モードにおいて、Primer3に与えるパラメータが書かれたファイルを指定する。デフォルトは refs/p3_amplicon.txt で、このファイルを直接編集しても良い。当初の内容は refs/p3_amplicon.txt.original として保存されている。
+snp解析モードにおいて、Primer3に与えるパラメータが書かれたファイルを指定する。デフォルトは refs/p3_amplicon.txt で、このファイルを直接編集しても良い。当初の内容は refs/p3_amplicon.txt.original として保存されている。設定できる内容は refs/p3_amplicon.txt.original の項目のみである。
 </p></p>
 </dd>
 </dl>
