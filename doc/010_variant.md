@@ -1,4 +1,4 @@
-[Description](DESCRIPTION.md)
+[../README.md](../README.md) | [Usage.jp.md](Usage.jp.md)
 
 # 010_variant
 
@@ -226,5 +226,5 @@ len_g0g1_dif_long
 </dl>
 
 
-[Description](DESCRIPTION.md)
+[../README.md](../README.md) | [Usage.jp.md](Usage.jp.md)
 

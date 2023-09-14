@@ -1,4 +1,4 @@
-[Description](DESCRIPTION.md)
+[../README.md](../README.md) | [Usage.jp.md](Usage.jp.md)
 
 # 040_FormatF, 050_FormatP
 
@@ -144,5 +144,5 @@ g0_product_size, g1_product_size, diff_length, g0_digested_size, g1_digested_siz
 </dl>
 
 
-[Description](DESCRIPTION.md)
+[../README.md](../README.md) | [Usage.jp.md](Usage.jp.md)
 

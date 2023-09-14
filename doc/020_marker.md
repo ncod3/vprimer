@@ -1,4 +1,4 @@
-[Description](DESCRIPTION.md)
+[../README.md](../README.md) | [Usage.jp.md](Usage.jp.md)
 
 # 020_marker
 
@@ -275,5 +275,5 @@ word
 </dl>
 
 
-[Description](DESCRIPTION.md)
+[../README.md](../README.md) | [Usage.jp.md](Usage.jp.md)
 

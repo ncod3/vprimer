@@ -1,4 +1,4 @@
-[Description](DESCRIPTION.md)
+[../README.md](../README.md) | [Usage.jp.md](Usage.jp.md)
 
 # 030_primer
 
@@ -212,5 +212,5 @@ SEQUENCE_EXCLUDED_REGION
 </dl>
 
 
-[Description](DESCRIPTION.md)
+[../README.md](../README.md) | [Usage.jp.md](Usage.jp.md)
 
