@@ -3,8 +3,10 @@
 # V-primer チュートリアル (日本語)
 
 >１．デモデータ概説  
->２．refs ディレクトリ詳細  
->３．テストスクリプト詳細
+>２．refs ディレクトリ  
+>３．解析の基本３フェーズ、variant、marker、primer  
+>４．出力取りまとめ、formpass  
+>５，SNP解析モードの snpfilter、chkhdimer
 
 ## １．デモデータ概説
 
@@ -20,31 +22,29 @@
 
 結果出力ディレクトリ (--out_dir) を明示的に指定していないことから、結果の出力はデフォルト「out_vprimer」に書き出される。結果出力ディレクトリには、logsと、bakというディレクトリが作成され、logsの下には最新の稼動ログ「vprimer_log.txt」が１つだけ保存される。bakには、何度か解析を実施したとしても、決して既存の情報を上書きしてしまわぬよう、同名のファイルがあったなら必ずbakにコピーを残してある。また、使用する各種データの準備を行うrefsディレクトリが作成される。refsディレクトリの詳細については後述する。
 
-### 種類２：ユーザ指定のグルーピング
-サンプルのグルーピングをユーザが指定する。スクリプトでは、a、b、２つのグループにそれぞれ３サンプルがカンマ区切りで指定されている。
+### 種類２：ユーザ指定の２グループ分割
+サンプル群の２グループ分割をユーザが指定する。スクリプトでは、a、b、２つのグループにそれぞれ３サンプルがカンマ区切りで指定されている。
 >--a_sample MP2_012,MP2_013,MP2_014  
 --b_sample MP2_015,MP2_018,MP2_020
 
-解析モードはそれぞれindel、 caps、snpを指定する。
+解析モードはそれぞれindel、 caps、snpを指定し、出力ディレクトリは次の通り。
 
 - 020.6samples_indel.sh → out_vprimer_020_indel
 - 021.6samples_caps.sh → out_vprimer_021_caps
 - 022.6samples_snp.sh → out_vprimer_022_snp
 
-### 種類３：genotypeによる自動グルーピング
-サンプルのグルーピングをgenotypeにより自動で行う。スクリプトでは、使用するサンプル群が６サンプル指定されている。
+### 種類３：genotypeによる自動２グループ分割
+サンプル群の２グループ分割をgenotypeにより自動で行う。スクリプトでは、使用するサンプル群が６サンプル指定されている。
 
 >--auto_group MP2_012,MP2_013,MP2_014,MP2_015,MP2_018,MP2_020
 
-解析モードはそれぞれindel、 caps、snpを指定する。
+解析モードはそれぞれindel、 caps、snpを指定し、出力ディレクトリは次の通り。
 
 - 030.auto_group_indel.sh → out_vprimer_030_indel
 - 031.auto_group_caps.sh → out_vprimer_031_caps
 - 032.auto_group_snp.sh → out_vprimer_032_snp
 
-それぞれのスクリプトにしたがって、動作の内容を説明する。
-
-## ２．refs ディレクトリ詳細
+## ２．refs ディレクトリ
 
 V-primer は、最初に実行された場所の直下に refs というディレクトリを作成し、そこに、解析に必要な情報をまとめて作成する。--show_samples オプションを指定した場合には最小限の 1) 〜 3) が準備され、実際の解析においては、1) 〜 6) が準備される。順に説明する。
 
@@ -60,7 +60,7 @@ V-primer は、最初に実行された場所の直下に refs というディ�
 - {fasta名}_BGZIP.gz.gzi:
   - fastaのindexファイル、bgzip用。
 - {fasta名}_BGZIP.gz.pickle:
-  - プログラム内部で用いるfastaの辞書形式をpickleで保存したもの。次回以降早い立ち上げを行う。
+  - fastaを、プログラム内部で用いる辞書形式に変換しpickleで保存したもの。次回以降早い立ち上げを行うため。
 
 ### 2) vcfファイル
 - slink_{vcfファイル名}:
@@ -149,11 +149,24 @@ __BTA.BEDファイル__
 - p3_amplicon.txt
   - 解析モードが snp の時のデフォルトファイル。
 
-## ３．各テストスクリプト詳細
+## ３．解析の基本３フェーズ、variant、marker、primer
+
+V-primerの解析は３つのフェーズで行われる。それぞれの結果がファイルに書き出される。次に行われるフェーズは、直前のフェーズに書き出されたファイルを読み込んで解析を行う。
+
+### 1) variant フェーズ
+
+[010_VARIANTのファイル項目](010_VARIANT.md)
+
+### 2) marker フェーズ
+
+
+### 3) primer フェーズ
 
 
 
+## ４．出力取りまとめ、formpass
 
+## ５，SNP解析モードの snpfilter、chkhdimer
 
 
 [../README.md](../README.md) | [Usage.jp.md](Usage.jp.md)
