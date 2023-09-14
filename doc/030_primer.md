@@ -1,4 +1,4 @@
-[../README.md](../README.md) | [Usage.jp.md](Usage.jp.md)
+[README](../README.md) | [Tutorial (Japanese doc)](doc/Tutorial.jp.md) | [Usage (Japanese doc)](doc/Usage.jp.md)
 
 # 030_primer
 
@@ -211,6 +211,4 @@ SEQUENCE_EXCLUDED_REGION
 </dd>
 </dl>
 
-
-[../README.md](../README.md) | [Usage.jp.md](Usage.jp.md)
-
+[README](../README.md) | [Tutorial (Japanese doc)](doc/Tutorial.jp.md) | [Usage (Japanese doc)](doc/Usage.jp.md)

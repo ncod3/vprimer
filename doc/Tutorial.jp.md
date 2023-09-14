@@ -1,4 +1,4 @@
-[../README.md](../README.md) | [Usage.jp.md](Usage.jp.md)
+[README](../README.md) | [Usage (Japanese doc)](Usage.jp.md)
 
 # V-primer チュートリアル (日本語)
 
@@ -171,5 +171,6 @@ V-primerの解析は３つのフェーズで行われる。それぞれの結果
 
 ## ５，SNP解析モードの snpfilter、chkhdimer
 
-[../README.md](../README.md) | [Usage.jp.md](Usage.jp.md)
+[README](../README.md) | [Usage (Japanese doc)](Usage.jp.md)
+
 

@@ -1,4 +1,4 @@
-[../README.md](../README.md) | [Usage.jp.md](Usage.jp.md)
+[README](../README.md) | [Tutorial (Japanese doc)](doc/Tutorial.jp.md) | [Usage (Japanese doc)](doc/Usage.jp.md)
 
 # 010_variant
 
@@ -226,5 +226,5 @@ len_g0g1_dif_long
 </dl>
 
 
-[../README.md](../README.md) | [Usage.jp.md](Usage.jp.md)
+[README](../README.md) | [Tutorial (Japanese doc)](doc/Tutorial.jp.md) | [Usage (Japanese doc)](doc/Usage.jp.md)
 
