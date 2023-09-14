@@ -155,7 +155,7 @@ V-primerの解析は３つのフェーズで行われる。それぞれの結果
 
 ### 1) variant フェーズ
 
-[010_VARIANTのファイル項目](010_VARIANT.md)
+[010_VARIANT のファイル項目](010_VARIANT.md)
 
 ### 2) marker フェーズ
 
