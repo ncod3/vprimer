@@ -155,19 +155,19 @@ V-primerの解析は３つのフェーズで行われる。それぞれの結果
 
 ### 1) variant フェーズ
 
-[010_VARIANT のファイル項目](010_VARIANT.md)
+[010_variant のファイル項目](010_variant.md)
 
 ### 2) marker フェーズ
 
-[010_VARIANT のファイル項目](010_VARIANT.md)
+[020_marker のファイル項目](020_marker.md)
 
 ### 3) primer フェーズ
 
-[010_VARIANT のファイル項目](010_VARIANT.md)
+[030_primer のファイル項目](030_primer.md)
 
 ## ４．出力取りまとめ、formpass
 
-[040/050_FORMAT Fail/Pass.md のファイル項目](040_050_FORMATF_P.md)
+[040_050_format_F_P のファイル項目](040_050_format_F_P.md)
 
 ## ５，SNP解析モードの snpfilter、chkhdimer
 
