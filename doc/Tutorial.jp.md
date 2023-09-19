@@ -190,11 +190,21 @@ indel解析モードではINDELが対象となり、caps解析モードではSNP
 
 ### 2) marker フェーズ
 
+variant フェーズ で書き出されたアリルペアの情報をもとに、マーカー化が可能かどうかを評価する。マーカー化評価の準備として、アリルペアのそれぞれのアリルごとに、リファレンス配列から前後20bpを切り出してアリルを挟み込んだ、２種類の target sequence を作成する。
 
+indel解析モードとsnp解析モードでは、すでに規定を満たす条件のアリルペアが残されていることから、すべてのアリルペア (target sequence) がマーカー作成可能と評価される。
+
+caps解析モードでは、２つの target sequence において、制限酵素での切断の有無を確認する。片方が制限酵素で切断され、片方が切断されないものがあれば、capsマーカー作成可能と評価される。
+
+マーカー作成可能と評価されたアリルペア (target sequence) は、primer配列設計領域としてリファレンス配列から target sequence の前後500bpを切り出して target sequenceを挟み込んだ template sequence を作成しする。template sequence は、020_marker ファイルに書き出され、続く解析に用いられる。
 
 [020_marker のファイル項目](020_marker.md)
 
 ### 3) primer フェーズ
+
+
+
+
 
 [030_primer のファイル項目](030_primer.md)
 
