@@ -208,16 +208,21 @@ marker フェーズ で書き出された template sequence 上に、バリア�
 
 この設計、確認の繰り返しの中で、blastサーチチェックをpassしたprimerペアは、complete=1 として030_primer ファイルに書き込まれる。
 
-このように、Primer design stepは、Primer3が設計不可能と報告するか、設計されたprimerペアがblastサーチチェックをpassするか、いずれかまで繰り返される。
-
+このように、Primer design stepは、Primer3が設計不可能と報告するか、設計されたprimerペアがblastサーチチェックをpassするか、いずれかまで繰り返され、すべての template sequence は、completeが1か0として、すべて030_primer ファイルに書きこまれる。
 
 [030_primer のファイル項目](030_primer.md)
 
 ## ４．出力取りまとめ、formpass
 
+primerペアの設計が失敗した complete=0 と、成功した complete=1 をそれぞれ、失敗=040_formfail、成功=050_formpass、のファイルに振り分ける。
+
+そして、primerペアの設計が成功した 050_formpass ファイルでは、ユーザがプライマー情報を理解しやすいように、出力をとりまとめてファイル出力している。
+
 [040_050_format_F_P のファイル項目](040_050_format_F_P.md)
 
 ## ５，SNP解析モードの snpfilter、chkhdimer
+
+
 
 [README](../README.md) | [Usage (Japanese doc)](Usage.jp.md)
 
