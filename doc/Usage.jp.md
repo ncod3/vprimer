@@ -270,11 +270,11 @@ snp解析モードでは、設計されたプライマーの全数総当りで�
 
 <dl>
 <dt>
---progress フェイズ名
+--progress フェーズ名
 </dt>
 <dd>
 <p><p>
-vprimerの実行フェイズは以下の８つに分かれている。prepare, variant, marker, primer, formfail, formpass, snpfilter, chkhdimer である。ここでは、開始したいフェイズ名を指定することで、それ以前の結果をもとにして、新しく解析をやり直すことができる。
+vprimerの実行フェーズは以下の８つに分かれている。prepare, variant, marker, primer, formfail, formpass, snpfilter, chkhdimer である。ここでは、開始したいフェイズ名を指定することで、それ以前の結果をもとにして、新しく解析をやり直すことができる。
 </p></p>
 </dd>
 </dl>
@@ -283,11 +283,11 @@ vprimerの実行フェイズは以下の８つに分かれている。prepare, v
 
 <dl>
 <dt>
---stop フェイズ名
+--stop フェーズ名
 </dt>
 <dd>
 <p><p>
---progress と同様、停止するフェイズ名を指定する。
+--progress と同様、停止するフェーズ名を指定する。
 </p></p>
 </dd>
 </dl>
