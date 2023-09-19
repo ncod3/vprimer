@@ -46,7 +46,7 @@
 
 ## ２．refs ディレクトリ
 
-V-primer は、最初に実行された場所の直下に refs というディレクトリを作成し、そこに、解析に必要な情報をまとめて作成する。--show_samples オプションを指定した場合には最小限の 1) 〜 3) が準備され、実際の解析においては、1) 〜 6) が準備される。順に説明する。
+V-primer は、最初に実行された場所の直下に refs というディレクトリを作成し、そこに、解析に必要な情報をまとめて作成する。--show_samples オプションを指定した場合には最小限の 1) 〜 3) が準備され、実際の解析においては、1) 〜 5) が準備される。順に説明する。
 
 ### 1) リファレンスfasta
 - slink_{fasta名}:
@@ -78,9 +78,7 @@ V-primer は、最初に実行された場所の直下に refs というディ�
     - fullname: vcfに書かれた名前そのもの。
 
 ### 3) bedディレクトリ
-bamファイルを用いて、プライマー生成の際に有効depthの判断を行う場合に作成される各種ファイルが置かれる。この時点ではディレクトリが作成されるのみ。
-
-### 4) bed ディレクトリ
+bamファイルを用いて、プライマー生成の際に有効depthの判断を行う場合に作成される各種ファイルが置かれる。初期設定ではディレクトリのみ作成される。
 
 __BB.BEDファイル__
 
@@ -115,7 +113,7 @@ bed行がすべて終わると、# で始まる以下の統計情報が付加さ
 
 __BTA.BEDファイル__
 
-指定されたサンプル群ごとに、bb.bedファイルの正常範囲外の領域をまとめたbedファイル(bed_thin_alignファイル)が作成される。ファイル名は、bed_thal_{年_月日_時分_秒}.m{最小デプス}_x{最大デプス}.bta.bed である。bedファイルの先頭には、# で始まる、集められた bb.bed ファイルの情報が書かれている。最初の # 行の固まりが終わると、bed行となる。この領域はデプスが正常範囲外であることを示す。ファイルの最後には、次のような統計情報が書かれている。
+指定されたサンプル群ごとに、bb.bedファイルの正常デプス範囲外の領域をまとめたbedファイル(bed_thin_alignファイル)が作成される。ファイル名は、bed_thal_{年_月日_時分_秒}.m{最小デプス}_x{最大デプス}.bta.bed である。bedファイルの先頭には、# で始まる、集められた bb.bed ファイルの情報が書かれている。最初の # 行の固まりが終わると、bed行となる。この領域はデプスが正常範囲外であることを示す。ファイルの最後には、次のような統計情報が書かれている。
 
 >\#  
 >\# genome_total_len      373,245,519  
@@ -123,7 +121,7 @@ __BTA.BEDファイル__
 >\# bed_thal_valid_rate   87.40%  
 >\#
 
-### 5) caps用 enzyme name list
+### 4) caps用 enzyme name list
 
 解析が始まると、解析モードに関わらず、caps用制限酵素名一覧表が作成される。
 
@@ -136,7 +134,7 @@ __BTA.BEDファイル__
 - slink_caps_enzyme_name_list.txt
   - ユーザが指定したファイルへのシンボリックリンク
 
-### 6) Primer3用パラメータ指定ファイル (normal / amplicon)
+### 5) Primer3用パラメータ指定ファイル (normal / amplicon)
 
 解析が始まると、解析モードに関わらず、Primer3用パラメータ指定ファイルが作成される。
 
@@ -190,20 +188,27 @@ indel解析モードではINDELが対象となり、caps解析モードではSNP
 
 ### 2) marker フェーズ
 
-variant フェーズ で書き出されたアリルペアの情報をもとに、マーカー化が可能かどうかを評価する。マーカー化評価の準備として、アリルペアのそれぞれのアリルごとに、リファレンス配列から前後20bpを切り出してアリルを挟み込んだ、２種類の target sequence を作成する。
+variant フェーズ で書き出されたアリルペアの情報をもとに、マーカー化が可能かどうかを評価する。マーカー化評価の準備として、アリルペアのそれぞれのアリルごとに、リファレンス配列から前後20bpを切り出してアリルを挟み込んだ、２種類の target sequence を作成する (Fig.3: Natsume et al. 2023)。
 
 indel解析モードとsnp解析モードでは、すでに規定を満たす条件のアリルペアが残されていることから、すべてのアリルペア (target sequence) がマーカー作成可能と評価される。
 
 caps解析モードでは、２つの target sequence において、制限酵素での切断の有無を確認する。片方が制限酵素で切断され、片方が切断されないものがあれば、capsマーカー作成可能と評価される。
 
-マーカー作成可能と評価されたアリルペア (target sequence) は、primer配列設計領域としてリファレンス配列から target sequence の前後500bpを切り出して target sequenceを挟み込んだ template sequence を作成しする。template sequence は、020_marker ファイルに書き出され、続く解析に用いられる。
+マーカー作成可能と評価されたアリルペア (target sequence) は、primer配列設計領域としてリファレンス配列から target sequence の前後500bpを切り出して target sequenceを挟み込んだ template sequence を作成する (Fig.3: Natsume et al. 2023)。このとき、template sequence 上には、BTA.BEDファイルで示された正常デプス範囲外の領域が excluded region として保存される。この情報は、Primer3がprimer設計を行う際に、回避する領域として用いられる (Fig.3: Natsume et al. 2023)。template sequence は、020_marker ファイルに書き出され、続く解析に用いられる。
 
 [020_marker のファイル項目](020_marker.md)
 
 ### 3) primer フェーズ
 
+marker フェーズ で書き出された template sequence 上に、バリアントを挟んでprimerのペアを設計する。V-primerは、Primer3ソフトウェアにprimer設計を依頼している。もしPrimer3が、primerペアが設計できませんでしたと報告したならば、その情報は、complete=0 として、030_primer ファイルに書き込まれる。
 
+もしprimerペアが設計できたならば、引き続き確認をする (Fig.1, Primer design step: Natsume et al. 2023)。まず、indel解析モードもしくはcaps解析モードの場合は、primerペアをゲノム上にblastサーチする。この時、primerペアが同じ染色体上に正しい向きで存在し、その距離が10kbps未満の場合には、このprimerペアは blastサーチチェックをfailしたというステータスとし、primer配列領域を template sequence 上の excluded region に追加して、再度 Primer3 を起動させる。
 
+もしsnp解析モードならば、blastサーチチェックの前に、ヘアピンチェックおよびホモ・ヘテロダイマーのチェックを行う。これは、primer配列の前にamplicon用タグを付け、個別にヘアピンチェックとホモダイマーチェックを行い、ペアとしてヘテロダイマーチェックを行う。このチェックをpassしたprimerペアは、上記のようにblastサーチチェックを行うが、チェックをfailしたprimerペアは、primer配列領域を template sequence 上の excluded region に追加して、再度 Primer3 を起動させる。
+
+この設計、確認の繰り返しの中で、blastサーチチェックをpassしたprimerペアは、complete=1 として030_primer ファイルに書き込まれる。
+
+このように、Primer design stepは、Primer3が設計不可能と報告するか、設計されたprimerペアがblastサーチチェックをpassするか、いずれかまで繰り返される。
 
 
 [030_primer のファイル項目](030_primer.md)
