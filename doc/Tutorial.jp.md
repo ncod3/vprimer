@@ -214,15 +214,30 @@ marker フェーズ で書き出された template sequence 上に、バリア�
 
 ## ４．出力取りまとめ、formpass
 
-primerペアの設計が失敗した complete=0 と、成功した complete=1 をそれぞれ、失敗=040_formfail、成功=050_formpass、のファイルに振り分ける。
+primerペアの設計が失敗した complete=0 と、成功した complete=1 をそれぞれ、失敗=040_formfail、成功=050_formpass、のファイルに振り分ける。そして、primerペアの設計が成功した 050_formpass ファイルでは、ユーザがプライマー情報を理解しやすいように、出力を整形してファイル出力している。
 
-そして、primerペアの設計が成功した 050_formpass ファイルでは、ユーザがプライマー情報を理解しやすいように、出力をとりまとめてファイル出力している。
+indel解析モードおよびcaps解析モードでは、ここで解析が終了する。
 
 [040_050_format_F_P のファイル項目](040_050_format_F_P.md)
 
 ## ５，SNP解析モードの snpfilter、chkhdimer
 
+snp解析モードでは、これまで設計が成功したprimerペアの全配列を用いてヘテロダイマーチェックを実施する。primer配列の全数総当りでのチェックとなり、多大な時間がかかるため、全数をあらかじめ減らしておく必要がある。
 
+### snpfilter フェーズ
+
+--snp_filter パラメータのgcrangeとintervalの値により、全数を減らし、060_snpfilter ファイルに書き込む。はじめにgcrangeにより絞り込み、次にintervalの距離の間で最初に見つかったprimerを採用、これらが 060_snpfilter ファイルに書きこまれる
+
+[060_snpfilter のファイル項目](060_snpfilter.md)
+
+### chkhdimer フェーズ
+
+全数を減らしたprimerペアの全配列を用いて、総当たりでヘテロダイマーチェックを行う。
+
+総当たりのチェックが完了したならば、チェックがfailしたprimerは、interval内の次のpositionのprimerと取り替えられ、再度総当たりでチェックを行い、すべてのprimerでチェックが通った時点で chkhdimer フェーズが終了し、070_chkhdimer ファイルに書きこまれる。
+
+
+[070_chkhdimer のファイル項目](070_chkhdimer.md)
 
 [README](../README.md) | [Usage (Japanese doc)](Usage.jp.md)
 
