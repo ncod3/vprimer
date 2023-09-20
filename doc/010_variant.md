@@ -2,32 +2,39 @@
 
 # 010_variant
 
+
+
 <dl>
 <dt>
+
 chrom, pos
+
 </dt>
 <dd>
 <p><p>
+
 現在注目している chromosome と position 。
-</p>
 
 chrom | pos
 :---:|:---:
 chrom_01 | 62651
 
+</p></p>
 </dd>
 </dl>
 
 
+
 <dl>
 <dt>
+
 targ_grp
+
 </dt>
 <dd>
 <p><p>
-ここで比較しているサンプルグループに付けられた名前(カンマ区切り)
-</p>
 
+ここで比較しているサンプルグループに付けられた名前(カンマ区切り)
 
 |name| fixed two groups | auto (just two groups) | auto (three groups or more) |
 |:---:|:---:|:---:|:---:|
@@ -36,13 +43,17 @@ targ_grp
 
 ２グループ固定の場合は、グループ名は 'a,b' が用いられる。genotype で自動的に分けられるオートグループの場合、比較するアリルが２つならば、グループ名は 'a,b' が用いられ、比較するアリルが３つ以上ならば、'c' からグループ名を付け始める ('c', 'd', 'e', ...) 。
 
+</p></p>
 </dd>
 </dl>
 
 
+
 <dl>
 <dt>
+
 vseq_gno_str
+
 </dt>
 <dd>
 <p><p>
@@ -52,7 +63,7 @@ name|indel|caps|snp|
 :---:|:---:|:---:|:---:|
 vseq_gno_str|ACCATTACTCGCTTACTCGCTTGTATGCTCCA,ACCA|A,T|G,C|
 
-</p>
+</p></p>
 </dd>
 </dl>
 
@@ -60,10 +71,13 @@ vseq_gno_str|ACCATTACTCGCTTACTCGCTTGTATGCTCCA,ACCA|A,T|G,C|
 
 <dl>
 <dt>
+
 gts_segr_lens
+
 </dt>
 <dd>
 <p><p>
+
 比較する２種類の genotype が、どのようなアリルの組み合わせに分解されるかのパターンを表す。
 
 |name|example|
@@ -93,7 +107,7 @@ segregation pattern の symbplの詳細は以下の通り。
 
 このように全ての異なるアリルの組み合わせごとにマーカーとしての評価を行い、Pass したものがファイルに書き出される。
 
-</p>
+</p></p>
 </dd>
 </dl>
 
@@ -101,30 +115,33 @@ segregation pattern の symbplの詳細は以下の通り。
 
 <dl>
 <dt>
+
 targ_ano
+
 </dt>
 <dd>
 <p><p>
-現在比較しているアリル番号の組み合わせをグループ順にカンマ区切り。
-</p>
 
+現在比較しているアリル番号の組み合わせをグループ順にカンマ区切り。
 
 |name| fixed two groups | auto (just two groups) | auto (three groups or more) |
 |:---:|:---:|:---:|:---:|
 | targ_ano |0,1|0,1|0,2|
 
-
+</p></p>
 </dd>
 </dl>
 
 
+
 <dl>
 <dt>
+
 set_n
+
 </dt>
 <dd>
 <p><p>
-
 
 異なるアリルの組み合わせの全体数と、自分の順番。
 
@@ -135,14 +152,17 @@ set_n
 
 indelが範囲内ではない場合など、マーカー評価で対象とならなかったものは飛ばされている。
 
-</p>
+</p></p>
 </dd>
 </dl>
 
 
+
 <dl>
 <dt>
+
 var_type, mk_type
+
 </dt>
 <dd>
 <p><p>
@@ -159,53 +179,64 @@ mk_typeは var_type が どのマーカーメソッドで取り扱われるか�
 | mk_type |INDEL|CAPS|SNP|
 |(pick_mode)| indel|caps|snp|
 
-
+</p></p>
 </dd>
 </dl>
 
 
+
 <dl>
 <dt>
+
 auto_grp0, auto_grp1
+
 </dt>
 <dd>
 <p><p>
+
 オートグループの際に、genotypeにより比較グループとして分けられたサンプル群。固定グループの場合は "-" が入る。
-</p>
 
 |name| value |
 |:---:|:---:|
 | auto_grop0 |MP2_013,MP2_015,MP2_018|
 | auto_grop1 |MP2_012,MP2_014,MP2_020|
 
+</p></p>
 </dd>
 </dl>
 
 
+
 <dl>
 <dt>
+
 vseq_ano_str
+
 </dt>
 <dd>
 <p><p>
-アリル番号順に、アリルの配列をカンマ区切りで接続した文字列
-</p>
 
+アリル番号順に、アリルの配列をカンマ区切りで接続した文字列
 
 |name| indel |caps|snp|
 |:---:|:---:|:---:|:---:|
 | vseq_ano_str |CAAAA,CAAAAAAAAAAAAAAAAAAAAAAAAAA,CAAAAAAAAAAAAAAAAAA|A,T|G,A|
 
+</p></p>
 </dd>
 </dl>
 
 
+
 <dl>
 <dt>
+
 len_g0g1_dif_long
+
 </dt>
 <dd>
 <p><p>
+
 グループ順に、アリルの長さと、比較対象アリルとの長さの差。
 
 |name| indel |CAPS|
@@ -221,7 +252,7 @@ len_g0g1_dif_long
 |アリル長差=28|アリル長差=0|
 |長い方のグループ=0|長い方のグループ=0 (同じ時は0)|
 
-</p>
+</p></p>
 </dd>
 </dl>
 
