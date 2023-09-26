@@ -4,9 +4,10 @@
 
 
 
-040_FormatF と、050_FormatP は、030_primer に記録された、プライマー作成完了(complete == 1) と、プライマー作成失敗（complete != 1) の情報をもとに、失敗したプライマー情報を 040_FormatFに、成功したプライマー情報を 050_FormatP に振り分けたものです。
+040_FormatF と、050_FormatP は、030_primer に記録された、プライマー作成完了(complete == 1) と、プライマー作成失敗（complete != 1) の情報をもとに、失敗したプライマー情報を 040_FormatF に、成功したプライマー情報を 050_FormatP に振り分けたものである。
 
-成功したプライマー情報を集めた 050_FormatP には、さらにPCR長の情報等を付加して、利用しやすい情報としてまとめています。
+成功したプライマー情報を集めた 050_FormatP には、さらにPCR長の情報等を付加して、利用しやすい情報としてまとめている。
+
 
 
 <dl>
@@ -89,9 +90,12 @@ targ_anoにより、0と1のアリルが比較対象になっていることが�
 </dl>
 
 
+
 <dl>
 <dt>
+
 dup_pos
+
 </dt>
 <dd>
 <p><p>
@@ -106,37 +110,51 @@ CAPSマーカーの際、同じポジションに他の制限酵素による有�
 |dup_pos|dup,1/3-1/1|
 
 
-</p>
+</p></p>
 </dd>
 </dl>
 
 
+
 <dl>
 <dt>
+
 enzyme
+
 </dt>
 <dd>
 <p><p>
+
 CAPSマーカーの場合、解析された制限酵素名が入る。それ以外は "-" が入る。
-</p>
+
+</p></p>
 </dd>
 </dl>
 
 
+
 <dl>
 <dt>
+
 g0_name, g1_name
+
 </dt>
 <dd>
 <p><p>
+
 現在比較しているグループ０とグループ１の名前。
-</p>
+
+</p></p>
 </dd>
 </dl>
 
+
+
 <dl>
 <dt>
+
 g0_product_size, g1_product_size, diff_length, g0_digested_size, g1_digested_size, digested_gno, digested_ano
+
 </dt>
 <dd>
 <p><p>
@@ -153,9 +171,61 @@ g0_product_size, g1_product_size, diff_length, g0_digested_size, g1_digested_siz
 |digested_gno|0|1|0|
 |digested_ano|0|1|0|
 
-
-</p>
+</p></p>
 </dd>
 </dl>
+
+
+
+<dl>
+<dt>
+
+same_primer
+
+</dt>
+<dd>
+<p><p>
+
+word
+
+</p></p>
+</dd>
+</dl>
+
+
+
+<dl>
+<dt>
+
+dimer_check
+
+</dt>
+<dd>
+<p><p>
+
+word
+
+</p></p>
+</dd>
+</dl>
+
+
+
+<dl>
+<dt>
+
+sample genotypes
+
+</dt>
+<dd>
+<p><p>
+
+word
+
+</p></p>
+</dd>
+</dl>
+
+
 
 [README](../README.md) | [Tutorial (Japanese doc)](doc/Tutorial.jp.md) | [Usage (Japanese doc)](doc/Usage.jp.md)

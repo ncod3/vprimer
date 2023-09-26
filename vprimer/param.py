@@ -198,10 +198,17 @@ class Param(object):
 
         # --amplicon_param
         hlp = "parameter for amplicon(SNP). Ftag,Rtag[,HrTM,DyTM]"
+        # 20230926
+        #metavar = "parameter"
+        #parser.add_argument('--amplicon_param', action='store',
+        #    type=str, metavar="{}".format(metavar),
+        #    help="{}".format(hlp))
         metavar = "parameter"
         parser.add_argument('--amplicon_param', action='store',
+            nargs='*',
             type=str, metavar="{}".format(metavar),
             help="{}".format(hlp))
+
 
         # --snp_filter
         hlp = "filter for snp marker"

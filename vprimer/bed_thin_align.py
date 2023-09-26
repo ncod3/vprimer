@@ -191,7 +191,8 @@ class BedThinAlign(object):
                             user_bam_path = "-"
 
                         else:
-                            # If there is a bed file corresponding to bam, use it.
+                            # If there is a bed file corresponding to bam,
+                            # use it.
                             er = "The Bam file {} ".format(associated_bam)
                             er += "not found."
                             log.error(er)
@@ -289,13 +290,32 @@ class BedThinAlign(object):
 
         if bam_exist == 0:
             # all the bam missed
-            err = "There are {} samples for analyse: {}, ".format(
+            mes = "There are {} samples for analyse: {}, ".format(
                 len(sorted_samples_list), sorted_samples_str)
-            err += "but no bam is specified (-). "
-            err += "Please check bam_table file. "
-            err += "exit."
-            log.info(err)
-            sys.exit(1)
+            mes += "but no bam is specified (-). "
+            mes += "So, glv.conf.depth_mode will change to glv.depth_no_check"
+            log.info(mes)
+
+            # glv.depth_no_check
+            # 20230925
+
+            #print()
+            #print("bed_thin_align.py: get_require_bam_bed_list")
+            #print("\tglv.conf.depth_mode\t{}".format(glv.conf.depth_mode))
+
+            glv.conf.depth_mode = glv.depth_no_check
+
+            #print("\tglv.conf.depth_mode\t{}".format(glv.conf.depth_mode))
+            #print("4")
+
+            #print()
+            #sys.exit(1)
+
+            # exit 不要
+            #err += "Please check bam_table file. "
+            #err += "exit."
+            #log.info(err)
+            #sys.exit(1)
 
         # set total num
         self.set_total_num(self.require_bam_bed_list)

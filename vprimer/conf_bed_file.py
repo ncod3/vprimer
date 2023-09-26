@@ -61,28 +61,60 @@ class ConfBedFile(object):
                     glv.bed_thal_merge_ext, fpath))
                 fpath.unlink()
 
-        bed_thal_path_list = list()
+        # 202309
+        #print()
+        #print("main.py: glv.conf.prepare_bed_thal")
+        #print()
+        #print("conf_bed_file.py: prepare_bed_thal")
+        #print("\tglv.conf.depth_mode\t{}".format(glv.conf.depth_mode))
+        #print("1")
+        #print()
+        #sys.exit(1)
 
+        # これは本当に必要か？
         if self.depth_mode == glv.depth_no_check:
             return
+
+        bed_thal_path_list = list()
 
         # prepare bed_thal
         for distin_grp_dict in self.distinguish_groups_list:
             # get bed_thal_path to list
 
+            # 202309
+            #print()
+            #print("conf_bed_file.py: prepare_bed_thal")
+            #print("\tglv.conf.depth_mode\t{}".format(glv.conf.depth_mode))
+            #print("\tdo self.select_depth_mode ->")
+            #print("2")
+            #print()
+
             bed_thal_path = self.select_depth_mode(distin_grp_dict)
-            #print(bed_thal_path)
-            #sys.exit(1)
 
             if bed_thal_path != "":
+
+                # 202309
+                #print()
+                #print("conf_bed_file.py: prepare_bed_thal")
+                #print("\tglv.conf.depth_mode\t{}".format(
+                #    glv.conf.depth_mode))
+                #print("\tdo self.select_depth_mode ->")
+                #print("2.1")
+                #print()
+
                 bed_thal_path_list += self.select_depth_mode(distin_grp_dict)
 
+                #print("444")
+
         # a list of paths to use as dictionary keys
-        for bed_thal_path in bed_thal_path_list:
-            self.read_bed_into_dict(bed_thal_path)
+        if glv.conf.depth_mode != glv.depth_no_check:
+            for bed_thal_path in bed_thal_path_list:
+                self.read_bed_into_dict(bed_thal_path)
 
 
     def select_depth_mode(self, distin_grp_dict):
+
+        print("conf_bed_file.py: select_depth_mode")
 
         bed_thal_path = ""
 
@@ -93,7 +125,8 @@ class ConfBedFile(object):
         sorted_samples_str = distin_grp_dict['sorted_samples']
         #print("sorted_samples_str={}".format(sorted_samples_str))
 
-        # self.depth_mode ３つのモード
+        # self.depth_mode ４のモード
+        #   glv.depth_no_check
         #   glv.depth_bam_table
         #   glv.depth_bed_bams
         #   glv.depth_bed_thal
@@ -109,15 +142,33 @@ class ConfBedFile(object):
         # *******************************************************
 
         log.info("start, depth mode: {}.".format(self.depth_mode))
+        # bamテーブルによるデプスチェック
+        # glv.conf.user_bam_table_path
+        bta.make_bam_table_dict()
+
+        # make bam_bed_file
+        # self.require_bam_bed_list
+
+        #print()
+        #print("conf_bed_file.py: select_depth_mode")
+        #print("\tdo bta.get_require_bam_bed_list->")
+        #print("3")
+        #print()
+
+        bta.get_require_bam_bed_list(sorted_samples_str)
+
+        #print("glv.conf.depth_mode\t{}".format(glv.conf.depth_mode))
+        #print("5")
 
         if self.depth_mode == glv.depth_bam_table:
             # bamテーブルによるデプスチェック
             # glv.conf.user_bam_table_path
-            bta.make_bam_table_dict()
+            #  bta.make_bam_table_dict()
 
             # make bam_bed_file
             # self.require_bam_bed_list
-            bta.get_require_bam_bed_list(sorted_samples_str)
+            #  bta.get_require_bam_bed_list(sorted_samples_str)
+
             # build bam_bed
             bta.build_bam_bed()
 

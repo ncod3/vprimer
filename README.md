@@ -158,6 +158,8 @@ Released under the MIT license
 https://github.com/YukinobuKurata/YouTubeMagicBuyButton/blob/master/MIT-LICENSSE.txt
 
 ## Changelog
+- 2023-09-26:
+	- 1.0.8 Fixed a bug that did not work when bam file was not specified. And it is now possible to specify --amplicon_param separated by spaces.
 - 2023-07-01
 	- 1.0.7 Improved the behavior of heterodimer checks in SNP mode.
 - 2023-06-07
