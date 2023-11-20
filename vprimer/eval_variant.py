@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
-#import os
+import os
 from pathlib import Path
 import errno
 import pprint
@@ -14,6 +14,13 @@ log = logging.getLogger(__name__)
 # global configuration
 import vprimer.glv as glv
 import vprimer.utils as utl
+
+# 20231120
+# biopython 1.76 のインストールを不要とする一時措置
+app_dir = os.path.dirname(os.path.realpath(__file__))
+#print(app_dir)
+# Bio, 1.76 を、このディレクトリから読み出す
+sys.path.insert(0, app_dir)
 
 from Bio import Restriction
 from Bio.Seq import Seq

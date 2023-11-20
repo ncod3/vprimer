@@ -212,10 +212,57 @@ class Primer(object):
                 utl.w_flush(self.f, line)
                 break
 
+            # ---------------------------------------------------------
+            # calc abs pos
+            abs_left_stt, abs_left_end, \
+            abs_right_stt, abs_right_end = \
+                self.get_primer_pos_info(prinfo)
+
+            # make fasta id
+            left_fasta_id = self.make_primer_name(
+                prinfo.chrom, abs_left_stt, abs_left_end, "plus")
+            right_fasta_id = self.make_primer_name(
+                prinfo.chrom, abs_right_stt, abs_right_end, "minus")
+
+            # set_primer_name and calc gc
+            prinfo.iopr3.make_primer_seq(left_fasta_id, right_fasta_id)
+            #prinfo.iopr3.set_primer_name(left_fasta_id, right_fasta_id)
+            # ---------------------------------------------------------
 
             # glv.MODE_SNP in self.pick_mode
             # distin_file に、pick_mode がなければならない。
             if self.distin_gdct['pick_mode'] == glv.MODE_SNP:
+
+
+                # 20231120 gc_contents check
+                # 指定のgcrange でプライマーの設計を行う
+                gcrange = glv.conf.snp_filter_gcrange
+                gc_min = glv.conf.snp_filter_gc_min
+                gc_max = glv.conf.snp_filter_gc_max
+
+                product_gc_contents = \
+                    prinfo.iopr3.get_product_gc_contents()
+
+                #print(gc_min)
+                #print(type(gc_min))
+                #print(gc_max)
+                #print(type(gc_max))
+                #print(product_gc_contents)
+                #print(type(product_gc_contents))
+
+                #print(product_gc_contents)
+                #sys.exit(1)
+
+                if product_gc_contents < gc_min or \
+                    gc_max < product_gc_contents:
+
+                    #print(product_gc_contents)
+
+                    primer_loc = 'both'
+                    prinfo.iopr3.add_ex_region(
+                        prinfo.iopr3.get_primer_region(primer_loc))
+                    complete -= 1
+                    continue
 
                 #print("hairpin_check")
 
@@ -254,27 +301,14 @@ class Primer(object):
                     '''
                     continue
 
-            # calc abs pos
-            abs_left_stt, abs_left_end, \
-            abs_right_stt, abs_right_end = \
-                self.get_primer_pos_info(prinfo)
-
-            # make fasta id
-            left_fasta_id = self.make_primer_name(
-                prinfo.chrom, abs_left_stt, abs_left_end, "plus")
-            right_fasta_id = self.make_primer_name(
-                prinfo.chrom, abs_right_stt, abs_right_end, "minus")
-
-            # set_primer_name
-            prinfo.iopr3.make_primer_seq(left_fasta_id, right_fasta_id)
-            #prinfo.iopr3.set_primer_name(left_fasta_id, right_fasta_id)
-
+            # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
             # search my blastn-short
             blast_check_result_list = \
                 Blast.primer_blast_check(
                     left_fasta_id, right_fasta_id,
                     prinfo.iopr3.get_primer_left_seq(),
                     prinfo.iopr3.get_primer_right_seq())
+            # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
             # break if complete
             if len(blast_check_result_list) == 0:

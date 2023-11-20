@@ -255,7 +255,8 @@ def try_exec(cmd, pre_log=False, print_log=False):
             check=True)
 
     except sbp.CalledProcessError as e:
-        if _log == True:
+        # 20231114 _log to print_log
+        if print_log == True:
             log.error("{}.".format(e.stderr))
         else:
             prelog("{}.".format(e.stderr), cmd)
@@ -1115,7 +1116,8 @@ def gc(seq):
 #        gc, len(seq) * 100, GC, GC_f))
 
     #print(GC)
-    return GC_f
+    # 20231120
+    return float(GC_f)
 
 #def exec_thin_to_bed(bam, depth_txt, thin_depth, thick_depth):
 #
@@ -1335,12 +1337,20 @@ def progress_message(ret_status, proc_name):
 
 def is_integer(num):
 
+    # 20231120 bug
     try:
-        float(num)
+        int(num)
     except ValueError:
         return False
     else:
-        return float(num).is_integer()
+        return True
+
+    #try:
+    #    float(num)
+    #except ValueError:
+    #    return False
+    #else:
+    #    return float(num).is_integer()
 
 
 def is_float(num):

@@ -135,6 +135,14 @@ class BedThinAlign(object):
         # for bam stat
         self.count_dict = dict()
 
+        # 20231115 染色体の末端がZeroだった時、zeroを書き出す前に
+        # 直前の解析結果を挿入する必要があり、その場合、endを書き出した
+        # あとの同行はダブルため書き出さない。
+        # calc_bam_depth の中で、zeroで終わる染色体を見た時、
+        # 行を挿入後に self.inserted_for_ZERO をセットする。
+        # その後、print_lineの中で書き出しを制御するために使用する
+        self.inserted_for_ZERO = False
+
 
     #~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#~#
     # 1/6. make_bam_table_dict, from conf_bed_file.py 
@@ -1023,7 +1031,8 @@ class BedThinAlign(object):
             self.count_dict['depth'][now_stat] += depth
             self.count_dict['depth']['total'] += depth
 
-            # next chromosome start
+            # *****************************************************
+            # 1) next chromosome start
             if stat_changed == glv.bed_stat_init:
 
                 # if end of chromosome,
@@ -1036,14 +1045,44 @@ class BedThinAlign(object):
                     # if chromosome end is Z,
                     if (expected_pos - 1) != chrom_end:
 
+                        # 20231114 insert ---------------------
+                        # print last start end
+                        # debug
+
+                        ##utl.w_flush_r(f,
+                        ##    ">1, insert={}, last={}, now={}, change={}\t".format(
+                        ##    self.inserted_for_ZERO,
+                        ##    last_stat, 
+                        ##    now_stat, stat_changed))
+
+                        self.print_line(f, last_stat,
+                            last_chrom, bed_close_stt, bed_close_end,
+                            last_stat)
+
                         # found Z area, insert one record
                         # The order of this line is reversed
                         self.print_line(f, glv.bed_now_zero,
                             last_chrom, expected_pos,
                             chrom_end, glv.bed_now_zero)
 
-                        self.print_single(f, "#end {} 1-{}\n".format(
-                            last_chrom, chrom_end))
+                        # After all the rows here are processed
+                        #self.inserted_for_ZERO = True
+
+                        #self.print_single(f, "#end {} 1-{}\n".format(
+                        #    last_chrom, chrom_end))
+
+                    else:
+                        # insert
+                        self.print_line(f, last_stat,
+                            last_chrom, bed_close_stt, bed_close_end,
+                            last_stat)
+
+                    # After all the rows here are processed
+                    self.inserted_for_ZERO = True
+
+                    # これをコントロールする
+                    self.print_single(f, "#end {} 1-{}\n".format(
+                        last_chrom, chrom_end))
 
                     mes = "{} finished ({}/{}){}, {}".format(
                         last_chrom, bam_num, ttl_num,
@@ -1054,12 +1093,21 @@ class BedThinAlign(object):
                 expected_pos = 1
                 # 20230126 mod
                 # force to stat_changed
+                # これ消すとどうなる？
+                # これを消すと、次の先頭の０からの行が表示されない
                 stat_changed = glv.bed_stat_changed
 
-            # position at depth 0 does not appear in depth
+            # *****************************************************
+            # 2) position at depth 0 does not appear in depth
+            # いくつか同じ状態が続いて飛ばされたとき
             if expected_pos != pos:
 
                 if last_chrom != "":
+                    # debug
+                    ##utl.w_flush_r(f,
+                    ##    ">2, last={}, now={}, change={}\t".format(
+                    ##    last_stat, now_stat, stat_changed))
+
                     # write last_stat
                     self.print_line(f, last_stat,
                         last_chrom, bed_close_stt, bed_close_end,
@@ -1075,7 +1123,25 @@ class BedThinAlign(object):
                 last_chrom = chrom
 
             # *****************************************************
+            # 3) 
             if stat_changed == glv.bed_stat_changed:
+
+                # debug
+                # 一度、zeroではさんだものは出さない
+                # insertがある場合には、表示せず、insertなしにする
+
+                # marking for insert
+                ##if self.inserted_for_ZERO:
+                ##
+                ##    utl.w_flush_r(f,
+                ##        ">3.inserted, last={}, now={}, change={}\t".format(
+                ##        last_stat, now_stat, stat_changed))
+                ##
+                ##else:
+                ##
+                ##    utl.w_flush_r(f,
+                ##        ">3, last={}, now={}, change={}\t".format(
+                ##        last_stat, now_stat, stat_changed))
 
                 # print last start end
                 self.print_line(f, last_stat,
@@ -1148,25 +1214,30 @@ class BedThinAlign(object):
 
     def get_bed_stat(self, chrom, pos, depth,
         min_depth, max_depth, last_stat, last_chrom):
-        '''
+        ''' 現在のstatを depth により調査し返す
+            さらに、直前のstatと比較し、statが続いてるか変わったか
+            報告する
         '''
 
-        now_stat        = glv.bed_now_nop
-        stat_changed    = glv.bed_stat_nop
+        now_stat        = glv.bed_now_nop   # 初期状態、stat何もなし
+        stat_changed    = glv.bed_stat_nop  # 初期状態、何も変わらず
 
+        # ******************************************************************
         # 1) now_stat by depth
         if depth == 0:
-            now_stat = glv.bed_now_zero
+            now_stat = glv.bed_now_zero     # 現状のdepthが０なら、zero
 
         elif depth < min_depth:
-            now_stat = glv.bed_now_thin
+            now_stat = glv.bed_now_thin     # 現状のdepthが薄いなら、thin
 
         elif depth > max_depth:
-            now_stat = glv.bed_now_thick
+            now_stat = glv.bed_now_thick    # 現状のdepthが厚いなら、thick
 
         else:
-            now_stat = glv.bed_now_valid
+            now_stat = glv.bed_now_valid    # 現状のdepthが正常なら、valid
 
+
+        # ******************************************************************
         # 2) stat_changed
         if chrom != last_chrom:
             stat_changed = glv.bed_stat_init
@@ -1207,14 +1278,14 @@ class BedThinAlign(object):
             if bed_open_stt > chrom_end and  bed_close_end > chrom_end:
                 #print("bed_open_stt {}".format(bed_open_stt))
                 #print("bed_close_end {}".format(bed_close_end))
-                #print("case 1")
+                #utl.w_flush(f, "case 1")
                 #print("")
                 return
 
             elif bed_open_stt > chrom_end:
                 #print("bed_open_stt {}".format(bed_open_stt))
                 #print("bed_close_end {}".format(bed_close_end))
-                #print("case 2")
+                #utl.w_flush(f, "case 2")
                 #print("")
                 return
 
@@ -1234,18 +1305,27 @@ class BedThinAlign(object):
         # 15-15のときは、14-15になるから。
         length = bed_close_end - bed_open_stt
 
-        # 直前のもののステータス
-        if last_stat != glv.bed_now_valid:
-            # no \n
-            utl.w_flush(f, "{}\t{}\t{}\t{}_{}".format(
-                chrom, bed_open_stt,
-                bed_close_end, comment, length))
+        #  直前のもののステータス
+        # 20231115 if inserted
+        if self.inserted_for_ZERO == True:
+            ##utl.w_flush(f, "print_line inserted={}".format(self.inserted_for_ZERO))
+            self.inserted_for_ZERO = False
 
         else:
-            if self.valid_print:
-                utl.w_flush(f, "{}\t{}\t{}\t({}_{})".format(
+            ##utl.w_flush(f, "print_line not inserted={}".format(self.inserted_for_ZERO))
+
+            if last_stat != glv.bed_now_valid:
+                # no \n
+                utl.w_flush(f, "{}\t{}\t{}\t{}_{}".format(
                     chrom, bed_open_stt,
                     bed_close_end, comment, length))
+
+            else:
+
+                if self.valid_print:
+                    utl.w_flush(f, "{}\t{}\t{}\t({}_{})".format(
+                        chrom, bed_open_stt,
+                        bed_close_end, comment, length))
 
         # summary: for width coverage
         width_coverage = length

@@ -4,7 +4,7 @@
 # https://international.neb.com/tools-and-resources/selection-charts/isoschizoomers
 
 import sys
-#import os
+import os
 import re
 import errno
 from pathlib import Path
@@ -15,6 +15,14 @@ import vprimer.glv as glv
 import vprimer.utils as utl
 
 from vprimer.logging_config import LogConf
+
+# 20231120
+# biopython 1.76 のインストールを不要とする一時措置
+app_dir = os.path.dirname(os.path.realpath(__file__))
+#print(app_dir)
+# Bio, 1.76 を、このディレクトリから読み出す
+sys.path.insert(0, app_dir)
+
 from Bio import Restriction
 import Bio.Restriction.Restriction_Dictionary as ResDict
 
