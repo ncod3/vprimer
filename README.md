@@ -40,24 +40,24 @@ First, check the settings for channels to install various conda tools. If the hi
 ```
 $ conda config --get channels
 
---add channels 'conda-forge'   # lowest priority
+--add channels 'defaults'   # lowest priority
 --add channels 'bioconda'
---add channels 'defaults'   # highest priority
+--add channels 'conda-forge'   # highest priority
 ```
 
 If the settings are not as described above, run the following three lines:
 
 ```
-$ conda config --add channels 'conda-forge'
-$ conda config --add channels 'bioconda'
 $ conda config --add channels 'defaults'
+$ conda config --add channels 'bioconda'
+$ conda config --add channels 'conda-forge'
 
 ```
 
 Next, create a virtual environment named "vprimer" using conda.
 
 ```
-$ conda create -n vprimer python 'biopython==1.76'
+$ conda create -n vprimer python=3.8
 ```
 
 Activate the created virtual environment.
