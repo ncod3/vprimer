@@ -1,6 +1,6 @@
 # V-primer
 
-V-primer is a software written in Python3 for the efficient design of genome-wide InDel, CAPS, and SNP markers from multi-sample variant call format (VCF) genotyping data obtained by NGS.
+V-primer is a software written in Python3 for the efficient design of genome-wide InDel, CAPS, and SNP markers from multi-sample variant call format (VCF) genotyping data obtained by NGS. 
 
 ## SYNOPSIS
 ```
